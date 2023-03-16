@@ -5,7 +5,7 @@
     home.stateVersion = "22.11";
     home.packages = with pkgs; [
       zsh-powerlevel10k
-      vim
+      (import ./config/vim/default.nix)
       spotify
       # ---- WALLETS
       electrum

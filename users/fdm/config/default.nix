@@ -18,6 +18,6 @@ let
 in
 [ 
   # multi-line configs
-  # ./git
+  # ./git TODO: fix
   ./zsh
 ]
