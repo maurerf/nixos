@@ -4,11 +4,16 @@
   programs.zsh = {
     enable = true;
     #syntaxHighlighting.enable = true;
-    #autosuggestions.enable = true;
+    enableAutosuggestions = true;
+    enableCompletion = true;
     shellAliases = {
       lsa = "ls -alF";
       rebuild = "sudo nixos-rebuild switch";
       cdconf = "cd /etc/nixos/users/fdm";
+    };
+    oh-my-zsh = {
+       enable = true;
+    #  plugins = [ "powerlevel10k" ];
     };
     plugins = [ 
       {
