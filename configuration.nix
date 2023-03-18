@@ -13,8 +13,9 @@
 
   # Bootloader.s
   boot.loader.grub.enable = true;
-  boot.loader.grub.device = "/dev/sda";
-  boot.loader.grub.useOSProber = true;
+  boot.loader.grub.device = "nodev";
+  #boot.loader.grub.efiSupport = true;
+  #boot.loader.grub.useOSProber = true;
 
   # Setup keyfile
   boot.initrd.secrets = {
@@ -24,7 +25,7 @@
   # Enable grub cryptodisk
   boot.loader.grub.enableCryptodisk=true;
 
-  boot.initrd.luks.devices."luks-TODO:FILL_WITH_UUID_FROM_HARDWARECONFIG.NIX".keyFile = "/crypto_keyfile.bin";
+  boot.initrd.luks.devices."luks-TODO".keyFile = "/crypto_keyfile.bin";
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
@@ -145,6 +146,8 @@
       libreoffice
       vlc
       bleachbit
+      keepassxc
+      neofetch
   ];
 
   # Fonts

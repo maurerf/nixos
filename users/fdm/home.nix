@@ -17,7 +17,6 @@
       thunderbird
       zoom
       # ---- BROWSERS
-      librewolf
       firefox
       tor-browser-bundle-bin
     ];
