@@ -28,6 +28,7 @@
       vlc
       bleachbit
       keepassxc
+      kleopatra
       # -- FONTS
       (pkgs.nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" ]; })
     ];
