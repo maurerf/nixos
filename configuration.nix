@@ -63,6 +63,7 @@
     gnome-weather
     gnome-contacts
     gnome-maps
+    gnome-connections
     gedit # text editor
     epiphany # web browser
     geary # email reader
