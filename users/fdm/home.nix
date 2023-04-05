@@ -28,6 +28,8 @@
       vlc
       bleachbit
       keepassxc
+      # -- FONTS
+      (pkgs.nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" ]; })
     ];
     programs.home-manager = {
       enable = true;
@@ -36,4 +38,5 @@
     imports = builtins.concatMap import [
       ./config
     ];
+    fonts.fontconfig.enable = true;
   }
