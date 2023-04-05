@@ -4,9 +4,11 @@
     #home.homeDirectory = /home/fdm;
     home.stateVersion = "22.11";
     home.packages = with pkgs; [
+      # --- CLI
       zsh-powerlevel10k
       (import ./config/vim/default.nix)
-      spotify
+      git
+      htop
       # ---- WALLETS
       electrum
       monero-gui
@@ -19,6 +21,13 @@
       # ---- BROWSERS
       firefox
       tor-browser-bundle-bin
+      # -- APPLICATIONS
+      spotify
+      arandr
+      libreoffice
+      vlc
+      bleachbit
+      keepassxc
     ];
     programs.home-manager = {
       enable = true;

@@ -136,20 +136,6 @@
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
-  environment.systemPackages = with pkgs; [
-      git
-      htop
-      spotify
-      arandr
-      libreoffice
-      vlc
-      bleachbit
-      keepassxc
-      neofetch
-  ];
-
   # Fonts
   fonts.fonts = with pkgs; [
     fira-code
