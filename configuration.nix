@@ -57,13 +57,13 @@
   environment.gnome.excludePackages = (with pkgs; [
     gnome-photos
     gnome-tour
+    gnome-connections
   ]) ++ (with pkgs.gnome; [
     gnome-music
     gnome-calendar
     gnome-weather
     gnome-contacts
     gnome-maps
-    gnome-connections
     gedit # text editor
     epiphany # web browser
     geary # email reader
