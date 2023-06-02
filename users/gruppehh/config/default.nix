@@ -12,12 +12,6 @@ let
         };
       };
 
-      git = {
-        enable = true;
-        userName = "Felix Maurer";
-        userEmail = "maurerfelix@protonmail.com";
-      };
-
       ssh.enable = true;
     };
   };
