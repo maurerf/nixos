@@ -15,6 +15,7 @@
       tor-browser-bundle-bin
       # -- APPLICATIONS
       arandr
+      tdesktop
       libreoffice
       vlc
       bleachbit
@@ -22,8 +23,6 @@
       kleopatra
       # -- FONTS
       (pkgs.nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" ]; })
-      # -- GNOME EXTENSIONS
-      gnomeExtensions.caffeine
     ];
     programs.home-manager = {
       enable = true;

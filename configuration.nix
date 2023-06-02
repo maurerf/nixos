@@ -21,7 +21,7 @@
   # Enable grub cryptodisk
   boot.loader.grub.enableCryptodisk=true;
 
-  boot.initrd.luks.devices."luks-TODO".keyFile = "/crypto_keyfile.bin";
+  boot.initrd.luks.devices."luks-341b2e6b-d4df-446b-a387-eb1d67160cdb".keyFile = "/crypto_keyfile.bin";
   networking.hostName = "thinkpad-nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
@@ -111,7 +111,11 @@
     description = "Gruppe Hamburg";
     initialPassword = "Password";
     extraGroups = [ "networkmanager" "wheel" ]; #TODO: remove from wheel 
-    packages = with pkgs; [];
+    packages = with pkgs; [
+      # -- GNOME EXTENSIONS
+      gnomeExtensions.caffeine
+      gnomeExtensions.dash-to-dock
+    ];
    };
    
   # Home Manager
