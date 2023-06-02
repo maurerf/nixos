@@ -22,7 +22,7 @@
   boot.loader.grub.enableCryptodisk=true;
 
   boot.initrd.luks.devices."luks-TODO".keyFile = "/crypto_keyfile.bin";
-  networking.hostName = "nixos"; # Define your hostname.
+  networking.hostName = "thinkpad-nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Enable networking
@@ -106,22 +106,22 @@
   users.defaultUserShell = pkgs.zsh;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.fdm = {
+  users.users.gruppehh = {
     isNormalUser = true;
-    description = "fdm";
+    description = "Gruppe Hamburg";
     initialPassword = "Password";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" ]; #TODO: remove from wheel 
     packages = with pkgs; [];
    };
    
   # Home Manager
-  home-manager.users.fdm = { pkgs, ...}: {
+  home-manager.users.gruppehh = { pkgs, ...}: {
     programs.zsh.enable = true;
-    imports = [ ./users/fdm/home.nix ];
+    imports = [ ./users/gruppehh/home.nix ];
   };
 
   # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.allowUnfree = false;
 
   # Leave this unchanged
   system.stateVersion = "22.11"; # Did you read the comment?

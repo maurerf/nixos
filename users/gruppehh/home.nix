@@ -1,7 +1,7 @@
 { pkgs, config, lib, stdenv, ... }:
   {
-    home.username = "fdm";
-    #home.homeDirectory = /home/fdm;
+    home.username = "gruppehh";
+    #home.homeDirectory = /home/gruppehh;
     home.stateVersion = "22.11";
     home.packages = with pkgs; [
       # --- CLI
@@ -9,20 +9,11 @@
       (import ./config/vim/default.nix)
       git
       htop
-      # ---- WALLETS
-      electrum
-      monero-gui
-      # ---- COMMUNICATION
-      discord
-      signal-desktop
-      tdesktop
-      thunderbird
-      zoom
+      neofetch
       # ---- BROWSERS
       firefox
       tor-browser-bundle-bin
       # -- APPLICATIONS
-      spotify
       arandr
       libreoffice
       vlc
@@ -31,11 +22,13 @@
       kleopatra
       # -- FONTS
       (pkgs.nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" ]; })
+      # -- GNOME EXTENSIONS
+      gnomeExtensions.caffeine
     ];
     programs.home-manager = {
       enable = true;
     };
-    nixpkgs.config.allowUnfree = true;
+    nixpkgs.config.allowUnfree = false;
     imports = builtins.concatMap import [
       ./config
     ];

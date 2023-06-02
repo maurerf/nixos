@@ -9,7 +9,7 @@
     shellAliases = {
       lsa = "ls -alF";
       rebuild = "sudo nixos-rebuild switch";
-      cdconf = "cd /etc/nixos/users/fdm";
+      cdconf = "cd /etc/nixos/users/gruppehh";
     };
     oh-my-zsh = {
        enable = true;
