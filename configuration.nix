@@ -4,7 +4,6 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
-      #<home-manager/nixos>
     ];
 
   # Bootloader
@@ -32,7 +31,7 @@
   time.timeZone = "Europe/Berlin";
 
   # Select internationalisation properties.
-  i18n.defaultLocale = "en_US.UTF-8";
+  i18n.defaultLocale = "de_DE.UTF-8";
 
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "de_DE.UTF-8";
@@ -125,7 +124,7 @@
     imports = [ ./users/gruppehh/home.nix ];
   };
 
-  # Allow unfree packages
+  # Disallow unfree packages
   nixpkgs.config.allowUnfree = false;
 
   # Enable flakes
