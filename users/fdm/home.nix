@@ -6,7 +6,7 @@
     home.packages = with pkgs; [
       # --- CLI
       zsh-powerlevel10k
-      (import ./config/vim/default.nix)
+      vim_configurable
       git
       htop
       # ---- WALLETS
@@ -15,6 +15,7 @@
       # ---- COMMUNICATION
       discord
       signal-desktop
+      element-desktop
       tdesktop
       thunderbird
       zoom

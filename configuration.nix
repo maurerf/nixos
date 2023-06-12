@@ -4,7 +4,6 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
-      <home-manager/nixos>
     ];
 
   # Bootloader
@@ -103,6 +102,7 @@
   # services.xserver.libinput.enable = true;
 
   # Set global default shell
+  programs.zsh.enable = true;
   users.defaultUserShell = pkgs.zsh;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
@@ -111,7 +111,9 @@
     description = "fdm";
     initialPassword = "Password";
     extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [];
+    packages = with pkgs; [
+        gnomeExtensions.caffeine
+    ];
    };
    
   # Home Manager
@@ -122,6 +124,9 @@
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
+
+  # Enable flakes
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Leave this unchanged
   system.stateVersion = "22.11"; # Did you read the comment?
