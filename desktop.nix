@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 
 {
   imports =
@@ -20,7 +20,7 @@
   # Enable grub cryptodisk
   boot.loader.grub.enableCryptodisk=true;
 
-  boot.initrd.luks.devices."luks-TODO".keyFile = "/crypto_keyfile.bin";
+  boot.initrd.luks.devices."luks-d44d0902-56f8-46f7-98e0-adf37059a27d".keyFile = "/crypto_keyfile.bin";
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
@@ -116,12 +116,6 @@
     ];
    };
    
-  # Home Manager
-  home-manager.users.fdm = { pkgs, ...}: {
-    programs.zsh.enable = true;
-    imports = [ ./users/fdm/home.nix ];
-  };
-
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 

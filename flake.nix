@@ -1,5 +1,5 @@
 {
-  description = "NixOS fuer Thinkpad von Gruppe Hamburg";
+  description = "NixOS Flake: Desktop PC, VPS, laptop";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs";
@@ -15,14 +15,39 @@
   in 
   {
     nixosConfigurations = {
-      default = nixpkgs.lib.nixosSystem {
+      desktop = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit inputs; };
         modules = [
-          ./configuration.nix
+          ./desktop.nix
           inputs.home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
+            home-manager.users.fdm = ./users/fdm/home.nix;
+          }
+        ];
+      };
+      laptop = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = { inherit inputs; };
+        modules = [
+          ./laptop.nix
+          inputs.home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.users.fdm = ./users/fdm/home.nix;
+          }
+        ];
+      };
+      vps = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = { inherit inputs; };
+        modules = [
+          ./vps.nix
+          inputs.home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.users.vps-admin = ./users/vps-admin/home.nix;
           }
         ];
       };
