@@ -18,7 +18,7 @@
       element-desktop
       tdesktop
       thunderbird
-      zoom
+      zoom-us
       # ---- BROWSERS
       firefox
       tor-browser-bundle-bin
@@ -30,6 +30,20 @@
       bleachbit
       keepassxc
       kleopatra
+      # -- DEVELOPMENT
+      jetbrains.idea-community maven jdk gcc12
+      (vscode-with-extensions.override {
+        vscodeExtensions = with vscode-extensions; [
+          bbenoist.nix
+          ms-vscode.cpptools
+          ms-python.python
+          haskell.haskell
+          justusadam.language-haskell
+          #vscodevim.vim
+          github.vscode-pull-request-github
+          #akamud.vscode-theme-onedark
+        ];
+      })
       # -- FONTS
       (pkgs.nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" ]; })
     ];
