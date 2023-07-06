@@ -41,7 +41,6 @@
           justusadam.language-haskell
           #vscodevim.vim
           github.vscode-pull-request-github
-          #akamud.vscode-theme-onedark
         ];
       })
       # -- FONTS
