@@ -15,11 +15,11 @@
   in 
   {
     nixosConfigurations = {
-      desktop = nixpkgs.lib.nixosSystem {
+      gnome-desktop = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit inputs; };
         modules = [
-          ./desktop.nix
+          ./gnome-desktop.nix
           inputs.home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
@@ -27,11 +27,11 @@
           }
         ];
       };
-      laptop = nixpkgs.lib.nixosSystem {
+      xmonad-desktop = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit inputs; };
         modules = [
-          ./laptop.nix
+          ./xmonad-desktop.nix
           inputs.home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;

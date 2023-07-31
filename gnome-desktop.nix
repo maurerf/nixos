@@ -20,7 +20,7 @@
   # Enable grub cryptodisk
   boot.loader.grub.enableCryptodisk=true;
 
-  boot.initrd.luks.devices."luks-d44d0902-56f8-46f7-98e0-adf37059a27d".keyFile = "/crypto_keyfile.bin";
+  boot.initrd.luks.devices."luks-427793d2-c21c-4f05-afa0-04b190e4e53a".keyFile = "/crypto_keyfile.bin";
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
@@ -89,6 +89,7 @@
 
   # Enable sound with pipewire.
   sound.enable = true;
+
   hardware.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
@@ -113,6 +114,8 @@
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [
         gnomeExtensions.caffeine
+        gnomeExtensions.wireless-hid
+        gnomeExtensions.vitals
     ];
    };
    

@@ -31,16 +31,16 @@
       keepassxc
       kleopatra
       # -- DEVELOPMENT
-      jetbrains.idea-community maven jdk gcc12
+      texlive.combined.scheme-full 
       (vscode-with-extensions.override {
         vscodeExtensions = with vscode-extensions; [
-          bbenoist.nix
+          james-yu.latex-workshop
+          jnoortheen.nix-ide
           ms-vscode.cpptools
           ms-python.python
-          haskell.haskell
-          justusadam.language-haskell
           #vscodevim.vim
           github.vscode-pull-request-github
+          github.copilot
         ];
       })
       # -- FONTS
