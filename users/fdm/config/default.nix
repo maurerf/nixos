@@ -26,4 +26,7 @@ in
   # multi-line configs
   # ./git TODO: fix
   ./zsh
+  # ./vim TODO: fix
+  ./firefox
+  ./vscode
 ]

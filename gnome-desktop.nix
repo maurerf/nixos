@@ -20,7 +20,7 @@
   # Enable grub cryptodisk
   boot.loader.grub.enableCryptodisk=true;
 
-  boot.initrd.luks.devices."luks-427793d2-c21c-4f05-afa0-04b190e4e53a".keyFile = "/crypto_keyfile.bin";
+  boot.initrd.luks.devices."luks-d44d0902-56f8-46f7-98e0-adf37059a27d".keyFile = "/crypto_keyfile.bin";
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
@@ -113,9 +113,26 @@
     initialPassword = "Password";
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [
+        # Manages/Disables Screensaver
         gnomeExtensions.caffeine
+
+        # Battery Indicator For Wireless Mouse/Keyboard/Headphones
         gnomeExtensions.wireless-hid
+
+        # System/Load Information Applet
         gnomeExtensions.vitals
+
+        # i3 Style Workspaces
+        gnomeExtensions.space-bar
+
+        # Hide Apps in App Menu
+        gnomeExtensions.app-hider
+
+        # Clipboard History Applet
+        gnomeExtensions.clipboard-indicator
+
+        # Logo Applet (macos-Style)
+        #gnomeExtensions.logo-menu
     ];
    };
    

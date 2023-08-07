@@ -20,7 +20,6 @@
       thunderbird
       zoom-us
       # ---- BROWSERS
-      firefox
       tor-browser-bundle-bin
       # -- APPLICATIONS
       spotify
@@ -32,17 +31,6 @@
       kleopatra
       # -- DEVELOPMENT
       texlive.combined.scheme-full 
-      (vscode-with-extensions.override {
-        vscodeExtensions = with vscode-extensions; [
-          james-yu.latex-workshop
-          jnoortheen.nix-ide
-          ms-vscode.cpptools
-          ms-python.python
-          #vscodevim.vim
-          github.vscode-pull-request-github
-          github.copilot
-        ];
-      })
       # -- FONTS
       (pkgs.nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" ]; })
     ];
