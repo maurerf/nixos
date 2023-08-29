@@ -19,6 +19,7 @@
       tdesktop
       thunderbird
       zoom-us
+      whatsapp-for-linux
       # ---- BROWSERS
       tor-browser-bundle-bin
       # -- APPLICATIONS
@@ -27,9 +28,11 @@
       libreoffice
       vlc
       bleachbit
+      filelight
       keepassxc
       kleopatra
       # -- DEVELOPMENT
+      jetbrains.idea-community maven jdk gcc12
       texlive.combined.scheme-full 
       # -- FONTS
       (pkgs.nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" ]; })

@@ -7,25 +7,20 @@
     ];
 
   # Bootloader
-  boot.loader.grub.enable = true;
-  boot.loader.grub.device = "nodev";
-  #boot.loader.grub.efiSupport = true;
-  #boot.loader.grub.useOSProber = true;
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
 
-  # Setup keyfile
-  boot.initrd.secrets = {
-    "/crypto_keyfile.bin" = null;
-  };
+  boot.initrd.systemd.enable = true;
+  #boot.plymouth.enable = true;
+  #boot.plymouth.theme = "bgrt";
+  boot.kernelParams = [ "quit" ];
 
-  # Enable grub cryptodisk
-  boot.loader.grub.enableCryptodisk=true;
-
-  boot.initrd.luks.devices."luks-d44d0902-56f8-46f7-98e0-adf37059a27d".keyFile = "/crypto_keyfile.bin";
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Enable networking
   networking.networkmanager.enable = true;
+  #hardware.enableRedistributableFirmware = true;
 
   # Set your time zone.
   time.timeZone = "Europe/Berlin";
@@ -132,12 +127,19 @@
         gnomeExtensions.clipboard-indicator
 
         # Logo Applet (macos-Style)
-        #gnomeExtensions.logo-menu
+        gnomeExtensions.logo-menu
     ];
    };
    
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
+
+  # Enable Steam
+  programs.steam.enable = true;
+
+  # Enable Virtualbox
+  virtualisation.virtualbox.host.enable = true;
+  users.extraGroups.vboxusers.members = [ "fdm" ];
 
   # Enable flakes
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
