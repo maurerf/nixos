@@ -3,13 +3,18 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs";
+    #nixpkgs2305.url = "github:NixOS/nixpkgs/nixos-23.05";
     home-manager = {
       url = github:nix-community/home-manager;
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    simple-nixos-mailserver = {
+      url = "gitlab:simple-nixos-mailserver/nixos-mailserver";
+      inputs.nixpkgs-23_05.follows = "nixpkgs";
+    };
   };
 
-  outputs = inputs @ { self, nixpkgs, home-manager }:
+  outputs = inputs @ { self, nixpkgs, home-manager, simple-nixos-mailserver }:
   let
     system = "x86_64-linux";
   in 
@@ -44,10 +49,11 @@
         specialArgs = { inherit inputs; };
         modules = [
           ./vps.nix
+          inputs.simple-nixos-mailserver.nixosModules.mailserver
           inputs.home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
-            home-manager.users.vps-admin = ./users/vps-admin/home.nix;
+            home-manager.users.fdm = ./users/fdm-vps/home.nix;
           }
         ];
       };

@@ -12,6 +12,9 @@
   #boot.loader.grub.efiSupport = true;
   #boot.loader.grub.useOSProber = true;
 
+  # Enable SSH
+  services.openssh.enable = true;
+
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
@@ -44,14 +47,33 @@
   users.defaultUserShell = pkgs.zsh;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.vps-admin = {
+  users.users.fdm = {
     isNormalUser = true;
-    description = "vps-admin";
     initialPassword = "Password";
-    extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [];
+    extraGroups = [ "wheel" ];
    };
    
+  # Configure maurerf.com mailserver
+  mailserver = {
+    enable = true;
+    fqdn = "mail.maurerf.com";
+    domains = [ "maurerf.com" ];
+
+    loginAccounts = {
+      "felix@maurerf.com" = {
+        hashedPasswordFile = "/etc/nixos/felix-password.txt";
+        aliases = ["contact@maurerf.com"];
+	name = "Felix Maurer";
+      };
+    };
+
+    # Use Let's Encrypt certificates. Note that this needs to set up a stripped
+    # down nginx and opens port 80.
+    certificateScheme = "acme-nginx";
+  };
+  security.acme.acceptTerms = true;
+  security.acme.defaults.email = "contact@maurerf.com";
+
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
@@ -59,5 +81,5 @@
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Leave this unchanged
-  system.stateVersion = "22.11"; # Did you read the comment?
+  system.stateVersion = "23.05"; # Did you read the comment?
 }
