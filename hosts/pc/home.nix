@@ -31,9 +31,6 @@
       filelight
       keepassxc
       kleopatra
-      # -- DEVELOPMENT
-      jetbrains.idea-community maven jdk gcc12
-      texlive.combined.scheme-full 
       # -- FONTS
       (pkgs.nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" ]; })
     ];
@@ -42,7 +39,8 @@
     };
     nixpkgs.config.allowUnfree = true;
     imports = builtins.concatMap import [
-      ./config
+      ../../modules
+      ./modules
     ];
     fonts.fontconfig.enable = true;
   }

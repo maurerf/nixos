@@ -15,7 +15,7 @@
   # Enable SSH
   services.openssh.enable = true;
 
-  networking.hostName = "nixos"; # Define your hostname.
+  networking.hostName = "nixos-vps"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Enable networking
@@ -61,7 +61,7 @@
 
     loginAccounts = {
       "felix@maurerf.com" = {
-        hashedPasswordFile = "/etc/nixos/felix-password.txt";
+        hashedPasswordFile = "/etc/nixos/hosts/vps/mailserver-pw-hashes/felix.txt";
         aliases = ["contact@maurerf.com"];
 	name = "Felix Maurer";
       };

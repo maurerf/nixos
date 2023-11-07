@@ -17,7 +17,8 @@
     };
     nixpkgs.config.allowUnfree = true;
     imports = builtins.concatMap import [
-      ./config
+      ../../modules
+      ./modules
     ];
     fonts.fontconfig.enable = true;
   }
