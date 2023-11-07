@@ -75,7 +75,7 @@
   security.acme.defaults.email = "contact@maurerf.com";
 
   # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.allowUnfree = false;
 
   # Enable flakes
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
