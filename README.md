@@ -6,4 +6,4 @@ This is my personal NixOS configuration.
 2. `nix-shell -p git`
 3. `git clone https://github.com/maurerf/nixos`
 4. `sudo cp -r nixos/* /etc/nixos/*`
-6. `sudo nixos-rebuild switch --flake .#pc` or `sudo nixos-rebuild switch --flake .#vps`
+5. `sudo nixos-rebuild switch --flake .#pc` or `sudo nixos-rebuild switch --flake .#vps`
