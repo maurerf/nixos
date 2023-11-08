@@ -9,6 +9,8 @@
       vim_configurable
       git
       htop
+      nix-output-monitor
+      neofetch
       # -- FONTS
       (pkgs.nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" ]; })
     ];

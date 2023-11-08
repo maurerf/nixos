@@ -9,6 +9,8 @@
       vim_configurable
       git
       htop
+      nix-output-monitor
+      neofetch
       # ---- WALLETS
       electrum
       monero-gui
