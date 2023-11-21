@@ -31,6 +31,19 @@
           }
         ];
       };
+      laptop = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = { inherit inputs; };
+        modules = [
+          ./laptop.nix
+          inputs.home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.users.fdm = ./hosts/pc/home.nix; #laptop uses the same host config as pc
+          }
+        ];
+      };
+
       vps = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit inputs; };

@@ -40,15 +40,8 @@
     LC_TIME = "de_DE.UTF-8";
   };
 
-  # Enable the X11 windowing system.
+  # Enable the X11 windowing system. TODO: doesnt this config use wayland?
   services.xserver.enable = true;
-
-  # Nvidia Drivers
-  services.xserver.videoDrivers = [ "nvidia" ];
-  hardware.opengl.enable = true;
-  hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
-  # Nvidia Driver causes problems in Wayland Gnome
-  services.xserver.displayManager.gdm.wayland = false;
 
   # Enable the GNOME Desktop Environment.
   services.xserver.displayManager.gdm.enable = true;
@@ -119,7 +112,7 @@
         gnomeExtensions.caffeine
 
         # Battery Indicator For Wireless Mouse/Keyboard/Headphones
-        gnomeExtensions.wireless-hid
+        # gnomeExtensions.wireless-hid
 
         # System/Load Information Applet
         gnomeExtensions.vitals
@@ -142,11 +135,11 @@
   nixpkgs.config.allowUnfree = true;
 
   # Enable Steam
-  programs.steam.enable = true;
+  # programs.steam.enable = true;
 
   # Enable Virtualbox
-  virtualisation.virtualbox.host.enable = true;
-  users.extraGroups.vboxusers.members = [ "fdm" ];
+  # virtualisation.virtualbox.host.enable = true;
+  # users.extraGroups.vboxusers.members = [ "fdm" ];
 
   # Enable flakes
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
