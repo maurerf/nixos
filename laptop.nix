@@ -117,14 +117,8 @@
         # System/Load Information Applet
         gnomeExtensions.vitals
 
-        # i3 Style Workspaces
-        gnomeExtensions.space-bar
-
         # Hide Apps in App Menu
         gnomeExtensions.app-hider
-
-        # Clipboard History Applet
-        gnomeExtensions.clipboard-indicator
 
         # Logo Applet (macos-Style)
         gnomeExtensions.logo-menu
