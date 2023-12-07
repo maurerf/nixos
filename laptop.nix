@@ -117,9 +117,6 @@
         # System/Load Information Applet
         gnomeExtensions.vitals
 
-        # Hide Apps in App Menu
-        gnomeExtensions.app-hider
-
         # Logo Applet (macos-Style)
         gnomeExtensions.logo-menu
     ];
@@ -134,6 +131,9 @@
   # Enable Virtualbox
   # virtualisation.virtualbox.host.enable = true;
   # users.extraGroups.vboxusers.members = [ "fdm" ];
+  # virtualisation.virtualbox.host.enableExtensionPack = true;
+  # virtualisation.virtualbox.guest.enable = true;
+  # virtualisation.virtualbox.guest.x11 = true;
 
   # Enable flakes
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
