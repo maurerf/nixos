@@ -20,7 +20,7 @@
 
   # Enable networking
   networking.networkmanager.enable = true;
-  hardware.enableRedistributableFirmware = true;
+  #hardware.enableRedistributableFirmware = true;
 
   # Set your time zone.
   time.timeZone = "Europe/Berlin";
@@ -65,6 +65,8 @@
     gnome-weather
     gnome-contacts
     gnome-maps
+    gnome-clocks
+    gnome-keyring
     gedit # text editor
     epiphany # web browser
     geary # email reader
@@ -75,6 +77,8 @@
     iagno # go game
     hitori # sudoku game
     atomix # puzzle game
+    yelp # help app
+    simple-scan # document scanner
   ]);
 
   # Configure keymap in X11

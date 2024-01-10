@@ -18,7 +18,7 @@
       discord
       signal-desktop
       element-desktop
-      tdesktop
+      telegram-desktop
       thunderbird
       zoom-us
       whatsapp-for-linux
