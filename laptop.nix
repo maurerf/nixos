@@ -56,6 +56,8 @@
     gnome-music
     gnome-calendar
     gnome-weather
+    gnome-clocks
+    gnome-keyring
     gnome-contacts
     gnome-maps
     gedit # text editor
@@ -68,6 +70,8 @@
     iagno # go game
     hitori # sudoku game
     atomix # puzzle game
+    yelp # help app
+    simple-scan # document scanner
   ]);
 
   # Configure keymap in X11
