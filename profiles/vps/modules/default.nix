@@ -8,6 +8,5 @@ let
 in
 [ 
   # multi-line configs
-  ./firefox
-  ./vscode
+  # none, currently
 ]

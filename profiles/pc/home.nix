@@ -2,15 +2,33 @@
   {
     home.username = "fdm";
     #home.homeDirectory = /home/fdm;
-    home.stateVersion = "23.05";
+    home.stateVersion = "22.11";
     home.packages = with pkgs; [
-      # --- CLI
+      # -- CLI
       zsh-powerlevel10k
       vim_configurable
       git
       htop
-      nix-output-monitor
       neofetch
+      # -- WALLETS
+      electrum
+      monero-gui
+      # -- COMMUNICATION
+      discord
+      signal-desktop
+      telegram-desktop
+      thunderbird
+      whatsapp-for-linux
+      # -- BROWSERS
+      tor-browser-bundle-bin
+      # -- APPLICATIONS
+      spotify
+      libreoffice
+      vlc
+      bleachbit
+      filelight
+      keepassxc
+      kleopatra
       # -- FONTS
       (pkgs.nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" ]; })
     ];

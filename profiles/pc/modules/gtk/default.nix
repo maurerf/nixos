@@ -37,8 +37,7 @@
         "thunderbird.desktop"
         "org.keepassxc.KeePassXC.desktop"
         "spotify.desktop"
-        "steam.desktop"
-        "virtualbox.desktop"
+        "code.desktop"
       ];
     };
     "org/gnome/desktop/interface" = {

@@ -26,6 +26,5 @@ in
   # multi-line configs
   # ./git TODO: fix
   ./zsh
-  ./gtk
   # ./vim TODO: fix
 ]

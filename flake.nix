@@ -23,11 +23,11 @@
         inherit system;
         specialArgs = { inherit inputs; };
         modules = [
-          ./pc.nix
+          ./machines/pc.nix
           inputs.home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
-            home-manager.users.fdm = ./hosts/pc/home.nix;
+            home-manager.users.fdm = ./profiles/pc/home.nix;
           }
         ];
       };
@@ -35,25 +35,36 @@
         inherit system;
         specialArgs = { inherit inputs; };
         modules = [
-          ./laptop.nix
+          ./machines/laptop.nix
           inputs.home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
-            home-manager.users.fdm = ./hosts/pc/home.nix; #laptop uses the same host config as pc
+            home-manager.users.fdm = ./profiles/pc/home.nix; #laptop uses the same host profile as pc
           }
         ];
       };
-
+      minimal = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = { inherit inputs; };
+        modules = [
+          ./machines/minimal.nix
+          inputs.home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.users.fdm = ./profiles/minimal/home.nix;
+          }
+        ];
+      };
       vps = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit inputs; };
         modules = [
-          ./vps.nix
+          ./machines/vps.nix
           inputs.simple-nixos-mailserver.nixosModules.mailserver
           inputs.home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
-            home-manager.users.fdm = ./hosts/vps/home.nix;
+            home-manager.users.fdm = ./profiles/vps/home.nix;
           }
         ];
       };
