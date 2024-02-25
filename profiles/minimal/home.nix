@@ -5,9 +5,7 @@
     home.stateVersion = "23.05";
     home.packages = with pkgs; [
       # --- CLI
-      zsh-powerlevel10k
-      vim_configurable
-      git
+      vim
       htop
       neofetch
       # -- FONTS

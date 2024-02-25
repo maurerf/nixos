@@ -5,9 +5,7 @@
     home.stateVersion = "22.11";
     home.packages = with pkgs; [
       # -- CLI
-      zsh-powerlevel10k
-      vim_configurable
-      git
+      vim
       htop
       neofetch
       # -- WALLETS
