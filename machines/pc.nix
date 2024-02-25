@@ -23,7 +23,7 @@
   services.xserver.desktopManager.gnome.enable = true;
   services.xserver = {
     xkb.layout = "de";
-    xkb.Variant = "";
+    xkb.variant = "";
   };
   services.xserver.displayManager.gdm.wayland = false;
 
