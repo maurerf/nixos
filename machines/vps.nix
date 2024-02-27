@@ -23,9 +23,9 @@
 
     loginAccounts = {
       "felix@maurerf.com" = {
-        hashedPasswordFile = "/etc/nixos/hosts/vps/mailserver-pw-hashes/felix.txt";
+        hashedPasswordFile = "../profiles/vps/mailserver-pw-hashes/felix.txt";
         aliases = ["contact@maurerf.com"];
-	      name = "Felix Maurer";
+        name = "Felix Maurer";
       };
     };
 
