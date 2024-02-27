@@ -24,6 +24,7 @@
         specialArgs = { inherit inputs; };
         modules = [
           ./machines/pc.nix
+          ./hardware/pc.nix
           inputs.home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
@@ -31,15 +32,29 @@
           }
         ];
       };
-      laptop = nixpkgs.lib.nixosSystem {
+      thinkpad-l450 = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit inputs; };
         modules = [
           ./machines/laptop.nix
+          ./hardware/thinkpad-l450.nix
           inputs.home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
-            home-manager.users.fdm = ./profiles/pc/home.nix; #laptop uses the same host profile as pc
+            home-manager.users.fdm = ./profiles/pc/home.nix; #laptops use the same host profile as pc
+          }
+        ];
+      };
+      thinkpad-t440s = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = { inherit inputs; };
+        modules = [
+          ./machines/laptop.nix
+          ./hardware/thinkpad-t440s.nix
+          inputs.home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.users.fdm = ./profiles/pc/home.nix; #laptops use the same host profile as pc
           }
         ];
       };
@@ -48,6 +63,7 @@
         specialArgs = { inherit inputs; };
         modules = [
           ./machines/minimal.nix
+          ./hardware-configuration.nix # NOTE: as this minimal flake is hardware-agnostic, you cannot directly access it from remote
           inputs.home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
@@ -60,6 +76,7 @@
         specialArgs = { inherit inputs; };
         modules = [
           ./machines/vps.nix
+          ./hardware/vultr-vps.nix
           inputs.simple-nixos-mailserver.nixosModules.mailserver
           inputs.home-manager.nixosModules.home-manager
           {

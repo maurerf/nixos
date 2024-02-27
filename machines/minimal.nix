@@ -1,11 +1,7 @@
 { config, pkgs, inputs, ... }:
 
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      /etc/nixos/hardware-configuration.nix
-    ];
-
+  # NOTE: as this minimal flake is hardware agnostic, you need to adjust this locally before rebuilding
   # Bootloader
   #boot.loader.grub.enable = true;
   #boot.loader.grub.device = "nodev";
