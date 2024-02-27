@@ -23,7 +23,7 @@
 
     loginAccounts = {
       "felix@maurerf.com" = {
-        hashedPasswordFile = "../profiles/vps/mailserver-pw-hashes/felix.txt";
+        hashedPassword = "$2b$05$sAg0iWFwS.DKrHggtDRbre7GcEwW2mJuOAnIGpGTPdBh3wcyaVPGK";
         aliases = ["contact@maurerf.com"];
         name = "Felix Maurer";
       };
