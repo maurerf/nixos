@@ -11,6 +11,9 @@
   boot.loader.grub.device = "nodev";
   #boot.loader.grub.efiSupport = true;
   #boot.loader.grub.useOSProber = true;
+
+  # https://gitlab.com/simple-nixos-mailserver/nixos-mailserver/-/issues/275
+  services.dovecot2.sieve.extensions = [ "fileinto" ];
    
   # Mailserver
   mailserver = {
