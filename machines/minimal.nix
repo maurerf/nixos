@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, ... }:
 
 {
   # NOTE: as this minimal flake is hardware agnostic, you need to adjust this locally before rebuilding
