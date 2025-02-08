@@ -11,9 +11,13 @@
       url = "gitlab:simple-nixos-mailserver/nixos-mailserver";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-darwin = {
+      url = "github:LnL7/nix-darwin/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = inputs @ { self, nixpkgs, home-manager, simple-nixos-mailserver }:
+  outputs = inputs @ { self, nixpkgs, home-manager, simple-nixos-mailserver, nix-darwin }:
   let
     system = "x86_64-linux";
   in 
@@ -99,6 +103,18 @@
         ];
       };
     };
+
+    darwinConfigurations = {
+      "m2-macbook-air" = nix-darwin.lib.darwinSystem {
+        modules = [
+          ./machines/m2-macbook-air.nix
+          inputs.home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.users.fdm = ./profiles/darwin/home.nix;
+          }
+        ];
+      };
+    };
   };
 }
-
