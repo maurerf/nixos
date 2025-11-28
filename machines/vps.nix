@@ -32,6 +32,7 @@
     # Use Let's Encrypt certificates. Note that this needs to set up a stripped
     # down nginx and opens port 80.
     certificateScheme = "acme-nginx";
+    stateVersion = 3;
   };
   security.acme.acceptTerms = true;
   security.acme.defaults.email = "contact@maurerf.com";
