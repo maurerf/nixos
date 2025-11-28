@@ -14,6 +14,12 @@
   nixpkgs.hostPlatform = "aarch64-darwin";
   nixpkgs.config.allowUnfree = true;
 
+  # User configuration
+  users.users.fdm = {
+    name = "fdm";
+    home = "/Users/fdm";
+  };
+
   # Homebrew integration
   homebrew = {
     enable = true;

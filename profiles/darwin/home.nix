@@ -11,7 +11,8 @@
     warp-terminal
     neofetch
     # -- FONTS (for cross-platform consistency)
-    (pkgs.nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" ]; })
+    pkgs.nerd-fonts.fira-code
+    pkgs.nerd-fonts.droid-sans-mono
   ];
   programs.home-manager = {
     enable = true;
