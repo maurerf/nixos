@@ -10,6 +10,10 @@
     telegram-desktop
     warp-terminal
     neofetch
+    # -- Migrated from Homebrew
+    obsidian
+    openscad
+    cmake
     # -- FONTS (for cross-platform consistency)
     pkgs.nerd-fonts.fira-code
     pkgs.nerd-fonts.droid-sans-mono

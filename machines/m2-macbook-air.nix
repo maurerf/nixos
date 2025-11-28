@@ -23,7 +23,10 @@
   # Homebrew integration
   homebrew = {
     enable = true;
-    casks = [];
+    casks = [
+      "rar"      # Proprietary, not available in nixpkgs
+      "steam"    # Better macOS integration via Homebrew
+    ];
     onActivation.cleanup = "none";  # Preserve existing Homebrew packages
   };
 }
