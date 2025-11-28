@@ -3,8 +3,11 @@
 {
   imports =
     [
-      ./minimal.nix
+      ../modules/core/base.nix
     ];
+
+  # Networking
+  networking.hostName = "nixos-vps";
 
   # Bootloader
   boot.loader.grub.enable = true;

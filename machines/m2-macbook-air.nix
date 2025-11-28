@@ -5,15 +5,19 @@
 
   services.openssh.enable = true;
 
-  networking.networkmanager.enable = true;
-  networking.hostName = "m2-macbook-air";
-
   nix.settings.experimental-features = "nix-command flakes";
 
-  system.configurationRevision = self.rev or self.dirtyRev or null;
+  #system.configurationRevision = self.rev or self.dirtyRev or null; # TODO: what is this?
 
-  system.stateVersion = "23.05";
+  system.stateVersion = 4;
 
   nixpkgs.hostPlatform = "aarch64-darwin";
   nixpkgs.config.allowUnfree = true;
+
+  # Homebrew integration
+  homebrew = {
+    enable = true;
+    casks = [];
+    onActivation.cleanup = "none";  # Preserve existing Homebrew packages
+  };
 }
