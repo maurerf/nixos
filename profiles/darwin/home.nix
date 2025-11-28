@@ -12,7 +12,6 @@
     neofetch
     # -- Migrated from Homebrew
     obsidian
-    openscad
     cmake
     # -- FONTS (for cross-platform consistency)
     pkgs.nerd-fonts.fira-code
