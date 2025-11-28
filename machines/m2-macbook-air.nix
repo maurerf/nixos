@@ -20,14 +20,14 @@
     home = "/Users/fdm";
   };
 
-  # Homebrew integration
-  homebrew = {
-    enable = true;
-    casks = [
-      "rar"      # Proprietary, not available in nixpkgs
-      "steam"    # Better macOS integration via Homebrew
-      "openscad" # Build issues with Qt5 dependencies in nixpkgs-unstable
-    ];
-    onActivation.cleanup = "none";  # Preserve existing Homebrew packages
-  };
+  # Homebrew integration (temporarily disabled to resolve activation issues)
+  # homebrew = {
+  #   enable = true;
+  #   casks = [
+  #     "rar"      # Proprietary, not available in nixpkgs
+  #     "steam"    # Better macOS integration via Homebrew
+  #     "openscad" # Build issues with Qt5 dependencies in nixpkgs-unstable
+  #   ];
+  #   onActivation.cleanup = "none";  # Preserve existing Homebrew packages
+  # };
 }
