@@ -1,33 +1,38 @@
 { config, pkgs, ... }:
 
 {
-  imports = [];
+  imports = [
+    # Note: modules/nixos-base.nix is Linux-specific, so we don't import it for Darwin
+  ];
 
   services.openssh.enable = true;
 
   nix.settings.experimental-features = "nix-command flakes";
+  nix.channel.enable = false;
 
-  #system.configurationRevision = self.rev or self.dirtyRev or null; # TODO: what is this?
-
-  system.stateVersion = 4;
+  # Nix-darwin stateVersion - represents the nix-darwin release version when this config was first created
+  # This helps maintain backwards compatibility during system upgrades
+  system.stateVersion = 5;
 
   nixpkgs.hostPlatform = "aarch64-darwin";
   nixpkgs.config.allowUnfree = true;
 
-  # User configuration
   users.users.fdm = {
     name = "fdm";
     home = "/Users/fdm";
   };
-
-  # Homebrew integration (temporarily disabled to resolve activation issues)
-  # homebrew = {
-  #   enable = true;
-  #   casks = [
-  #     "rar"      # Proprietary, not available in nixpkgs
-  #     "steam"    # Better macOS integration via Homebrew
-  #     "openscad" # Build issues with Qt5 dependencies in nixpkgs-unstable
-  #   ];
-  #   onActivation.cleanup = "none";  # Preserve existing Homebrew packages
-  # };
+  
+  system.primaryUser = "fdm";
+  # Homebrew as backup utility - minimal integration to avoid changes during activation
+  homebrew = {
+    enable = true;
+    # No packages managed by nix-darwin - use Homebrew manually when needed
+    brews = [];
+    casks = [];
+    onActivation = {
+      cleanup = "none";        # Never cleanup nix-darwin managed packages (preserves manual installs)
+      upgrade = false;         # Sets HOMEBREW_BUNDLE_NO_UPGRADE=1 (same effect as --no-upgrade)
+      autoUpdate = false;      # Prevents Homebrew itself from auto-updating during activation
+    };
+  };
 }

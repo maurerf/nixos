@@ -3,13 +3,11 @@
 {
   imports =
     [
-      ../modules/core/base.nix
+      ../modules/nixos-base.nix
     ];
 
-  # Networking
   networking.hostName = "nixos-vps";
 
-  # Bootloader
   boot.loader.grub.enable = true;
   boot.loader.grub.device = "nodev";
   #boot.loader.grub.efiSupport = true;
@@ -35,6 +33,7 @@
     # Use Let's Encrypt certificates. Note that this needs to set up a stripped
     # down nginx and opens port 80.
     certificateScheme = "acme-nginx";
+    stateVersion = 3;
   };
   security.acme.acceptTerms = true;
   security.acme.defaults.email = "contact@maurerf.com";

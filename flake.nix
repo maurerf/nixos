@@ -8,7 +8,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {
-      url = "github:nix-community/home-manager/release-24.05";
+      url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     simple-nixos-mailserver = {
@@ -24,7 +24,7 @@
   in 
   {
     nixosConfigurations = {
-      vps = nixpkgs.lib.nixosSystem {
+      "vps" = nixpkgs.lib.nixosSystem {
         system = nixosSystem;
         specialArgs = { inherit inputs; };
         modules = [
@@ -34,7 +34,7 @@
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
-            home-manager.users.fdm = ./profiles/vps/home.nix;
+            home-manager.users.fdm = ./profiles/home-vps.nix;
           }
         ];
       };
@@ -48,7 +48,7 @@
           home-manager.darwinModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
-            home-manager.users.fdm = import ./profiles/darwin/home.nix;
+            home-manager.users.fdm = ./profiles/home-darwin.nix;
           }
         ];
       };

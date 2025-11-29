@@ -4,25 +4,17 @@
   home.stateVersion = "24.05";
   home.packages = with pkgs; [
     vim
-    vscode
-    spotify
-    keepassxc
-    telegram-desktop
-    warp-terminal
+    htop
     neofetch
-    # -- Migrated from Homebrew
-    obsidian
-    cmake
-    # -- FONTS (for cross-platform consistency)
     pkgs.nerd-fonts.fira-code
     pkgs.nerd-fonts.droid-sans-mono
   ];
   programs.home-manager = {
     enable = true;
   };
-  nixpkgs.config.allowUnfree = true;
-  imports = builtins.concatMap import [
-    ../../modules
+  imports = [
+    ../modules/git.nix
+    ../modules/zsh.nix
   ];
   fonts.fontconfig.enable = true;
 }
