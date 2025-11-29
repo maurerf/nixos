@@ -1,19 +1,13 @@
 { config, pkgs, ... }:
 
 {
-  # NOTE: as this minimal flake is hardware agnostic, you need to adjust this locally before rebuilding
-  # Bootloader
-  #boot.loader.grub.enable = true;
-  #boot.loader.grub.device = "nodev";
-  #boot.loader.grub.efiSupport = true;
-  #boot.loader.grub.useOSProber = true;
-
+  # NOTE: as this base module is hardware agnostic, you need to adjust boot loader settings locally before rebuilding
+  
   # SSH
   services.openssh.enable = true;
 
   # Networking
   networking.networkmanager.enable = true;
-  networking.hostName = "nixos-fdm";
 
   # Localisation
   time.timeZone = "Europe/Berlin";
@@ -49,5 +43,5 @@
 
   # Nix
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
-  system.stateVersion = "23.05";
+  system.stateVersion = "24.05";
 }

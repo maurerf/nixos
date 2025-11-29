@@ -1,5 +1,4 @@
 [ 
-  # multi-line configs
-  ./git
-  ./zsh
+  # shared development tools
+  ./development-tools
 ]
