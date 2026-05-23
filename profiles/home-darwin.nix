@@ -5,12 +5,11 @@
   home.packages = with pkgs; [
     vim
     htop
-    neofetch
     vscode
     # spotify  # Temporarily disabled due to hash mismatch
     keepassxc
+    notion-app
     telegram-desktop
-    warp-terminal
     obsidian
     anki-bin
     rar
