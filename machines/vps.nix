@@ -13,28 +13,29 @@
   #boot.loader.grub.efiSupport = true;
   #boot.loader.grub.useOSProber = true;
 
-  # https://gitlab.com/simple-nixos-mailserver/nixos-mailserver/-/issues/275
-  services.dovecot2.sieve.extensions = [ "fileinto" ];
-   
   # Mailserver
   mailserver = {
     enable = true;
     fqdn = "mail.maurerf.com";
     domains = [ "maurerf.com" ];
 
-    loginAccounts = {
+    accounts = {
       "felix@maurerf.com" = {
-        hashedPassword = "$2b$05$sAg0iWFwS.DKrHggtDRbre7GcEwW2mJuOAnIGpGTPdBh3wcyaVPGK";
+        hashedPasswordFile = "/etc/checkup-secrets/mail-felix.hash";
         aliases = ["contact@maurerf.com"];
         name = "Felix Maurer";
       };
     };
 
-    # Use Let's Encrypt certificates. Note that this needs to set up a stripped
-    # down nginx and opens port 80.
-    certificateScheme = "acme-nginx";
+    # Reuse the existing ACME host name; nginx serves the HTTP-01 challenge.
+    x509.useACMEHost = "mail.maurerf.com";
     stateVersion = 3;
   };
   security.acme.acceptTerms = true;
   security.acme.defaults.email = "contact@maurerf.com";
+  services.nginx = {
+    enable = true;
+    virtualHosts."mail.maurerf.com".enableACME = true;
+  };
+  networking.firewall.allowedTCPPorts = [ 80 ];
 }

@@ -28,7 +28,7 @@
 
   users.users.fdm = {
     isNormalUser = true;
-    initialPassword = "Password";
+    hashedPasswordFile = "/etc/checkup-secrets/fdm-login.hash";
     extraGroups = [ "wheel" ];
    };
    

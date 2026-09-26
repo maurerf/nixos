@@ -1,0 +1,22 @@
+name: Check Nix configurations
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: cachix/install-nix-action@v31
+      - name: Evaluate both hosts and check the flake
+        run: |
+          nix eval --raw .#darwinConfigurations.m2-macbook-air.system.drvPath --no-update-lock-file --no-write-lock-file
+          nix eval --raw .#nixosConfigurations.vps.config.system.build.toplevel.drvPath --no-update-lock-file --no-write-lock-file
+          nix flake check --no-build --all-systems --no-update-lock-file --no-write-lock-file
+          git diff --check
