@@ -3810,3 +3810,55 @@ Resume state:
 - After resolving/explicitly dispositioning Layer 3: stop at Layer 4 for the user's independent Vultr console login and completed snapshot identity/time/coverage/consistency/retention evidence. No production activation or reboot belongs to US-01. Layer 5 repeats permitted baselines and confirms active/selected paths; Layer 6 records exact old-generation rollback parameters without executing recovery.
 - Backup and console evidence has not been supplied. Do not mark done until criteria have evidence. Finalize US-01 status/date/evidence/commit reference, commit locally with `[US-01]` prefix, and leave clean status only upon completion. No source edits, stateVersion changes, input updates, GC, channel deletion or app removal.
 - Essential apps: VS Code, KeePassXC, Telegram, Obsidian, Claude, Steam, Tor Browser, Monero Wallet; user accepts successful startup, but US-01 forbids launching. User approved retaining linkApps and AGENTS.md. App removals, stale Spotlight trampolines, Obsidian discovery, and secret migration are later-story follow-ups.
+
+## US-02 source preparation (2026-09-26)
+
+US-01 is done with recorded exceptions above. Its snapshot-consistency and IPv6-SSH exceptions block VPS activation, not this source edit. Pre-story HEAD was `a5203af2f90e69b47b51a0779db0585cc2731525`; `git status --short --untracked-files=all` was empty. Branch `checkup/US-02` was created from `main`. No host was activated or provisioned.
+
+### Release and migration matrix
+
+Sources were checked on 2026-09-26. [NixOS 26.05 support](https://nixos.org/blog/announcements/2026/nixos-2605/) runs through 2026-12-31. The flake now follows these compatible stable branches, retaining one shared nixpkgs. The four named inputs were updated with `nix flake update nixpkgs` after changing their URLs; Nix refreshed the other three because their URLs changed. No unrelated input was deliberately updated.
+
+| Input | Branch | Locked revision | Reason |
+| --- | --- | --- | --- |
+| nixpkgs | `nixos-26.05` | `f5c082a40f7571c266e74e80ae2e68aadd8a9fc7` | Supported stable NixOS and packages on both hosts. |
+| nix-darwin | `nix-darwin-26.05` | `c3e90c89649b07d1a96e4b9dd6cd0d6e44b91a74` | Matching [stable Darwin branch](https://github.com/nix-darwin/nix-darwin). |
+| Home Manager | `release-26.05` | `a6631107a83ceab5872f298a2ea710859c80c4cb` | Matching [stable HM branch](https://github.com/nix-community/home-manager). |
+| NixOS Mailserver | `nixos-26.05` | `d357b9f048c5532ec81b0e0034c0b8463d5ddd46` | Matching [mailserver branch](https://nixos-mailserver.readthedocs.io/en/nixos-26.05/). |
+
+No unstable package exception was added. `rg -n 'stateVersion' machines profiles modules hardware` confirms Darwin 5, NixOS 24.05, both homes 24.05 and mailserver 3 unchanged. [Home Manager guidance](https://nix-community.github.io/home-manager/installation/nixos.html) keeps the original home state version. [nix-darwin's changelog](https://github.com/nix-darwin/nix-darwin/blob/nix-darwin-26.05/CHANGELOG) does not require a change to this host's state version or Homebrew activation options. Its no-cleanup/no-update settings and the existing linkApps setting are retained.
+
+The [NixOS 26.05 release notes](https://nixos.org/manual/nixos/stable/release-notes) and [mailserver 26.05 notes](https://nixos-mailserver.readthedocs.io/en/nixos-26.05/release-notes.html) identify Dovecot 2.4 and mail option changes. `mailserver.loginAccounts` became `mailserver.accounts`, and `certificateScheme = "acme-nginx"` became `x509.useACMEHost` with an explicit nginx ACME vhost and port 80. The old `services.dovecot2.sieve.extensions` assertion failed static evaluation. [Dovecot 2.4 lists `fileinto` as enabled](https://doc.dovecot.org/2.4.0/core/config/sieve/), so the explicit workaround was removed; existing Sieve behavior still needs live acceptance. Disabled Spotify remains commented out because no approved use or working replacement was established. No application was removed.
+
+The [mailserver migration guide](https://nixos-mailserver.readthedocs.io/en/nixos-26.05/migrations.html) requires the 25.11 mail layout migration for every configuration, but the baseline already declares mailserver state version 3. Confirm actual mailbox layout on the isolated restore before deployment; the declaration alone does not prove the data was migrated. The 26.05 Sieve and LDAP migrations are conditional; target evaluations returned `mailserver.enableManageSieve = false` and `mailserver.ldap.enable = false`, so neither is required for this candidate. A direct version jump is provisionally selected. Dovecot 2.4 persistent-state backward readability is unverified; generation rollback of a live VPS must remain blocked until US-05/US-06 prove it or provide the tested restoration/reconciliation route. Nix may also update its store schema; preserve the old closure and validate rollback in US-04/US-05 before activation. No intermediate is currently demonstrated as required.
+
+### US-02 runtime secret procedure
+
+The source previously embedded a mail password hash in `machines/vps.nix` and a Linux initial password in `modules/nixos-base.nix`. A filename-only Nix audit found those two files. Both assignments now refer to absolute `/etc/checkup-secrets` files; the target's [mail account option](https://nixos-mailserver.readthedocs.io/en/nixos-26.05/options.html) and [NixOS user option](https://github.com/NixOS/nixpkgs/blob/nixos-26.05/nixos/modules/config/users-groups.nix) read hashes at runtime. Source inspection found no `builtins.readFile` of a credential or embedded credential assignment. Historical Git objects and old store paths may still disclose the earlier values, so rotate credentials after continuity and recovery are demonstrated; no history was purged.
+
+| File | Owner/mode | Provision timing | Recovery/rotation |
+| --- | --- | --- | --- |
+| `/etc/checkup-secrets/fdm-login.hash` | root:root `0600`; parent root:root `0700` | After verified backup and console access, before VPS `test`; enter the existing Linux password privately to preserve login. | Recreate interactively through console if absent; rotate deliberately only after a fresh SSH login succeeds. |
+| `/etc/checkup-secrets/mail-felix.hash` | root:root `0600`; same parent | Same gate; enter the existing mail password privately to preserve IMAPS/submission. | Recreate interactively through console; rotate clients only after controlled IMAPS and submission pass. |
+
+The operator runs these commands on the VPS with shell tracing/session recording off. `mkpasswd` must be available before the outage; install/provision that tool under the later host gate, without putting a password on a command line. Its interactive prompt accepts the existing password and writes only the resulting hash to the protected file, with no terminal hash output:
+
+```sh
+sudo install -d -o root -g root -m 0700 /etc/checkup-secrets
+sudo sh -c 'umask 077; mkpasswd -m yescrypt > /etc/checkup-secrets/fdm-login.hash'
+sudo sh -c 'umask 077; mkpasswd -m yescrypt > /etc/checkup-secrets/mail-felix.hash'
+sudo chown root:root /etc/checkup-secrets/fdm-login.hash /etc/checkup-secrets/mail-felix.hash
+sudo chmod 0600 /etc/checkup-secrets/fdm-login.hash /etc/checkup-secrets/mail-felix.hash
+sudo stat -c '%U:%G %a %n' /etc/checkup-secrets /etc/checkup-secrets/fdm-login.hash /etc/checkup-secrets/mail-felix.hash
+```
+
+Expected metadata: parent `root:root 700`, each file `root:root 600`; check privately that each file has one nonempty line without displaying it. On a failed or lost file, use the independent Vultr console, rerun the relevant `mkpasswd` command with the approved password, then repeat the stat check and the user-controlled SSH or IMAPS/submission authentication check. Keep the original SSH session open. If the password is unknown, stop for an approved rotation and client update; neither an empty file nor a new untested password passes continuity. Do not place these files in Git, Nix store paths, logs or a public backup. Snapshot restoration and post-snapshot mail reconciliation remain US-05/US-06 gates.
+
+### Static validation so far
+
+- Darwin drvPath evaluation: exit 0, `/nix/store/62qh5cvw5wxdlczwbqq205gkrwbirqxr-darwin-system-26.05.c3e90c8.drv`. [verified: `nix eval --raw .#darwinConfigurations.m2-macbook-air.system.drvPath --no-update-lock-file --no-write-lock-file`]
+- VPS drvPath evaluation: initially failed on removed `services.dovecot2.sieve.extensions` with Dovecot 2.4 assertion; after removing the obsolete workaround, exit 0, `/nix/store/8h7kyp74adgfw84w5m3yxv50i1zm2a7l-nixos-system-nixos-vps-26.05.20260925.f5c082a.drv`. [verified: corresponding `nix eval --raw` command]
+- Flake check: exit 0, `all checks passed!`; dirty-tree warning is expected before the candidate commit. [verified: `nix flake check --no-build --all-systems --no-update-lock-file --no-write-lock-file`]
+- State-version and whitespace checks passed. [verified: `rg -n 'stateVersion' machines profiles modules hardware`; `git diff --check`]
+
+Remaining US-02 gates: evaluate both `configurationRevision` values from the final clean approved commit; validate the workflow with the provider and record its actual PR run ID; native builds and deployed closure diffs through US-03; runtime authentication and recovery through US-04/US-06. No CI run, build, closure comparison, activation or post-activation check is claimed here.

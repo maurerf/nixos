@@ -2,17 +2,17 @@
   description = "maurerf's personal NixOS and nix-darwin flake";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nix-darwin = {
-      url = "github:LnL7/nix-darwin/master";
+      url = "github:nix-darwin/nix-darwin/nix-darwin-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {
-      url = "github:nix-community/home-manager/master";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     simple-nixos-mailserver = {
-      url = "gitlab:simple-nixos-mailserver/nixos-mailserver";
+      url = "gitlab:simple-nixos-mailserver/nixos-mailserver/nixos-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -33,6 +33,7 @@
           simple-nixos-mailserver.nixosModules.mailserver
           home-manager.nixosModules.home-manager
           {
+            system.configurationRevision = self.rev or null;
             home-manager.useGlobalPkgs = true;
             home-manager.users.fdm = ./profiles/home-vps.nix;
           }
@@ -47,6 +48,7 @@
           ./machines/m2-macbook-air.nix
           home-manager.darwinModules.home-manager
           {
+            system.configurationRevision = self.rev or null;
             home-manager.useGlobalPkgs = true;
             home-manager.users.fdm = ./profiles/home-darwin.nix;
           }

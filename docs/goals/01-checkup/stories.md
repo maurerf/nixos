@@ -153,6 +153,7 @@ Expected: intended old active/selected paths, V and US-06 tests pass, and messag
 - Out of scope: Source edits/builds/activation; inferred historical source commits; installer/UID changes; package/profile/channel cleanup; printing mail/credential contents; bootloader/firewall changes.
 
 ### US-02: Prepare a supported, secure and maintainable source
+- Status: source prepared, acceptance pending (2026-09-26) on `checkup/US-02`. Both drvPaths and flake validation passed locally; the actual PR CI run, final clean-commit revision checks, native builds/closure diffs through US-03, and host authentication checks through US-04/US-06 remain open. No host was activated. [Source, migration and secret evidence](EVIDENCE.md#us-02-source-preparation-2026-09-26).
 - Story: As me, I want a compatible stable configuration with runtime-secret references, provenance, CI and accurate maintenance instructions so that both systems have a repeatable upgrade path.
 - PRD refs: R-REPO-01, R-REPO-02, R-REPO-03, R-REPO-04, R-REPO-05, R-REPO-06, R-REPO-07, R-REPO-08, R-VPS-05
 - Preconditions / depends on: US-01 discovery and source-inclusion decisions. Select the secret mechanism before editing references; sanitize candidate source before evaluation/materialization. No live provisioning in this story. Host provisioning/rotation requires the later deployment story’s verified backup and tested independent-access gates.
