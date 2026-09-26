@@ -24,4 +24,5 @@
     ../modules/zsh.nix
   ];
   fonts.fontconfig.enable = true;
+  targets.darwin.linkApps.enable = true;
 }
