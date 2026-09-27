@@ -8,7 +8,7 @@
 | US-06 | Upgrade and accept the mail VPS within the outage limit | VPS | R-REPO-04, R-REPO-05, R-VPS-03, R-VPS-05, R-VPS-06, R-VPS-07, R-VPS-08, R-VPS-09, R-VPS-10 | US-03, US-04, US-05 | high | no |
 | US-07 | Close maintenance and cross-system acceptance | both | R-MAC-02, R-MAC-05, R-REPO-01, R-REPO-02, R-REPO-03, R-REPO-04, R-REPO-05, R-REPO-06, R-REPO-07, R-VPS-02, R-VPS-08, R-VPS-09, R-VPS-10, R-VPS-11, R-VPS-12 | US-04, US-06 | high | yes |
 
-Planning only. No story has been implemented or its runtime acceptance passed. The plan has seven outcome-based stories; inventories, CI, documentation and protocol checks are work within those outcomes. “Reversible: no” means generation rollback alone cannot undo all effects, including mutable application state, accepted mail and credential writes.
+The plan has seven outcome-based stories. US-01 and US-03 are done with their recorded decisions and exceptions; US-04 Mac target acceptance passed under its recorded operator-approved exceptions. US-02 source preparation is complete, but final acceptance still depends on later VPS host checks. US-05 through US-07 remain pending. Inventories, CI, documentation and protocol checks are work within those outcomes. “Reversible: no” means generation rollback alone cannot undo all effects, including mutable application state, accepted mail and credential writes.
 
 ## Decisions, gates and sequencing
 

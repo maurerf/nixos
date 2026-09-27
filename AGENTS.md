@@ -37,6 +37,8 @@ No dedicated test framework or coverage threshold exists. Validate changes by bu
 
 Recent commits commonly use `fix:` and `chore:` prefixes, alongside older descriptive subjects. Prefer concise, imperative subjects and focused commits. Pull requests should explain the change, affected hosts, validation results, and any activation or migration steps. Link relevant issues when applicable.
 
+For checkup stories, create a feature branch before committing and use a pull request instead of committing directly to `main`. Keep the approved runtime source commit and `flake.lock` hash distinct from later documentation commits when recording build or activation evidence. A merged source pull request does not by itself complete a story; verify its acceptance gates and evidence before updating its status.
+
 ## Configuration Safety
 
 Do not add credentials or private keys. Preserve state-version values unless intentionally performing a documented migration. Review mailserver, SSH, and bootloader changes carefully before activation.
