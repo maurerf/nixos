@@ -37,6 +37,8 @@ The operator-approved US-04 exception is recorded in [stories.md](stories.md#us-
 
 ## VPS readiness — preparation outside its outage window
 
+**US-06 operator revision (2026-09-28):** IPv6 validation is explicitly deferred for this deployment, including second-session IPv6 SSH and external IPv6 mail/ACME/AAAA checks. IPv4 checks remain required. Record IPv6 as deferred, never as passing; do not change DNS or networking merely to bypass this limitation. This exception applies to readiness and post-test/switch/recovery checks below. [Decision and diagnostics](EVIDENCE.md#us-06-vps-preflight-2026-09-28).
+
 **US-05 operator revision (2026-09-27):** The [recorded decision](EVIDENCE.md#us-05-snapshot-based-recovery-readiness-2026-09-27) replaces the isolated rehearsal with snapshot-based live readiness. Untested consistency, unknown recovery duration and possible post-snapshot mail loss are explicitly accepted. References below to tested restoration/reconciliation and a measured recovery deadline are waived to that extent, including downstream US-06/07 readiness references; no successful restore, zero-loss result or one-hour recovery guarantee is implied. The outage objective remains one hour. US-06/07 runtime work and all unrelated access/authentication gates remain outstanding.
 
 - [ ] **R-VPS-01 / US-01:** Actual paths, owners/modes, filesystems and backup coverage are recorded for mailbox state, delivery queues, Sieve, credentials, DKIM, ACME and persistent Rspamd/Redis, with evidence of absence when a category does not exist. Only metadata is retained.
