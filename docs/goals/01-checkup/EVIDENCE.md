@@ -4018,3 +4018,106 @@ At 11:54:30–11:56:47 UTC, agent checks returned the approved `darwin-version -
 Post-login `df -k / /nix` reported 38,436,588 KiB available, above the 10,485,760 KiB US-04 reserve. The Homebrew formula listing hash remained `7be55422261a6f4a514aab3a8b172e09378d3049491680792e39795993a7e802`; the nine individually queryable casks retained hash `8fb531a44cdaf4ee566de75aee00172590217459557827750bbbb94961aeb7dc`, and Caskroom still had ten entries. The Chromium full-list failure remains the US-01 exception; no package was removed or updated. Main was clean before this documentation change; the isolated approved source checkout remained at the exact original commit and lock hash. No GC, generation deletion, installer replacement, UID/state-version change, RM, VPS deployment work or push occurred.
 
 **Decision:** US-04 Mac target acceptance passes on 2026-09-27 under the explicit operator-approved backup, local-data, console and no-automatic-recovery exceptions. The Obsidian name-registration gap and older name-launch executable observations remain recorded limitations; direct current link startup was user-confirmed. The accepted Mac source is still `a6478f68937add6ef8026555d2a33ddd323ccb46`, lock hash `sha256-SXw/9jciRkqk8p/Eb4pttg8U33OpUH8J8GLKzvfEDZ4=`. US-02 remains source-prepared with final acceptance pending later VPS authentication and deployment evidence; the merged commits alone do not close it. Mac acceptance makes later VPS scheduling eligible under the story sequence, but does not satisfy US-05 or authorize US-06 activation.
+
+## US-05 snapshot-based recovery readiness (2026-09-27)
+
+### Operator revision and source boundary
+
+The initial request required the original isolated restore/reconciliation story, production unchanged, and no US-06/07 implementation. PRD, US-05, validation.md and US-01–04 evidence were reviewed before work. During Layer 1 the operator explicitly replaced the clone requirement: “We dont need to work on a clone, we can work on the live machine.” Asked separately about untested snapshot consistency, unknown restore duration and possible loss of mail received after the snapshot, the operator selected: “Accept these risks explicitly and revise US-05 acceptance to snapshot-based readiness.” These are VPS-specific decisions; none derives from the US-04 Mac exceptions.
+
+Accordingly, the original clone isolation, restored-content verification, console boot rehearsal, measured recovery/deadline and synthetic-message reconciliation criteria are **waived, not passed**. The revised story retains snapshot availability/coverage/retention, console/sudo access, retained baseline closure, live health and a documented recovery route. One hour remains the outage objective, with no demonstrated recovery bound. Actual losses or a later bound violation must be reported. No production restore, activation or secret change was requested or performed in this readiness work. PRD and validation.md carry the same exception so downstream prerequisite wording cannot be mistaken for a successful rehearsal.
+
+Pre-story documentation HEAD: `a10ef5f40b3f9341dfa59b4a20244fac054f9bc3`; initial worktree clean. Branch `checkup/US-05` was created before edits. The first branch creation exited 128 because the sandbox could not create its Git ref lock; an authorized retry exited 0. The approved runtime source remains `a6478f68937add6ef8026555d2a33ddd323ccb46`, lock `sha256-SXw/9jciRkqk8p/Eb4pttg8U33OpUH8J8GLKzvfEDZ4=`. Later evidence commits do not replace that runtime source.
+
+### Layer 1 — source, backup, console and recovery design
+
+Agent checks on the Mac at `2026-09-27T12:25:24Z`–`12:26:00Z`:
+
+| Command/check | Sanitized result |
+| --- | --- |
+| `git status --short --untracked-files=all`; `git rev-parse HEAD`; `git diff --check` | Exit 0 each; clean before edits, documentation HEAD above, no whitespace errors. |
+| `git diff --name-only a6478f68937add6ef8026555d2a33ddd323ccb46 HEAD` | Exit 0; only AGENTS.md and the four checkup Markdown documents differ. |
+| `git diff --quiet a6478f68937add6ef8026555d2a33ddd323ccb46 HEAD -- flake.nix flake.lock machines hardware profiles modules` | Exit 0; runtime source and lock unchanged. |
+| `nix hash file flake.lock` | Exit 0; approved lock hash above. |
+| `git -C /private/tmp/checkup-us04-a6478f6 rev-parse HEAD` and `status --porcelain` | Exit 0 each; approved source commit and clean detached checkout. No build or evaluation performed. |
+
+Backup input is US-01's `pre-coding-agent`, snapshot ID `9832d1f4-0ee1-4e78-9046-54c8049f4c39`, 25GB, created `2026-09-26T08:31:09Z` (provider display `10:31:09 CEST`). The prior screenshot showed Available. In response to the question naming that exact ID and independent Vultr console login/sudo, the operator reconfirmed: “The snapshop is available and I have sudo access.” This is current operator confirmation, received in this session before `12:30:19Z`, not an agent API inspection or newly timed console screenshot. The original independently accessed console transcript is dated `2026-09-26T09:20:08Z` and showed UID 0 through sudo and the baseline closure. Full boot-disk coverage and operator-managed long-term retention carry forward from US-01; no deletion date was supplied. Snapshot capture was live, without reported quiescence. Its consistency remains untested under the explicit exception.
+
+Coverage review against US-01, with no state contents read or copied:
+
+| Recovery category | Recorded persistent source / limitation |
+| --- | --- |
+| Mailboxes | `/var/vmail`, 1,181,968 KiB at US-01, ext4 root disk. Maildir configuration was observed; actual migrated layout and restored contents remain untested. |
+| Delivery queues | `/var/lib/postfix/queue` within `/var/lib/postfix`, root disk. Snapshot does not include mail accepted after its timestamp. |
+| Sieve / Dovecot state | `/var/sieve` and `/var/lib/dovecot`, root disk. No restored Sieve behavior or old-reader compatibility after target writes demonstrated. |
+| Account credentials | Old system closure contains the persistent password source; Dovecot pre-start regenerates `/run/dovecot2/passwd` and `userdb`. `/run` is tmpfs and is not disk-backup content. US-01 traced the regeneration chain; restoration is untested. |
+| DKIM / ACME | `/var/dkim` and `/var/lib/acme`, root disk. No private key read; validity after future restore is untested. |
+| Rspamd / Redis | `/var/lib/rspamd` and `/var/lib/redis-rspamd`, root disk. Live-capture consistency and newer-format downgrade safety remain unproved. |
+| System / Linux login | Retained generation 21, system closure and persistent account files on the full root disk. Later password changes are not preserved by this older snapshot. |
+| Target runtime secret files | `/etc/checkup-secrets/fdm-login.hash` and `mail-felix.hash` were designed after this snapshot. Their inclusion is not claimed. Future target recovery uses the US-02 interactive provisioning procedure; it has not been tested here. |
+
+US-02/03 migration dispositions remain: Dovecot 2.3.21.1→2.4.5, Pigeonhole 0.5.21.1→2.4.5 and Rspamd 3.13.0→4.0.1 have unverified backward state readability. The [mailserver migration guide](https://nixos-mailserver.readthedocs.io/en/nixos-26.05/migrations.html), rechecked in this session, still makes migration 3 universal and migrations 4/5 conditional on LDAP/ManageSieve. Prior target evaluations disabled both conditional features. Declared state version 3 alone is not proof of migrated mailbox layout. No migration script was run, no state version changed, and generation-only recovery remains conditional on compatible state. The user waived rehearsal; that does not establish compatibility or close US-02 authentication acceptance.
+
+Before the revision, provider research found that [Vultr's specific firewall FAQ](https://docs.vultr.com/support/products/network/does-vultr-firewall-filter-outgoing-traffic-from-my-instance) says filtering is incoming only, despite broader wording elsewhere. The [private-instance guide](https://docs.vultr.com/how-to-deploy-vpc-only-instances-with-nat-gateway-on-vultr) supplies outbound connectivity through NAT. Neither alone proved both-direction IPv4/IPv6 isolation. No provider resource was created or started. No connected Vultr tool was present; plugin-directory search for Vultr returned no matches. This original Layer 1 isolation blocker was superseded by the explicit no-clone decision, not resolved by a technical isolation test. Production IPv6 SSH remains a separate US-06 gate.
+
+Layer 1 passes under the operator revision with the current backup/console confirmations and the documented untested recovery route below.
+
+### Layer 2 — no build; approved native evidence reused
+
+No new build applies to revised readiness. Runtime source/lock are unchanged, so US-03 supplies the native x86_64-linux build and D review. Baseline `VPS_OLD` is `/nix/store/yhczh27iwxqsbikj51c4lkb4gpwzzmwh-nixos-system-nixos-vps-26.05.20251129.59b6c96`, generation 21, configuration revision historically unknown. Approved target `VPS_NEW` remains `/nix/store/nmkc0j8kjpb61bj5ad6hmdncqxbypxcf-nixos-system-nixos-vps-26.05.20260925.f5c082a`. The snapshot predates the target build; availability of that target inside the snapshot is not claimed. Layer 2 is not applicable; no Linux build on the Mac or production build occurred.
+
+### Layer 3 — live baseline and retained closure
+
+The operator ran the requested read-only block on the VPS, beginning `2026-09-27T12:27:47Z`. Each command was wrapped as `check() { "$@"; printf 'exit=%s\n' "$?"; }`, and every reported exit was 0. The transcript was supplied later in this session; end time was not supplied. These are operator-executed results, not successful agent SSH results.
+
+| Command | Result |
+| --- | --- |
+| `date -u '+%Y-%m-%dT%H:%M:%SZ'`; `uname -m` | Timestamp above; `x86_64`. |
+| `realpath /run/current-system` | Exact `VPS_OLD` above. |
+| `realpath /nix/var/nix/profiles/system` | Exact `VPS_OLD` above. |
+| `readlink /nix/var/nix/profiles/system-21-link` | Exact `VPS_OLD` above; baseline profile root retained. |
+| `nix store verify --recursive --no-trust /nix/store/yhczh27iwxqsbikj51c4lkb4gpwzzmwh-nixos-system-nixos-vps-26.05.20251129.59b6c96` | Exit 0, no reported error. |
+
+No runtime source changed and no new closure diff is needed for this documentation revision. US-03 D is reused with its state-format limitations, not treated as restored-data proof. Layer 3 passes.
+
+### Layer 4 — documented future recovery; no activation
+
+No activation or restore was performed. The future full-disk action is documented from [Vultr's restore instructions](https://docs.vultr.com/products/storage/snapshots/management/restore), checked on 2026-09-27: Products → Compute → select the existing mail VPS → Snapshots → select `pre-coding-agent`, ID `9832d1f4-0ee1-4e78-9046-54c8049f4c39` → Restore Snapshot. The provider instance UUID has not been supplied; before any later destructive action, independently match that instance to the live mail VPS and record its UUID. Do not select a target based only on a copied hostname. The current story does not execute the final restore action. The operator confirms access, but this UI sequence has not been exercised on their account.
+
+Full-disk restore replaces newer filesystem state, including mailboxes, queues, credentials and any target closure absent at capture. Possible post-snapshot mail loss is explicitly accepted; no synthetic IDs were issued, no newer-mail preservation/import was tested, and reconciliation counts are **not measured**, not zero. Provider timing guidance is not a measurement for this VPS. Recovery duration, safety margin and latest start offset are unmeasured; the former `60 minutes − recovery − margin` formula cannot produce a verified deadline. A later deployment must record its operational recovery decision without claiming a measured bound.
+
+After a future restore, use the independent Vultr console to verify baseline paths, selected generation and services, then repeat the relevant V/access/mail checks before calling recovery successful. The restored baseline's Dovecot pre-start should regenerate runtime account files from its snapshot-era persistent source, as traced in US-01; this is an expected mechanism, not a tested restore result. The snapshot may restore older login/mail passwords. For a later reattempt of the target, use [US-02's exact protected-file procedure](#us-02-runtime-secret-procedure) with privately entered known passwords, root:root 0700 parent and 0600 files, followed by authentication checks. No provisioning or password rotation occurred here. A missing password remains a gate; no secret value is retained in this evidence.
+
+Layer 4 is not applicable to execution; the recovery procedure and unresolved instance UUID are documented. Selecting the exact live target remains mandatory before any future destructive restore, not an invented successful action in this story.
+
+### Layer 5 — live readiness results
+
+From the same operator transcript starting `2026-09-27T12:27:47Z`, after the Layer 3 checks:
+
+| Command | Result |
+| --- | --- |
+| `systemctl --failed --no-legend --plain` | Exit 0; no rows. |
+| `systemctl is-active postfix dovecot rspamd nginx sshd redis-rspamd kresd@1` | Exit 0; seven `active` lines. |
+| `df -k / /nix` | Exit 0; both on `/dev/vda1`: 24,593,744 KiB total, 16,451,572 used, 6,867,548 available, 71% used. |
+
+Available space exceeds US-03's post-build observation of 6,858,868 KiB by 8,680 KiB. This is a current observation, not a guarantee of future build/recovery capacity. Layer 5 passes as live readiness only. No target runtime authentication, external mail/TLS/DNS, IPv6 SSH, boot-menu selection or restored state check was performed. These results cannot close US-02 final acceptance or US-06 deployment.
+
+### Layer 6 — recovery boundaries and acceptance
+
+No runtime mutation occurred, so no rollback was needed. Retain US-01's exact conditional RV: after a compatible-state `test`, `sudo /nix/store/yhczh27iwxqsbikj51c4lkb4gpwzzmwh-nixos-system-nixos-vps-26.05.20251129.59b6c96/bin/switch-to-configuration test`; after a compatible-state `switch`, `sudo nix-env --profile /nix/var/nix/profiles/system --switch-generation 21` followed by `sudo /nix/var/nix/profiles/system/bin/switch-to-configuration switch`. These are not safe merely because the old closure verifies; old-software readability after new writes remains unverified. The fallback is the documented, untested provider restore with the operator-accepted data/timing risks. No rollback command was executed. Layer 6 completes its no-mutation/recovery-record check.
+
+**Decision:** Revised US-05 snapshot-based readiness passes using operator-confirmed backup/console access and the successful live transcript. The original isolated recovery/reconciliation acceptance has not passed. No clone or restore exists, no recovery time was measured, no zero-loss guarantee is made, and the precise provider target UUID must be bound before a future restore. US-02 final VPS acceptance remains open; US-04 Mac acceptance remains passed. US-06/07 have not been implemented or scheduled, and production services/data/configuration were not changed by this work.
+
+### Local SSH access diagnostic requested by the operator
+
+The agent attempted read-only SSH with IPv4, BatchMode, 10-second timeout, strict host-key checking, the existing `id_ed25519_maurerf` key and target `fdm@maurerf.com`. Both sandboxed and authorized unrestricted attempts exited 255 before connecting: `No user exists for uid 501`. No remote command or authentication was reached. The operator supplied the live results above and explicitly requested fixing the client.
+
+By `2026-09-27T12:30:19Z`, local diagnostics showed `/usr/bin/ssh` is the selected binary; even `ssh -V` fails at account lookup. `id -un` prints `501`; Python `pwd.getpwuid(501)` raises `KeyError`; `dscacheutil -q user -a uid 501` returns no rows; `dscl .` returns `eServerError`, and `/Local/Default` returns invalid data source. `launchctl print` and an authorized `launchctl asuser 501 /usr/bin/id -un` both fail with error 141, `Reentrancy avoided`. A fresh command with no inherited environment and a separate PTY/login-disabled attempt still fail. These observations locate the failure in local account/launch context rather than the remote mail server. No account, daemon, SSH configuration or key was changed.
+
+Working hypothesis: the agent's process context retained a stale macOS session across the recent logout/login; this is not yet proven. A fresh Terminal identity/SSH check was requested to distinguish that from a system-wide failure. Repair is still pending; none of these failures is represented as successful agent access or a VPS health failure.
+
+The operator subsequently ran the same strict IPv4 SSH connection with remote `true` from a fresh Mac Terminal: `id -un` returned `fdm`, and `ssh_exit=0`. No UTC time was included in that transcript; received before the agent's `2026-09-27T12:32:49Z` checkpoint. This proves that account lookup and the SSH connection work from the fresh Terminal and narrows the agent failure to its process context. At that checkpoint, an unrestricted process query identified parent/child Codex app-server processes 32398/38890 using `/Users/fdm/.codex/packages/app-server-daemon/releases/0.157.1-aarch64-apple-darwin/bin/codex`. The parent has PPID 1. An unrestricted Git HTTPS read also failed with `Could not resolve host: github.com`, consistent with the local context problem. No system-wide SSH repair is justified by these observations.
+
+The installed binary's `app-server daemon --help` and `app-server daemon restart --help` both exit 0 and explicitly support restarting the managed daemon. They emit only a sandbox PATH-alias write warning. After saving the PR, the proposed repair is to run `/Users/fdm/.codex/packages/app-server-daemon/releases/0.157.1-aarch64-apple-darwin/bin/codex app-server daemon restart` from the working fresh Terminal, then resume and repeat agent `id -un` and the strict IPv4 SSH `true` probe. The restart has not been executed or verified here. [Official troubleshooting guidance](https://learn.chatgpt.com/docs/reference/troubleshooting#terminal-issues) also advises finishing active chats before restarting the app; it does not specifically diagnose this UID failure. Local help, rather than a guessed daemon command, supplies the restart syntax.
+
+At `2026-09-27T12:35:36Z`, `git diff --check` and the runtime-path comparison against the approved source both exited 0; `nix hash file flake.lock` still returned the approved hash. Final planned file scope is only PRD.md, stories.md, validation.md and this consolidated EVIDENCE.md; no extra artifact or collector was added. Native builds are reused because these are documentation-only changes. A direct DNS query outside the sandbox succeeded, and a command-local `http.curloptResolve` HTTPS read with normal TLS verification returned remote main `a10ef5f40b3f9341dfa59b4a20244fac054f9bc3`. This permits fetching the PR branch without changing persistent Git/DNS settings; GitHub connector publication does not depend on local SSH. The agent's SSH repair remains pending daemon restart and a successful post-restart probe.
