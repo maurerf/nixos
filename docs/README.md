@@ -6,6 +6,7 @@ Read only what the task needs:
 - [Validation and deployment](deployment.md): checks, host acceptance and generation recovery.
 - [VPS recovery and maintenance](vps-recovery.md): backup, mail state, secrets and legacy recovery.
 - [Decisions and limitations](decisions.md): reasons, retained policies and scoped historical exceptions.
+- [Fredy hosting plan](fredy-hosting-plan.md): agreed requirements and implementation handoff for the VPS apartment-search service; not yet deployed.
 - [Completed checkup archive](archive/01-checkup/README.md): original evidence and its provenance.
 
 Nix files define declared configuration. These pages own operational context and
