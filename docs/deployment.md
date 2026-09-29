@@ -83,7 +83,8 @@ is not a general fallback authorization.
 Before and after activation, verify the candidate/baseline revision with
 `nixos-version --configuration-revision`; compare `/run/current-system`,
 `/nix/var/nix/profiles/system` and, after reboot, `/run/booted-system` to expected
-closures. During `test`, the old selected/booted paths are expected to differ.
+closures. After a successful `test`, the active path should match the candidate;
+the selected and booted paths remain at their recorded pre-test values.
 Check zero failed units, required services, queue depth, free space/inodes, intended
 listeners and host/provider firewall rules. The 2026-09-28 service names were
 `postfix dovecot rspamd nginx sshd redis-rspamd kresd@1`; verify actual names for
@@ -104,8 +105,9 @@ Use an independent external client for SSH, TCP reachability and mail checks:
   unless a new scoped deferral is explicitly accepted; the old deferral is not a pass.
 
 Measure interruption, report failures and missing messages, and do not call deployment
-complete on service status alone. Source: [dated service/mail checks](archive/01-checkup/EVIDENCE.md#us-06-next-day-stability-checkpoint-2026-09-29t085934z)
-and preceding US-06 evidence, not a fresh runtime inspection.
+complete on service status alone. Source: [2026-09-28 postboot service and external
+mail checks](archive/01-checkup/EVIDENCE.md#us-06-controlled-reboot-and-initial-postboot-checks-2026-09-28t202115z202212z),
+not a fresh runtime inspection.
 
 ## Generation recovery
 
