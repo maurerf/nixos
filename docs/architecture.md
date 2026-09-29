@@ -19,10 +19,11 @@ managing its manually installed packages; application ownership matters when
 checking launches or contemplating removal.
 
 The VPS exists to serve mail. The mailserver module supplies the mail stack;
-nginx serves ACME HTTP challenges for the mail hostname. The proposed Fredy
+nginx serves ACME HTTP challenges for the mail hostname. The Fredy
 service adds a pinned Podman container with `/var/lib/fredy` persistence and a
-loopback proxy behind HTTPS at `fredy.maurerf.com`. It is not active until the
-[staged deployment](fredy.md#first-login-and-public-switch) is approved. Explicit Postfix outbound
+loopback proxy behind HTTPS at `fredy.maurerf.com`. Its
+[staged deployment](fredy.md#first-login-and-public-switch) gates external
+access until the initial password is replaced. Explicit Postfix outbound
 IPv4 overrides preserve inbound IPv6 while avoiding the historical sender-identity
 failure; see [decisions](decisions.md). A listening port is not automatically a
 public service requirement. Runtime credentials are absolute host-file references,

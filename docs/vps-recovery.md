@@ -37,9 +37,9 @@ before a new backup or restore:
 backup contents. The old snapshot predates target secret provisioning. Never put
 mail contents, private keys, passwords or hashes in Git, logs or the Nix store.
 
-The proposed Fredy service adds `/var/lib/fredy/conf` and `/var/lib/fredy/db`
-on the same root disk. These directories do not exist until its approved first
-start. The SQLite database contains account hashes, a session signing secret,
+The Fredy bootstrap `test` first started on 2026-09-30 and created
+`/var/lib/fredy/conf` and `/var/lib/fredy/db` on the same root disk. The
+SQLite database contains account hashes, a session signing secret,
 jobs, listings and Telegram credentials. Treat a Fredy state copy as secret
 material. A VPS snapshot includes it only if captured after Fredy state exists;
 the historical snapshot above predates it.

@@ -3,14 +3,15 @@
 [Knowledge index](README.md) · [Hosting plan](fredy-hosting-plan.md) ·
 [Deployment](deployment.md) · [Recovery](vps-recovery.md)
 
-Status: configuration candidate only. Fredy has not been activated. The NixOS
-outputs `vps-fredy-bootstrap` and `vps` are two stages of the same reviewed
-source. Activate the bootstrap output first; its nginx locations deny external
-requests while the upstream `admin` / `admin` account exists. Activate the public
-`vps` output only after changing the password through an SSH tunnel and verifying
-the bootstrap gate. Both stages start the same pinned container and mount the same
+The NixOS outputs `vps-fredy-bootstrap` and `vps` are two stages of the same
+reviewed source. The bootstrap output's nginx locations deny external requests
+while the upstream `admin` / `admin` account exists. Activate the public `vps`
+output only after changing the password through an SSH tunnel and verifying the
+bootstrap gate. Both stages start the same pinned container and mount the same
 state. Any `nixos-rebuild test` activates services and requires the production
-[approval and recovery preparation](deployment.md#deployment).
+[approval and recovery preparation](deployment.md#deployment). The first
+bootstrap `test` was activated on 2026-09-30; the public stage was not active
+at that check. Compare live active and selected closures before each next step.
 
 ## Candidate and measured budget
 
@@ -29,6 +30,13 @@ creates a missing `/conf/config.json` with `/db` as its SQLite directory before
 database startup. Keep `/var/lib/fredy/conf` and `/var/lib/fredy/db` together;
 both are root owned with mode 0700 on the host. Password hashes, session keys,
 Telegram tokens, jobs and listings live in the database. Treat copies as secrets.
+
+During the 2026-09-30 bootstrap `test`, Podman 5.8.7 reported no health check
+on either the pulled OCI image or the running container, although the registry
+config contains one. The revised candidate supplies the HTTP health command
+explicitly at container creation. Verify Podman reports `healthy` before
+accepting the revised bootstrap stage; a healthy UI still does not prove a
+provider search works.
 
 Read-only VPS observations at 2026-09-29 21:30 UTC: 964 MiB RAM, 601 MiB
 reported available, 174 MiB of 1 GiB swap used, 6.9 GiB free and 750,215
@@ -64,6 +72,11 @@ used `108.61.190.159`. Authoritative DNS returned the same address for
 it does not establish whether a dedicated `fredy` record exists. The current
 CAA set permits Let's Encrypt. Recheck the interface IP, nameservers, CAA and
 existing Fredy A/CNAME/AAAA records before editing DNS.
+
+On 2026-09-30, the operator added a dedicated `fredy` A record in Epik with
+`108.61.190.159` and TTL 300. Both Epik nameservers and a public resolver
+returned that address; mail A and MX answers matched the earlier baseline.
+The steps below apply if the record must be recreated later.
 
 In Epik, open **My Account → My Domains → Registrar → maurerf.com → DNS & WHOIS
 → SET DNS HOST RECORD → A RECORDS**. The exact labels are based on a

@@ -2,11 +2,13 @@
 
 [Knowledge index](README.md)
 
-Status: configuration candidate prepared on 2026-09-29; production activation
-still requires approval. The [Fredy operations guide](fredy.md) gives the
-measured baseline, selected image, staged first login, DNS and Telegram steps.
-This plan remains the design record. No Fredy service, dedicated DNS record or
-Telegram bot has been deployed or created by this implementation work.
+Status: candidate prepared on 2026-09-29; the operator added dedicated Fredy
+DNS and approved staged activation on 2026-09-30. An initial bootstrap `test`
+activated Fredy behind an external nginx 403 gate that day; the public stage
+had not been activated at that check. The [Fredy operations guide](fredy.md)
+gives the measured baseline, selected image, staged first login, DNS and
+Telegram steps. This plan remains the design record. No Telegram bot has been
+created by this implementation work.
 
 ## Goal and agreed requirements
 

@@ -41,6 +41,8 @@ in
         "--memory-swap=576m"
         "--cpus=0.5"
         "--pids-limit=128"
+        # Podman does not retain the health check in this upstream OCI image.
+        "--health-cmd=curl -f http://127.0.0.1:9998/"
         "--health-interval=120s"
         "--health-timeout=10s"
         "--health-retries=3"
