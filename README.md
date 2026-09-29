@@ -63,18 +63,26 @@ After the matching native build, reviewed diff and host-specific gates:
 ```sh
 # Mac, in its own deployment window
 sudo darwin-rebuild switch --flake .#m2-macbook-air --no-update-lock-file --no-write-lock-file
-# VPS, in a later window: verify mail and access after test before switch
+# VPS, in a later window: follow the reviewed story-specific activation route
 sudo nixos-rebuild test --flake .#vps --no-update-lock-file --no-write-lock-file
 sudo nixos-rebuild switch --flake .#vps --no-update-lock-file --no-write-lock-file
 ```
 
 Keep a second SSH session and the Vultr console open for VPS activation.
 Check version revision, active/selected paths, services, SSH and external mail
-after each step as specified in US-04 and US-06. `test` can write mail state.
-If acceptance fails, use the exact previously verified recovery procedures.
+after each step as specified in US-04 and US-06. The 2026-09-28 VPS migration
+used an explicitly approved `boot` and reboot route after `test` returned exit
+4 during the D-Bus transition; see the [recorded exception and postboot
+checks](docs/goals/01-checkup/EVIDENCE.md#us-06-boot-route-assessment-no-boot-action-2026-09-28t201331z201416z).
+Do not treat that failed `test` as a general reason to select a new boot
+generation. `test` can write mail state. If acceptance fails, use the exact
+previously verified recovery procedures.
 Mac: `sudo darwin-rebuild --switch-generation "$MAC_OLD_GEN"`. VPS after
 `test`, only when state remains compatible:
 `sudo "$VPS_OLD/bin/switch-to-configuration" test`. After `switch`, select
 the recorded old generation and run its `switch-to-configuration switch`.
-Incompatible mail state requires the isolated restore and message
-reconciliation procedure; a generation rollback alone is insufficient.
+Incompatible mail state requires a reviewed restore and message reconciliation;
+a generation rollback alone is insufficient. The current Vultr snapshot has
+not been restore-tested, and its recovery duration and post-snapshot mail-loss
+risk are [explicitly accepted](docs/goals/01-checkup/EVIDENCE.md#us-05-snapshot-based-recovery-readiness-2026-09-27),
+not demonstrated away.
