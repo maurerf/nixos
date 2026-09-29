@@ -2,10 +2,11 @@
 
 [Knowledge index](README.md)
 
-Status: agreed design, awaiting implementation. Written 2026-09-29 from the
-operator interview and source research. This document does not describe a running
-service and does not authorize production activation. No Fredy configuration,
-DNS record, Telegram bot or resource measurement was created during planning.
+Status: configuration candidate prepared on 2026-09-29; production activation
+still requires approval. The [Fredy operations guide](fredy.md) gives the
+measured baseline, selected image, staged first login, DNS and Telegram steps.
+This plan remains the design record. No Fredy service, dedicated DNS record or
+Telegram bot has been deployed or created by this implementation work.
 
 ## Goal and agreed requirements
 
@@ -70,19 +71,20 @@ by the creation of this planning document.
 Source inspection on 2026-09-29 established the following. Recheck against the
 specific release selected for implementation; upstream `master` links can change.
 
-- The repository's pinned nixpkgs has neither `pkgs.fredy` nor a
-  `services.fredy` option. A search of its package/module source also found no
-  Fredy declaration. Online research found no community package, which is not
-  proof that none exists. Building a custom native package is outside this plan.
+- At planning time, the pinned nixpkgs had neither `pkgs.fredy` nor a built-in
+  Fredy service module. The implementation adds a local
+  `services.fredy.bootstrapOnly` option; it is not an upstream NixOS module.
+  Online research found no community package, which is not proof that none
+  exists. Building a custom native package is outside this plan.
 - The [upstream README](https://github.com/orangecoding/fredy#readme) documents
   container deployment, application port `9998`, `/conf` and `/db` volumes,
   SQLite persistence and default `admin` / `admin` credentials. Most application
   settings and uploaded documents are stored in the database.
-- The [Dockerfile](https://github.com/orangecoding/fredy/blob/master/Dockerfile)
-  includes Node.js, native SQLite support, a CloakBrowser Chromium binary and
-  an init process. This dependency stack favours the upstream image over a new
-  native Nix packaging project. Its HTTP health check alone does not prove that
-  searches or notifications work.
+- The selected [25.2.0 Dockerfile](https://github.com/orangecoding/fredy/blob/25.2.0/Dockerfile)
+  includes Node.js, native SQLite support and a CloakBrowser Chromium binary;
+  it does not declare a separate init process. This dependency stack favours
+  the upstream image over a new native Nix packaging project. Its HTTP health
+  check alone does not prove that searches or notifications work.
 - [Provider documentation](https://github.com/orangecoding/fredy/blob/master/doc/providers.md)
   describes datacenter-IP blocking for some browser-based portals. A working UI
   is not proof that the VPS can fetch listings. ImmoScout uses a separate mobile
@@ -92,8 +94,10 @@ specific release selected for implementation; upstream `master` links can change
   creating bots with BotFather. Check Fredy's selected-version Telegram adapter
   for its exact fields and group setup procedure.
 
-No runtime capacity check or Fredy load test has occurred. A 1 GB VPS running mail
-may have insufficient headroom; feasibility must be demonstrated. Do not present
+At planning time no runtime capacity check or Fredy load test had occurred.
+The later [dated baseline](fredy.md#candidate-and-measured-budget) still cannot
+establish browser-load feasibility. A 1 GB VPS running mail may have
+insufficient headroom; feasibility must be demonstrated. Do not present
 2 GB or any other size as a measured minimum. Resource limits reduce risk but do
 not completely isolate shared CPU, memory, disk and network contention.
 

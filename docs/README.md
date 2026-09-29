@@ -7,6 +7,7 @@ Read only what the task needs:
 - [VPS recovery and maintenance](vps-recovery.md): backup, mail state, secrets and legacy recovery.
 - [Decisions and limitations](decisions.md): reasons, retained policies and scoped historical exceptions.
 - [Fredy hosting plan](fredy-hosting-plan.md): agreed requirements and implementation handoff for the VPS apartment-search service; not yet deployed.
+- [Fredy operations](fredy.md): staged first login, DNS, Telegram and constrained VPS trial; candidate only.
 - [Completed checkup archive](archive/01-checkup/README.md): original evidence and its provenance.
 
 Nix files define declared configuration. These pages own operational context and

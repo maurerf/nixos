@@ -22,7 +22,10 @@ nix build .#darwinConfigurations.m2-macbook-air.system --no-update-lock-file --n
 nix build .#nixosConfigurations.vps.config.system.build.toplevel --no-update-lock-file --no-write-lock-file
 ```
 
-PR CI evaluates both outputs and checks the flake; it does not replace native builds.
+PR CI evaluates the outputs and checks the flake; it does not replace native builds.
+The [Fredy candidate](fredy.md) has two VPS outputs; evaluate and build both
+`vps-fredy-bootstrap` and `vps` before its staged activation. The Mac output is
+unchanged by this VPS-only change.
 For deployment, build the clean, committed candidate on each affected native host,
 record its full source commit, `nix hash file flake.lock`, output (`realpath result`),
 and old active/selected system paths. Keep later documentation commits distinct.
@@ -78,6 +81,14 @@ approved `boot`/reboot route, with target selected before reboot and target
 booted/active/selected afterward. The [2026 D-Bus failure](decisions.md#historical-exceptions)
 is not a general fallback authorization.
 
+Fredy adds a justified public HTTPS requirement on TCP 443. Its
+[first-login sequence](fredy.md#first-login-and-public-switch) uses
+`#vps-fredy-bootstrap` first, then `#vps` only after the initial password has
+been replaced and verified. Both stages require the same mail/access checks
+after `test` and `switch`. Public 443 is expected only for the Fredy HTTPS
+host; direct 9998 and quota-status 12340 remain nonpublic. Check the Vultr
+firewall independently of the NixOS firewall and preserve port 80 for ACME.
+
 ## VPS acceptance
 
 Before and after activation, verify the candidate/baseline revision with
@@ -92,8 +103,9 @@ the candidate rather than assuming them forever.
 
 Use an independent external client for SSH, TCP reachability and mail checks:
 
-- Intended public ports: 22, 25, 80, 465, 993. Keep 443 and quota-status 12340
-  nonpublic unless a new requirement justifies a change.
+- Intended public ports before Fredy: 22, 25, 80, 465, 993. The Fredy
+  candidate adds HTTPS 443 after its approved staged activation. Keep direct
+  Fredy 9998 and quota-status 12340 nonpublic.
 - Validate TLS chain, hostname and expiry on SMTP STARTTLS 25, submission 465 and
   IMAPS 993; check MX/A/AAAA, sender PTR/forward identity, SPF, DKIM and DMARC.
 - Send controlled messages to the primary account and alias, verify IMAPS receipt

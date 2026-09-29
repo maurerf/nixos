@@ -14,9 +14,14 @@ jobs:
         with:
           persist-credentials: false
       - uses: cachix/install-nix-action@v31
-      - name: Evaluate both hosts and check the flake
+      - name: Evaluate hosts and check the flake
         run: |
           nix eval --raw .#darwinConfigurations.m2-macbook-air.system.drvPath --no-update-lock-file --no-write-lock-file
           nix eval --raw .#nixosConfigurations.vps.config.system.build.toplevel.drvPath --no-update-lock-file --no-write-lock-file
+          nix eval --raw .#nixosConfigurations.vps-fredy-bootstrap.config.system.build.toplevel.drvPath --no-update-lock-file --no-write-lock-file
           nix flake check --no-build --all-systems --no-update-lock-file --no-write-lock-file
           git diff --check
+      - name: Build both VPS stages on Linux
+        run: |
+          nix build .#nixosConfigurations.vps-fredy-bootstrap.config.system.build.toplevel --no-link --no-update-lock-file --no-write-lock-file
+          nix build .#nixosConfigurations.vps.config.system.build.toplevel --no-link --no-update-lock-file --no-write-lock-file
