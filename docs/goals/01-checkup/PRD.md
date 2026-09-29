@@ -112,6 +112,8 @@ All requirements apply to later implementation. Priority is must, should or coul
 
 ## 5. Constraints and interview decisions
 
+**US-05 operator revision, 2026-09-27:** The operator replaced the isolated restore/mail-reconciliation rehearsal with snapshot-based recovery readiness on the live VPS. They explicitly accept untested snapshot consistency, unknown restore duration, and possible loss of mail accepted after the snapshot. For US-05 and its dependent readiness gates, this supersedes the rehearsal, clone isolation, tested old-generation console boot, measured recovery/deadline, and zero-loss reconciliation requirements in R-VPS-02/03/09/10 and SC-07/10. A completed available full-system snapshot, independent console/sudo access, retained recovery generation, and documented recovery procedure remain required. The one-hour outage limit remains the operational objective; recovery within it is not demonstrated or guaranteed. Actual loss or an outage exceeding that limit must still be reported. The waiver is a risk decision, not successful restore evidence. See [US-05 evidence](EVIDENCE.md#us-05-snapshot-based-recovery-readiness-2026-09-27) and the revised story for the precise boundary. US-06 activation and US-07 implementation are outside this session; runtime authentication and migration compatibility remain unverified. Mac exceptions do not apply to the VPS.
+
 | Decision | User answer and interpretation |
 | --- | --- |
 | VPS purpose | Mail only; no other stateful workload is expected. Supporting mail services still require state inventory. I1 |
