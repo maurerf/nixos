@@ -38,4 +38,8 @@
     virtualHosts."mail.maurerf.com".enableACME = true;
   };
   networking.firewall.allowedTCPPorts = [ 80 ];
+
+  # Keep inbound IPv6; use the correctly identified IPv4 address for outgoing mail.
+  services.postfix.settings.master.smtp.args = [ "-o" "inet_protocols=ipv4" ];
+  services.postfix.settings.master.relay.args = [ "-o" "inet_protocols=ipv4" ];
 }
