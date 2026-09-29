@@ -3,12 +3,13 @@
 [Knowledge index](README.md)
 
 Status: candidate prepared on 2026-09-29; the operator added dedicated Fredy
-DNS and approved staged activation on 2026-09-30. An initial bootstrap `test`
-activated Fredy behind an external nginx 403 gate that day; the public stage
-had not been activated at that check. The [Fredy operations guide](fredy.md)
-gives the measured baseline, selected image, staged first login, DNS and
-Telegram steps. This plan remains the design record. No Telegram bot has been
-created by this implementation work.
+DNS and approved staged activation on 2026-09-30. The bootstrap and public
+stages were activated and selected in sequence that day; the public stage was
+running from source revision `68c6cc671415117d7b06569ff125da6dbfaca7b2`
+at the [dated post-switch check](fredy.md#candidate-and-measured-budget). The
+[Fredy operations guide](fredy.md) gives the measured baseline, selected image,
+first-login, DNS and Telegram steps. This plan remains the design record.
+Telegram setup and sustained trial observation remain pending.
 
 ## Goal and agreed requirements
 

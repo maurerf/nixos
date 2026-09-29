@@ -9,9 +9,13 @@ while the upstream `admin` / `admin` account exists. Activate the public `vps`
 output only after changing the password through an SSH tunnel and verifying the
 bootstrap gate. Both stages start the same pinned container and mount the same
 state. Any `nixos-rebuild test` activates services and requires the production
-[approval and recovery preparation](deployment.md#deployment). The first
-bootstrap `test` was activated on 2026-09-30; the public stage was not active
-at that check. Compare live active and selected closures before each next step.
+[approval and recovery preparation](deployment.md#deployment). Both stages were
+activated in sequence on 2026-09-30 from source revision
+`68c6cc671415117d7b06569ff125da6dbfaca7b2`. At the post-switch check,
+the public `vps` closure
+`/nix/store/85lhgp48pks17dl5fhi85755pywsnkzr-nixos-system-nixos-vps-26.05.20260925.f5c082a`
+was active and selected; the booted closure was the retained pre-Fredy
+generation. Compare live active and selected closures before future changes.
 
 ## Candidate and measured budget
 
@@ -57,6 +61,16 @@ the container is running; systemd unit logs remain in the journal with a unit
 rate limit. This protects existing mail journal retention from Fredy noise.
 Neither the UI health check nor these limits proves that a browser based
 provider works within the budget. Do not raise limits automatically.
+
+At the 2026-09-30 post-switch check, Fredy, nginx and the named mail/access
+units were active with no failed units. The host reported 616 MiB available
+RAM, 237 MiB swap used and 4.1 GiB free disk. HTTPS returned the UI with a
+valid certificate, unauthenticated `/api/jobs/events` returned 401, and port
+9998 listened only on loopback. The operator confirmed HTTPS login on a
+computer and phone, a search that returned listings, and working inbound and
+authenticated outbound mail. Direct inspection of the authenticated event
+stream remains pending. These are initial trial observations, not a sustained
+load measurement.
 
 The image and Podman state consume the same root disk as mail and Nix. Check
 free bytes/inodes before pulling the image or building on the VPS, and keep
