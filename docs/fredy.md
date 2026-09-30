@@ -72,6 +72,14 @@ authenticated outbound mail. Direct inspection of the authenticated event
 stream remains pending. These are initial trial observations, not a sustained
 load measurement.
 
+At a later 2026-09-30 trial sample after a search run, the operator confirmed
+actual listing notifications arrived in the private Telegram group. A read-only
+VPS check found Fredy active with zero systemd restarts, nginx and mail services
+active, no failed units, 584 MiB available RAM, 312 MiB swap used and 4.1 GiB
+free disk. This single sample does not establish sustained resource safety;
+continue the trial observations below. The authenticated event stream has not
+yet been inspected directly.
+
 The image and Podman state consume the same root disk as mail and Nix. Check
 free bytes/inodes before pulling the image or building on the VPS, and keep
 at least 3 GiB free after preparation. Prefer an independent Linux builder;
@@ -200,16 +208,67 @@ except Exception:
 PY
 ```
 
+Use the full negative group ID returned as `message.chat.id` by the bot API;
+Fredy's positive-number examples are for individual recipients. A Telegram Web
+URL is not a substitute for checking what this bot receives. Several updates
+from the same group can print the same ID. Do not remove its minus sign.
+
 Fredy sends outbound to Telegram;
 no inbound webhook is needed.
 
 In Fredy's UI, add the Telegram notification adapter to the first search with
 its token and signed Chat Id. The token is stored in Fredy's database, so backups
-and exports need secret handling. Use the adapter's test function if available,
-then run a representative Hamburg rental search and verify an actual listing
-arrives in the shared group. Start with one provider and conservative scheduling;
-leave price tracking off. Observe several cycles, ideally a day, with mail
-health, `podman stats`, `podman inspect`, `memory.events`, swap and disk checks.
+and exports need secret handling. In the pinned 25.2.0 release, the
+[Try route](https://github.com/orangecoding/fredy/blob/25.2.0/lib/api/routes/notificationAdapterRouter.js)
+invokes a sample send, but the
+[Telegram adapter](https://github.com/orangecoding/fredy/blob/25.2.0/lib/notification/adapter/telegram.js)
+can log a failed message send and still let Try display success. Confirm that
+the test message actually appears in the intended group. If it does not,
+validate the token and exact signed group ID with a private Bot API `sendMessage`
+call before changing Fredy or running another search; `chat not found` means the
+bot cannot reach that ID. On a trusted computer, use this prompt-only check;
+report only its status, never the token or raw request:
+
+```sh
+python3 - <<'PY'
+import getpass
+import json
+import urllib.error
+import urllib.request
+
+token = getpass.getpass("Telegram bot token: ")
+chat_id_text = getpass.getpass("Group Chat Id (entire negative number): ").strip()
+if not chat_id_text.startswith("-") or not chat_id_text[1:].isdigit():
+    raise SystemExit("Group Chat Id must be a negative number")
+chat_id = int(chat_id_text)
+request = urllib.request.Request(
+    "https://api.telegram.org/bot" + token + "/sendMessage",
+    data=json.dumps({"chat_id": chat_id, "text": "Fredy Telegram delivery check"}).encode(),
+    headers={"Content-Type": "application/json"},
+)
+try:
+    with urllib.request.urlopen(request, timeout=15) as response:
+        print("Telegram accepted:", json.load(response).get("ok"))
+except urllib.error.HTTPError as error:
+    try:
+        description = json.loads(error.read()).get("description", "")
+    except Exception:
+        description = ""
+    safe_description = description.replace(token, "[redacted]").replace(chat_id_text, "[redacted]")
+    print("Telegram HTTP", error.code, safe_description)
+except Exception as error:
+    print("Request failed:", type(error).__name__)
+PY
+```
+
+Never paste the token into a browser URL or shell history. Then run a
+representative Hamburg rental search and verify a genuinely new listing arrives
+in the shared group. Normal soft deletion leaves known listing hashes in place,
+so deleting displayed results does not make them new again; do not delete
+listings to force a notification test. Start with one provider and conservative
+scheduling; leave price tracking off. Observe several cycles, ideally a day,
+with mail health, `podman stats`, `podman inspect`, `memory.events`, swap and disk
+checks.
 Stop Fredy if it OOMs repeatedly, swaps heavily, loops on restart, fills disk,
 or affects mail. A working UI alone does not prove provider access from a Vultr
 IP. Record blocked portals separately from resource failures and discuss any

@@ -9,7 +9,9 @@ running from source revision `68c6cc671415117d7b06569ff125da6dbfaca7b2`
 at the [dated post-switch check](fredy.md#candidate-and-measured-budget). The
 [Fredy operations guide](fredy.md) gives the measured baseline, selected image,
 first-login, DNS and Telegram steps. This plan remains the design record.
-Telegram setup and sustained trial observation remain pending.
+The operator confirmed actual Telegram listing notifications on 2026-09-30.
+Authenticated event-stream inspection and sustained trial observation remain
+pending.
 
 ## Goal and agreed requirements
 
