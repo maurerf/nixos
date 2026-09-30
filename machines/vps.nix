@@ -4,6 +4,7 @@
   imports =
     [
       ../modules/nixos-base.nix
+      ../modules/fredy.nix
     ];
 
   networking.hostName = "nixos-vps";
@@ -37,7 +38,7 @@
     enable = true;
     virtualHosts."mail.maurerf.com".enableACME = true;
   };
-  networking.firewall.allowedTCPPorts = [ 80 ];
+  networking.firewall.allowedTCPPorts = [ 80 443 ];
 
   # Keep inbound IPv6; use the correctly identified IPv4 address for outgoing mail.
   services.postfix.settings.master.smtp.args = [ "-o" "inet_protocols=ipv4" ];

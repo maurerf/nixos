@@ -37,6 +37,70 @@ before a new backup or restore:
 backup contents. The old snapshot predates target secret provisioning. Never put
 mail contents, private keys, passwords or hashes in Git, logs or the Nix store.
 
+The Fredy bootstrap `test` first started on 2026-09-30 and created
+`/var/lib/fredy/conf` and `/var/lib/fredy/db` on the same root disk. The
+SQLite database contains account hashes, a session signing secret,
+jobs, listings and Telegram credentials. Treat a Fredy state copy as secret
+material. A VPS snapshot includes it only if captured after Fredy state exists;
+the historical snapshot above predates it.
+
+## Fredy backup and recovery
+
+No scheduled daily Fredy backup is configured for the initial trial. Before a
+Fredy image upgrade, record the running digest and state paths, verify free
+space and make a consistent protected copy of **both** `/var/lib/fredy/conf`
+and `/var/lib/fredy/db`. The simplest route is an approved brief stop of
+`podman-fredy.service`, then a root-only archive of all of `/var/lib/fredy`,
+followed by a start of the same image and health checks. For an approved upgrade,
+choose a new unique name and create the archive while the service is stopped:
+
+```sh
+sudo systemctl stop podman-fredy.service
+sudo install -d -o root -g root -m 0700 /root/fredy-backups
+sudo tar -C /var/lib -cpf /root/fredy-backups/fredy-preupgrade-YYYYMMDDTHHMMSSZ.tar fredy
+sudo chmod 0600 /root/fredy-backups/fredy-preupgrade-YYYYMMDDTHHMMSSZ.tar
+sudo tar -tf /root/fredy-backups/fredy-preupgrade-YYYYMMDDTHHMMSSZ.tar
+sudo systemctl start podman-fredy.service
+```
+
+Replace the timestamp placeholder with a new timestamp before running any
+command. The listing should contain `fredy/conf` and `fredy/db`; inspect it
+without printing secret contents. Include SQLite WAL and SHM files; do not
+copy only a live `listings.db`. Check archive readability, ownership and
+retention before changing the pinned image. A same-disk copy helps with
+application mistakes but cannot recover a lost VPS disk.
+
+For a failed new image, stop Fredy and assess whether it wrote a new database
+schema. If state remains compatible, restore the previously reviewed NixOS
+generation and image, then check account, jobs and notifications. A NixOS
+rollback alone does not reverse database writes. If the previous image cannot
+read the changed data, ask for explicit approval before replacing current Fredy
+state with the matching pre-upgrade copy; this discards all later Fredy changes.
+After approval, use the matching pre-upgrade archive and a distinct name for
+the failed state. Check that the archive contains only the expected `fredy/`
+tree, then restore while Fredy is stopped:
+
+```sh
+sudo systemctl stop podman-fredy.service
+sudo tar -tf /root/fredy-backups/fredy-preupgrade-YYYYMMDDTHHMMSSZ.tar
+sudo mv -T /var/lib/fredy /root/fredy-backups/fredy-failed-YYYYMMDDTHHMMSSZ
+sudo tar -C /var/lib -xpf /root/fredy-backups/fredy-preupgrade-YYYYMMDDTHHMMSSZ.tar
+sudo chown -R root:root /var/lib/fredy
+sudo chmod 0700 /var/lib/fredy /var/lib/fredy/conf /var/lib/fredy/db
+```
+
+Replace placeholders with the approved archive and new failed-state name;
+confirm neither destination already exists. Do not extract untrusted archives
+or silently overwrite live state. Restore the reviewed previous NixOS
+generation and image using [generation recovery](deployment.md#generation-recovery)
+before starting Fredy; that activation may itself start the service. Verify
+the active unit references the previous digest, start it if necessary, and
+repeat Fredy plus mail acceptance.
+Do not restore the whole mail VPS snapshot just to repair Fredy without a
+separate recovery decision. If Fredy harms mail or host resources during the
+trial, stop `podman-fredy.service` within the approved incident scope and
+diagnose before changing limits, deleting state or altering the VPS size.
+
 ## Runtime secrets
 
 The declared references are in [Linux users](../modules/nixos-base.nix) and
