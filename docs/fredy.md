@@ -85,6 +85,35 @@ free bytes/inodes before pulling the image or building on the VPS, and keep
 at least 3 GiB free after preparation. Prefer an independent Linux builder;
 do not run a heavy build on the 1 GiB mail host to satisfy a build check.
 
+## Search failure observed on 2026-10-03
+
+The operator reported that Telegram listing notifications stopped after roughly
+one day and jobs returned zero listings. The locally supplied
+`2026-10-03-FredyDebug-25.2.0.zip` contains 174 browser startup errors between
+2026-10-01 12:46:10 and 2026-10-03 19:56:45 (timestamps as written in the log).
+Every error reports that Chromium could not spawn `chrome_crashpad_handler`:
+`Resource temporarily unavailable (11)`. Keep the raw archive out of Git.
+
+A read-only SSH inspection on 2026-10-03 at 20:41:50 UTC confirmed PID exhaustion:
+the container had 115 zombie Chromium processes parented to Node, which was PID 1
+inside the container. Its 11 threads plus those zombies accounted for
+`pids.current=126`, with `pids.max=128` and `pids.events max=362`.
+The service remained active with zero systemd restarts. This explains how its UI
+could remain available while browser searches failed. Telegram delivery itself
+was not tested during this inspection.
+
+The container also had recorded memory/swap pressure: `memory.events max=600`,
+zero OOM/OOM-kill events, and `memory.swap.events max=19040 fail=19040`.
+The root filesystem had 3,215,826,944 bytes available, slightly below the 3 GiB
+preparation floor. All seven named mail/access services were active and no units
+were failed; these status checks do not establish end-to-end mail delivery.
+
+The [recovery and upgrade handoff](fredy-upgrade-plan.md) records the remaining
+measurements and implementation steps. Fredy 29.2.1's tagged Dockerfile includes
+`tini` specifically to reap orphaned Chromium children; verify the published
+image and sustained behavior before accepting the repair. This inspection did
+not restart, upgrade or otherwise modify the running service.
+
 ## DNS and HTTPS preparation
 
 On 2026-09-29, `ns3.epik.com` and `ns4.epik.com` were authoritative for
