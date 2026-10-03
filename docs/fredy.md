@@ -15,7 +15,9 @@ activated in sequence on 2026-09-30 from source revision
 the public `vps` closure
 `/nix/store/85lhgp48pks17dl5fhi85755pywsnkzr-nixos-system-nixos-vps-26.05.20260925.f5c082a`
 was active and selected; the booted closure was the retained pre-Fredy
-generation. Compare live active and selected closures before future changes.
+generation. After the 2026-10-03 VPS plan change and filesystem expansion,
+the same public `vps` closure was active, selected and booted. Compare live
+paths again before future changes.
 
 ## Deployed 25.2.0 baseline and measured budget
 
@@ -51,10 +53,11 @@ baseline, not a Fredy load measurement. Recheck before deployment.
 
 The trial caps the whole Fredy container, including browser children, at
 448 MiB memory plus at most 128 MiB swap (`--memory-swap=576m`), half of the
-single CPU and 128 PIDs. This leaves a nominal 516 MiB of physical RAM for
-mail and the host; Rspamd's observed unit peak was about 208 MiB. The peak
-could coincide with Fredy's peak, so this budget may still cause host swap or
-Fredy browser failures. Three failures within ten minutes stop systemd retries.
+single CPU and 128 PIDs. On the original 1 GiB VPS this left a nominal
+516 MiB of physical RAM for mail and the host; Rspamd's observed unit peak
+was about 208 MiB. Its peak could coincide with Fredy's peak, so this budget
+may still cause host swap or Fredy browser failures. Three failures within
+ten minutes stop systemd retries.
 Container application logs use Podman's 10 MiB capped file driver under
 `/var/log/fredy/container.log`, readable with `sudo podman logs fredy` while
 the container is running; systemd unit logs remain in the journal with a unit
@@ -83,7 +86,7 @@ yet been inspected directly.
 The image and Podman state consume the same root disk as mail and Nix. Check
 free bytes/inodes before pulling the image or building on the VPS, and keep
 at least 3 GiB free after preparation. Prefer an independent Linux builder;
-do not run a heavy build on the 1 GiB mail host to satisfy a build check.
+do not run a heavy build on the mail host to satisfy a build check.
 
 ## Search failure observed on 2026-10-03
 
@@ -147,15 +150,24 @@ run against migrated state without establishing compatibility; recovery may
 require the matching pre-upgrade copy of both `/conf` and `/db`.
 
 The 2026-10-03 21:02 UTC read-only VPS check found 3,201,622,016 free bytes and
-648,878 free inodes, about 20 MiB below the 3 GiB preparation floor. The new
-image has 694,075,620 compressed bytes across 19 layers; unpacked layers,
-writable layer, backup, Nix closure and mail growth need additional space.
-Do not pull it on the VPS until the operator has approved and verified a
-capacity plan that preserves the old image and recovery generations. The
-current 25 GB (about 23.5 GiB) root filesystem would need to be expanded or
-another safe storage arrangement provided; deleting mail, logs, images or retained
-generations is not part of this proposal. Recalculate the measured headroom
-and verify filesystem growth before scheduling the upgrade.
+648,878 free inodes, about 20 MiB below the 3 GiB preparation floor on the
+old 25 GB root filesystem. The operator upgraded the Vultr plan, took a fresh
+snapshot, then expanded the ext4 root partition from a SystemRescue ISO and
+recreated the 1 GiB swap partition with its original UUID. At the 2026-10-03
+22:40 UTC post-reboot check, `/dev/vda` was 55 GiB, root was 54 GiB with
+33,699,082,240 bytes and 2,636,568 inodes available, and swap was active.
+The VPS had 2 GiB RAM and the expected active, selected and booted closure.
+Fredy 25.2.0 returned HTTP 200 and Podman subsequently reported `healthy`;
+all required services were active with no failed units and the mail queue was
+empty. The operator confirmed primary and alias inbound delivery plus
+authenticated outbound receipt around 2026-10-04 00:44 CEST. The snapshot has
+not been restore-tested. Recheck free space and recovery readiness before the
+Fredy activation.
+
+The new image has 694,075,620 compressed bytes across 19 layers; unpacked
+layers, writable layer, backup, Nix closure and mail growth need additional
+space. Preserve the old image and recovery generations. Do not delete mail,
+logs, images or retained generations as an incidental capacity measure.
 
 The existing account has already passed first login. For this upgrade, use only
 the public `#vps` activation route; build the bootstrap output because it shares
