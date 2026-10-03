@@ -8,6 +8,7 @@ Read only what the task needs:
 - [Decisions and limitations](decisions.md): reasons, retained policies and scoped historical exceptions.
 - [Fredy hosting plan](fredy-hosting-plan.md): agreed requirements and design record for the VPS apartment-search service.
 - [Fredy operations](fredy.md): staged first login, DNS, Telegram and constrained VPS trial.
+- [Fredy recovery and upgrade handoff](fredy-upgrade-plan.md): confirmed Chromium PID exhaustion and the implementation plan for a newer image.
 - [Completed checkup archive](archive/01-checkup/README.md): original evidence and its provenance.
 
 Nix files define declared configuration. These pages own operational context and

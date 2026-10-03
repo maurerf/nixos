@@ -26,8 +26,9 @@ in
     virtualisation.podman.enable = true;
     virtualisation.oci-containers.backend = "podman";
     virtualisation.oci-containers.containers.fredy = {
-      # Fredy 25.2.0, Linux amd64, GHCR index digest (2026-09-29).
-      image = "ghcr.io/orangecoding/fredy@sha256:74e075c34a38223faaef7705c4f7de637d1dafc683bd61dfa46bb391980c665b";
+      # Fredy 29.2.1, Linux amd64, GHCR index digest (2026-10-03).
+      # Its /usr/bin/tini entrypoint reaps orphaned Chromium children.
+      image = "ghcr.io/orangecoding/fredy@sha256:45fc1d36f8c79151f66c981c1aacde0f9d19409ffac0d9d084dcd2acecc9ea18";
       pull = "missing";
       # Keep application logs from displacing the mail journal on this small disk.
       log-driver = "k8s-file";
