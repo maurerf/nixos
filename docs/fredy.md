@@ -17,9 +17,9 @@ the public `vps` closure
 was active and selected; the booted closure was the retained pre-Fredy
 generation. Compare live active and selected closures before future changes.
 
-## Candidate and measured budget
+## Deployed 25.2.0 baseline and measured budget
 
-The candidate uses Fredy [25.2.0](https://github.com/orangecoding/fredy/releases/tag/25.2.0),
+The original deployment uses Fredy [25.2.0](https://github.com/orangecoding/fredy/releases/tag/25.2.0),
 `ghcr.io/orangecoding/fredy@sha256:74e075c34a38223faaef7705c4f7de637d1dafc683bd61dfa46bb391980c665b`.
 On 2026-09-29, the registry index resolved to Linux amd64 manifest
 `sha256:cbbac45ade2428c36e6abedeccae25635c0b3a37fcfd597c46fa6f088dde8d5d`;
@@ -113,6 +113,63 @@ measurements and implementation steps. Fredy 29.2.1's tagged Dockerfile includes
 `tini` specifically to reap orphaned Chromium children; verify the published
 image and sustained behavior before accepting the repair. This inspection did
 not restart, upgrade or otherwise modify the running service.
+
+## Prepared 29.2.1 repair and upgrade
+
+The proposed Nix configuration pins Fredy
+[29.2.1](https://github.com/orangecoding/fredy/releases/tag/29.2.1) to the GHCR
+index digest
+`sha256:45fc1d36f8c79151f66c981c1aacde0f9d19409ffac0d9d084dcd2acecc9ea18`.
+On 2026-10-03, the release API identified it as the latest stable release,
+from source commit `9f6551ee74249924c57e671a36658e890c52d9f2`.
+The published Linux amd64 manifest is
+`sha256:1be69e57027924abba16a0d06f37697ae883322002e0fd2d2325f8ef459612cc`;
+its config has `/usr/bin/tini -g --` as entrypoint and `node index.js` as command.
+This makes `tini` PID 1 to reap orphaned Chromium children. The image still
+exposes 9998 and declares `/conf` and `/db`. Nix preserves the loopback binding,
+HTTPS proxy, state mounts, explicit Podman health command, resource limits and
+log cap. Verify the actual image, PID tree and health after approved activation.
+
+The tagged [migration runner](https://github.com/orangecoding/fredy/blob/29.2.1/lib/services/storage/migrations/migrate.js)
+runs unapplied migrations in order at startup, each in a transaction, and aborts
+startup if one fails. The direct 25.2.0 upgrade applies migrations 32–47.
+[Migration 32](https://github.com/orangecoding/fredy/blob/29.2.1/lib/services/storage/migrations/sql/32.configured-adapters.js)
+converts each job's inline notification adapters into owner-private channels,
+deduplicated per owner and configuration, and rewrites the job to reference them.
+Check existing jobs, channel ownership, Telegram fields and job links after
+upgrade. Migration 34 pins existing working hours to the container's current
+timezone; check the resulting hours. Later migrations add listing columns,
+indexes, settings and tables, including attachments stored in SQLite; migration
+41 backfills price per square metre and migration 45 requeues unanswered
+connectivity checks. Startup also initializes connectivity work. Inspect
+resource use and disk growth during acceptance. A 25.2.0 binary must not be
+run against migrated state without establishing compatibility; recovery may
+require the matching pre-upgrade copy of both `/conf` and `/db`.
+
+The 2026-10-03 21:02 UTC read-only VPS check found 3,201,622,016 free bytes and
+648,878 free inodes, about 20 MiB below the 3 GiB preparation floor. The new
+image has 694,075,620 compressed bytes across 19 layers; unpacked layers,
+writable layer, backup, Nix closure and mail growth need additional space.
+Do not pull it on the VPS until the operator has approved and verified a
+capacity plan that preserves the old image and recovery generations. The
+current 25 GB (about 23.5 GiB) root filesystem would need to be expanded or
+another safe storage arrangement provided; deleting mail, logs, images or retained
+generations is not part of this proposal. Recalculate the measured headroom
+and verify filesystem growth before scheduling the upgrade.
+
+The existing account has already passed first login. For this upgrade, use only
+the public `#vps` activation route; build the bootstrap output because it shares
+the module, but do not reactivate bootstrap or reset credentials. After an
+approved Fredy stop, make and verify a protected, consistent archive of both
+state directories, including SQLite WAL/SHM, before the first new-image start.
+`nixos-rebuild test` will recreate the container and run the migrations. Accept
+login, saved jobs and schedule, channel links, a representative provider search,
+and an authorized Telegram delivery check before `switch`. Track the payload
+cgroup's PID count, `pids.events max`, memory and swap events through normal
+searches, and verify HTTPS plus mail using [VPS acceptance](deployment.md#vps-acceptance).
+Observe for at least 24 hours, preferably 48, because the original failure
+developed after roughly a day. See the [recovery guide](vps-recovery.md#fredy-backup-and-recovery)
+before any state restore.
 
 ## DNS and HTTPS preparation
 
