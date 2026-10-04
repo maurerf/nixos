@@ -17,6 +17,13 @@ Do not import the Linux base into Darwin. The Mac integrates Homebrew without
 managing its manually installed packages; application ownership matters when
 checking launches or contemplating removal.
 
+Home Manager copies apps from the Mac user's `home.packages` into
+`~/Applications/Home Manager Apps` for Spotlight discovery. Its activation syncs
+that directory from the current Nix packages on every rebuild. Older
+`~/Applications/Home Manager Trampolines` applets came from a former Home Manager
+activation mechanism and are not maintained by this configuration; check their
+embedded destinations before using or retiring them.
+
 The VPS exists to serve mail. The mailserver module supplies the mail stack;
 nginx serves ACME HTTP challenges for the mail hostname. Explicit Postfix outbound
 IPv4 overrides preserve inbound IPv6 while avoiding the historical sender-identity

@@ -60,6 +60,9 @@ Check `darwin-version --configuration-revision`, active and selected paths
 discovery and launches for the operator's currently used apps. Compare manual
 Homebrew inventory when relevant. Establish mutable-data backup and independent
 recovery access anew; the [Mac waiver](decisions.md#historical-exceptions) is not a backup.
+For Home Manager app-link migrations, inspect any old trampolines and their
+embedded launch targets before moving them aside; verify Spotlight resolves to
+the current copied apps and repeat discovery after a fresh login.
 
 VPS: complete [recovery preparation](vps-recovery.md), establish baseline mail/access
 checks below, and keep a second SSH session plus independent Vultr console available.
