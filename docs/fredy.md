@@ -132,8 +132,7 @@ its config has `/usr/bin/tini -g --` as entrypoint and `node index.js` as comman
 This makes `tini` PID 1 to reap orphaned Chromium children. The image still
 exposes 9998 and declares `/conf` and `/db`. Nix preserves the loopback binding,
 HTTPS proxy, state mounts, explicit Podman health command, memory and CPU limits,
-and log cap. The revised candidate raises only the PID cap from 128 to 256;
-verify the actual image, PID tree and health after approved activation.
+and log cap. The deployed configuration raises only the PID cap from 128 to 256.
 
 The tagged [migration runner](https://github.com/orangecoding/fredy/blob/29.2.1/lib/services/storage/migrations/migrate.js)
 runs unapplied migrations in order at startup, each in a transaction, and aborts
@@ -180,6 +179,25 @@ memory-plus-swap setting and CPU limit stay unchanged.
 The container was near its memory cap, but most charged memory was reclaimable
 file cache and no OOM kill occurred. Continue monitoring memory pressure and
 mail rather than raising that cap on this sample alone.
+
+On 2026-10-04, the operator stopped Fredy and verified a root-only pre-migration
+archive of both state directories at
+`/root/fredy-backups/fredy-preupgrade-20261004T084802Z.tar`. The approved
+`nixos-rebuild test` and then `switch` of source revision
+`8ca2b36774066a64362084179c94227eb3400424` succeeded. At the 09:24 UTC
+post-switch check, active and selected system paths both pointed to
+`/nix/store/rvafxmadqx6bhrahy2z9mkxk90yz8hx9-nixos-system-nixos-vps-26.05.20260925.f5c082a`;
+the booted path still named the earlier generation, as expected without a reboot.
+The running image reported 29.2.1 at the pinned digest, with `tini` above Node;
+the container was at 12 of 256 allowed PIDs, with no PID-limit events or
+Chromium zombies. Fredy returned HTTP 200 locally and over HTTPS, all required
+mail/access units were active, no units were failed, the mail queue was empty,
+and root had 30,890,278,912 free bytes. The operator confirmed saved jobs,
+schedule and Telegram channel linkage, a representative search with listings,
+and external primary/alias inbound plus authenticated outbound mail delivery.
+No genuinely new listing was available to prove Telegram delivery. Continue
+observing PID, memory/swap and search behavior for at least 24 hours; the
+snapshot and Fredy archive have not been restore-tested.
 
 The existing account has already passed first login. For this upgrade, use only
 the public `#vps` activation route; build the bootstrap output because it shares
