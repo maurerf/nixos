@@ -41,7 +41,8 @@ in
         "--memory=448m"
         "--memory-swap=576m"
         "--cpus=0.5"
-        "--pids-limit=128"
+        # A 29.2.1 search reached 124 PIDs; allow overlapping browser work.
+        "--pids-limit=256"
         # Podman does not retain the health check in this upstream OCI image.
         "--health-cmd=curl -f http://127.0.0.1:9998/"
         "--health-interval=120s"

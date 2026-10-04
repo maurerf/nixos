@@ -51,9 +51,10 @@ averages were zero; the seven named mail/access services were active and no
 units failed. Port 9998 and public 443 were not listening. These are a dated
 baseline, not a Fredy load measurement. Recheck before deployment.
 
-The trial caps the whole Fredy container, including browser children, at
-448 MiB memory plus at most 128 MiB swap (`--memory-swap=576m`), half of the
-single CPU and 128 PIDs. On the original 1 GiB VPS this left a nominal
+The original trial capped the whole Fredy container, including browser
+children, at 448 MiB memory plus at most 128 MiB swap
+(`--memory-swap=576m`), half of the single CPU and 128 PIDs. On the original
+1 GiB VPS this left a nominal
 516 MiB of physical RAM for mail and the host; Rspamd's observed unit peak
 was about 208 MiB. Its peak could coincide with Fredy's peak, so this budget
 may still cause host swap or Fredy browser failures. Three failures within
@@ -130,8 +131,9 @@ The published Linux amd64 manifest is
 its config has `/usr/bin/tini -g --` as entrypoint and `node index.js` as command.
 This makes `tini` PID 1 to reap orphaned Chromium children. The image still
 exposes 9998 and declares `/conf` and `/db`. Nix preserves the loopback binding,
-HTTPS proxy, state mounts, explicit Podman health command, resource limits and
-log cap. Verify the actual image, PID tree and health after approved activation.
+HTTPS proxy, state mounts, explicit Podman health command, memory and CPU limits,
+and log cap. The revised candidate raises only the PID cap from 128 to 256;
+verify the actual image, PID tree and health after approved activation.
 
 The tagged [migration runner](https://github.com/orangecoding/fredy/blob/29.2.1/lib/services/storage/migrations/migrate.js)
 runs unapplied migrations in order at startup, each in a transaction, and aborts
@@ -168,6 +170,16 @@ The new image has 694,075,620 compressed bytes across 19 layers; unpacked
 layers, writable layer, backup, Nix closure and mail growth need additional
 space. Preserve the old image and recovery generations. Do not delete mail,
 logs, images or retained generations as an incidental capacity measure.
+
+During the approved 2026-10-04 `test` of the first 29.2.1 candidate, one
+browser search reached 124 of 128 allowed PIDs, then fell to 12 after
+Chromium exited. No Chromium zombies or PID-limit events were observed; `tini`
+was PID 1. The small four-PID margin could reject overlapping browser work,
+so the revised candidate allows 256 PIDs. The 448 MiB memory cap, total
+memory-plus-swap setting and CPU limit stay unchanged.
+The container was near its memory cap, but most charged memory was reclaimable
+file cache and no OOM kill occurred. Continue monitoring memory pressure and
+mail rather than raising that cap on this sample alone.
 
 The existing account has already passed first login. For this upgrade, use only
 the public `#vps` activation route; build the bootstrap output because it shares
