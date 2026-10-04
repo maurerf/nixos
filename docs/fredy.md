@@ -15,11 +15,13 @@ activated in sequence on 2026-09-30 from source revision
 the public `vps` closure
 `/nix/store/85lhgp48pks17dl5fhi85755pywsnkzr-nixos-system-nixos-vps-26.05.20260925.f5c082a`
 was active and selected; the booted closure was the retained pre-Fredy
-generation. Compare live active and selected closures before future changes.
+generation. After the 2026-10-03 VPS plan change and filesystem expansion,
+the same public `vps` closure was active, selected and booted. Compare live
+paths again before future changes.
 
-## Candidate and measured budget
+## Deployed 25.2.0 baseline and measured budget
 
-The candidate uses Fredy [25.2.0](https://github.com/orangecoding/fredy/releases/tag/25.2.0),
+The original deployment uses Fredy [25.2.0](https://github.com/orangecoding/fredy/releases/tag/25.2.0),
 `ghcr.io/orangecoding/fredy@sha256:74e075c34a38223faaef7705c4f7de637d1dafc683bd61dfa46bb391980c665b`.
 On 2026-09-29, the registry index resolved to Linux amd64 manifest
 `sha256:cbbac45ade2428c36e6abedeccae25635c0b3a37fcfd597c46fa6f088dde8d5d`;
@@ -49,12 +51,14 @@ averages were zero; the seven named mail/access services were active and no
 units failed. Port 9998 and public 443 were not listening. These are a dated
 baseline, not a Fredy load measurement. Recheck before deployment.
 
-The trial caps the whole Fredy container, including browser children, at
-448 MiB memory plus at most 128 MiB swap (`--memory-swap=576m`), half of the
-single CPU and 128 PIDs. This leaves a nominal 516 MiB of physical RAM for
-mail and the host; Rspamd's observed unit peak was about 208 MiB. The peak
-could coincide with Fredy's peak, so this budget may still cause host swap or
-Fredy browser failures. Three failures within ten minutes stop systemd retries.
+The original trial capped the whole Fredy container, including browser
+children, at 448 MiB memory plus at most 128 MiB swap
+(`--memory-swap=576m`), half of the single CPU and 128 PIDs. On the original
+1 GiB VPS this left a nominal
+516 MiB of physical RAM for mail and the host; Rspamd's observed unit peak
+was about 208 MiB. Its peak could coincide with Fredy's peak, so this budget
+may still cause host swap or Fredy browser failures. Three failures within
+ten minutes stop systemd retries.
 Container application logs use Podman's 10 MiB capped file driver under
 `/var/log/fredy/container.log`, readable with `sudo podman logs fredy` while
 the container is running; systemd unit logs remain in the journal with a unit
@@ -83,7 +87,131 @@ yet been inspected directly.
 The image and Podman state consume the same root disk as mail and Nix. Check
 free bytes/inodes before pulling the image or building on the VPS, and keep
 at least 3 GiB free after preparation. Prefer an independent Linux builder;
-do not run a heavy build on the 1 GiB mail host to satisfy a build check.
+do not run a heavy build on the mail host to satisfy a build check.
+
+## Search failure observed on 2026-10-03
+
+The operator reported that Telegram listing notifications stopped after roughly
+one day and jobs returned zero listings. The locally supplied
+`2026-10-03-FredyDebug-25.2.0.zip` contains 174 browser startup errors between
+2026-10-01 12:46:10 and 2026-10-03 19:56:45 (timestamps as written in the log).
+Every error reports that Chromium could not spawn `chrome_crashpad_handler`:
+`Resource temporarily unavailable (11)`. Keep the raw archive out of Git.
+
+A read-only SSH inspection on 2026-10-03 at 20:41:50 UTC confirmed PID exhaustion:
+the container had 115 zombie Chromium processes parented to Node, which was PID 1
+inside the container. Its 11 threads plus those zombies accounted for
+`pids.current=126`, with `pids.max=128` and `pids.events max=362`.
+The service remained active with zero systemd restarts. This explains how its UI
+could remain available while browser searches failed. Telegram delivery itself
+was not tested during this inspection.
+
+The container also had recorded memory/swap pressure: `memory.events max=600`,
+zero OOM/OOM-kill events, and `memory.swap.events max=19040 fail=19040`.
+The root filesystem had 3,215,826,944 bytes available, slightly below the 3 GiB
+preparation floor. All seven named mail/access services were active and no units
+were failed; these status checks do not establish end-to-end mail delivery.
+
+The [recovery and upgrade handoff](fredy-upgrade-plan.md) records the remaining
+measurements and implementation steps. Fredy 29.2.1's tagged Dockerfile includes
+`tini` specifically to reap orphaned Chromium children; verify the published
+image and sustained behavior before accepting the repair. This inspection did
+not restart, upgrade or otherwise modify the running service.
+
+## Prepared 29.2.1 repair and upgrade
+
+The proposed Nix configuration pins Fredy
+[29.2.1](https://github.com/orangecoding/fredy/releases/tag/29.2.1) to the GHCR
+index digest
+`sha256:45fc1d36f8c79151f66c981c1aacde0f9d19409ffac0d9d084dcd2acecc9ea18`.
+On 2026-10-03, the release API identified it as the latest stable release,
+from source commit `9f6551ee74249924c57e671a36658e890c52d9f2`.
+The published Linux amd64 manifest is
+`sha256:1be69e57027924abba16a0d06f37697ae883322002e0fd2d2325f8ef459612cc`;
+its config has `/usr/bin/tini -g --` as entrypoint and `node index.js` as command.
+This makes `tini` PID 1 to reap orphaned Chromium children. The image still
+exposes 9998 and declares `/conf` and `/db`. Nix preserves the loopback binding,
+HTTPS proxy, state mounts, explicit Podman health command, memory and CPU limits,
+and log cap. The deployed configuration raises only the PID cap from 128 to 256.
+
+The tagged [migration runner](https://github.com/orangecoding/fredy/blob/29.2.1/lib/services/storage/migrations/migrate.js)
+runs unapplied migrations in order at startup, each in a transaction, and aborts
+startup if one fails. The direct 25.2.0 upgrade applies migrations 32–47.
+[Migration 32](https://github.com/orangecoding/fredy/blob/29.2.1/lib/services/storage/migrations/sql/32.configured-adapters.js)
+converts each job's inline notification adapters into owner-private channels,
+deduplicated per owner and configuration, and rewrites the job to reference them.
+Check existing jobs, channel ownership, Telegram fields and job links after
+upgrade. Migration 34 pins existing working hours to the container's current
+timezone; check the resulting hours. Later migrations add listing columns,
+indexes, settings and tables, including attachments stored in SQLite; migration
+41 backfills price per square metre and migration 45 requeues unanswered
+connectivity checks. Startup also initializes connectivity work. Inspect
+resource use and disk growth during acceptance. A 25.2.0 binary must not be
+run against migrated state without establishing compatibility; recovery may
+require the matching pre-upgrade copy of both `/conf` and `/db`.
+
+The 2026-10-03 21:02 UTC read-only VPS check found 3,201,622,016 free bytes and
+648,878 free inodes, about 20 MiB below the 3 GiB preparation floor on the
+old 25 GB root filesystem. The operator upgraded the Vultr plan, took a fresh
+snapshot, then expanded the ext4 root partition from a SystemRescue ISO and
+recreated the 1 GiB swap partition with its original UUID. At the 2026-10-03
+22:40 UTC post-reboot check, `/dev/vda` was 55 GiB, root was 54 GiB with
+33,699,082,240 bytes and 2,636,568 inodes available, and swap was active.
+The VPS had 2 GiB RAM and the expected active, selected and booted closure.
+Fredy 25.2.0 returned HTTP 200 and Podman subsequently reported `healthy`;
+all required services were active with no failed units and the mail queue was
+empty. The operator confirmed primary and alias inbound delivery plus
+authenticated outbound receipt around 2026-10-04 00:44 CEST. The snapshot has
+not been restore-tested. Recheck free space and recovery readiness before the
+Fredy activation.
+
+The new image has 694,075,620 compressed bytes across 19 layers; unpacked
+layers, writable layer, backup, Nix closure and mail growth need additional
+space. Preserve the old image and recovery generations. Do not delete mail,
+logs, images or retained generations as an incidental capacity measure.
+
+During the approved 2026-10-04 `test` of the first 29.2.1 candidate, one
+browser search reached 124 of 128 allowed PIDs, then fell to 12 after
+Chromium exited. No Chromium zombies or PID-limit events were observed; `tini`
+was PID 1. The small four-PID margin could reject overlapping browser work,
+so the revised candidate allows 256 PIDs. The 448 MiB memory cap, total
+memory-plus-swap setting and CPU limit stay unchanged.
+The container was near its memory cap, but most charged memory was reclaimable
+file cache and no OOM kill occurred. Continue monitoring memory pressure and
+mail rather than raising that cap on this sample alone.
+
+On 2026-10-04, the operator stopped Fredy and verified a root-only pre-migration
+archive of both state directories at
+`/root/fredy-backups/fredy-preupgrade-20261004T084802Z.tar`. The approved
+`nixos-rebuild test` and then `switch` of source revision
+`8ca2b36774066a64362084179c94227eb3400424` succeeded. At the 09:24 UTC
+post-switch check, active and selected system paths both pointed to
+`/nix/store/rvafxmadqx6bhrahy2z9mkxk90yz8hx9-nixos-system-nixos-vps-26.05.20260925.f5c082a`;
+the booted path still named the earlier generation, as expected without a reboot.
+The running image reported 29.2.1 at the pinned digest, with `tini` above Node;
+the container was at 12 of 256 allowed PIDs, with no PID-limit events or
+Chromium zombies. Fredy returned HTTP 200 locally and over HTTPS, all required
+mail/access units were active, no units were failed, the mail queue was empty,
+and root had 30,890,278,912 free bytes. The operator confirmed saved jobs,
+schedule and Telegram channel linkage, a representative search with listings,
+and external primary/alias inbound plus authenticated outbound mail delivery.
+No genuinely new listing was available to prove Telegram delivery. Continue
+observing PID, memory/swap and search behavior for at least 24 hours; the
+snapshot and Fredy archive have not been restore-tested.
+
+The existing account has already passed first login. For this upgrade, use only
+the public `#vps` activation route; build the bootstrap output because it shares
+the module, but do not reactivate bootstrap or reset credentials. After an
+approved Fredy stop, make and verify a protected, consistent archive of both
+state directories, including SQLite WAL/SHM, before the first new-image start.
+`nixos-rebuild test` will recreate the container and run the migrations. Accept
+login, saved jobs and schedule, channel links, a representative provider search,
+and an authorized Telegram delivery check before `switch`. Track the payload
+cgroup's PID count, `pids.events max`, memory and swap events through normal
+searches, and verify HTTPS plus mail using [VPS acceptance](deployment.md#vps-acceptance).
+Observe for at least 24 hours, preferably 48, because the original failure
+developed after roughly a day. See the [recovery guide](vps-recovery.md#fredy-backup-and-recovery)
+before any state restore.
 
 ## DNS and HTTPS preparation
 
