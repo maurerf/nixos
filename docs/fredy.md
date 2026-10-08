@@ -17,7 +17,7 @@ the public `vps` closure
 was active and selected; the booted closure was the retained pre-Fredy
 generation. Compare live active and selected closures before future changes.
 
-## Candidate and measured budget
+## Original 25.2.0 candidate and measured budget
 
 The candidate uses Fredy [25.2.0](https://github.com/orangecoding/fredy/releases/tag/25.2.0),
 `ghcr.io/orangecoding/fredy@sha256:74e075c34a38223faaef7705c4f7de637d1dafc683bd61dfa46bb391980c665b`.
@@ -84,6 +84,90 @@ The image and Podman state consume the same root disk as mail and Nix. Check
 free bytes/inodes before pulling the image or building on the VPS, and keep
 at least 3 GiB free after preparation. Prefer an independent Linux builder;
 do not run a heavy build on the 1 GiB mail host to satisfy a build check.
+
+## 2026-10-08 search and notification investigation
+
+This is dated runtime evidence, not a change to the repository's Nix declaration.
+The VPS was running Fredy 29.2.1 at GHCR index digest
+`sha256:45fc1d36f8c79151f66c981c1aacde0f9d19409ffac0d9d084dcd2acecc9ea18`,
+activated on 2026-10-04 from source revision
+`8ca2b36774066a64362084179c94227eb3400424`. The container was healthy,
+with zero systemd restarts and no observed PID exhaustion or OOM kill. Its limits
+were 256 PIDs, 448 MiB RAM and 128 MiB swap. The repository's current
+`modules/fredy.nix` still declares the original 25.2.0 image and 128 PIDs;
+reconcile that drift against the deployed generation before any future VPS
+activation. A NixOS activation from this branch would not preserve the running
+Fredy version and PID limit.
+
+The operator reported roughly one to three Telegram posts daily. Read-only
+diagnostics found one enabled job, an attached Telegram channel and hourly
+searches. Its Fredy spec filter required at least 2.5 rooms and 40 m², at most
+€1,300, plus a blacklist and an area polygon. On 2026-10-07 UTC, debug logs
+recorded the following **repeated per-run observations**, not unique listings:
+
+| Provider | Observations after initial provider filtering | Spec rejects | Already known | New stored |
+| --- | ---: | ---: | ---: | ---: |
+| ImmoScout | 944 | 745 | 199 | 0 |
+| Immowelt | 319 | 195 | — | 1 |
+| Kleinanzeigen | 49 | 22 | — | 6 |
+
+Five of the six new Kleinanzeigen rows on October 7 were outside the saved
+polygon and did not become visible notifications. The operator's local-day
+Telegram counts were one on October 6, three on October 7 and one by the
+October 8 check. Those counts were consistent with stored, area-eligible rows
+after accounting for the Berlin/UTC day boundary. The operator had also hidden
+some other listings manually; the hidden flag alone cannot identify why every
+historical row was hidden. No recent Telegram send error explained the low
+volume; three Telegram 429 errors were confined to October 3–4. Search results
+and notifications are distinct counts.
+
+Kleinanzeigen failed to render a page in 15 of 23 October 7 runs, timing out
+while waiting for the `body` element and returning zero results. ImmoScout and
+Immowelt search requests were functioning in the retained logs. During an
+October 8 scheduled search, the container reached roughly 448 MiB RAM and
+128 MiB swap with high memory pressure; a Kleinanzeigen `body` timeout followed.
+The same resource pressure recurred in two manual runs. The timing is a strong
+correlation, not proof that memory pressure caused the browser timeout. No OOM
+kill or mail-service outage was observed.
+
+The saved ImmoScout search had no upstream price or size restriction and only a
+four-room maximum. Fredy 29.2.1 fetches one ImmoScout mobile API page, sorted
+newest first, with no pagination. Controlled read-only requests returned exactly
+50 raw listings on page 1 and another 50 on page 2. Among 35 novel page-1
+listings after the provider blacklist, none passed the Fredy spec filter;
+rooms and price caused most rejections. Two of 28 novel page-2 listings passed
+the spec filter, although their area eligibility was not checked. This shows a
+first-page coverage gap; it does not mean all portal results were eligible or
+that those two would have produced notifications.
+
+The operator reported saving narrower provider URLs with 2.5–4 rooms, 40–80 m²
+and €1,300 maximum where the portals support those terms, then selecting
+newest-first sorting. The final saved URLs were not independently re-read.
+The provider price semantics differ: the tested ImmoScout URL uses calculated
+total rent, the Immowelt URL uses warm rent, and Kleinanzeigen's price field is
+basic rent. Fredy's own spec and area filters still apply. In the 17:07 CEST
+manual run, Fredy stored two ImmoScout and two Immowelt listings, and all four
+arrived in Telegram; Kleinanzeigen timed out. A 17:11 repeat stored no new
+listings. After the operator removed Kleinanzeigen in the UI, an apparent 17:22
+scheduled run still used the old three-provider job, apparently loaded around
+the edit.
+The 17:26 manual run used only ImmoScout and Immowelt, checked three already
+known listings from each, logged no provider errors and finished in about 22
+seconds. No new Telegram posts were expected from that final run. This verifies
+the saved two-provider configuration. No live resource sample was taken during
+that short run, so its peak memory pressure remains unknown.
+
+Debug ZIP download worked in Safari. The reported Firefox download failure was
+not reproduced with a status/console trace and remains unexplained. Keep debug
+ZIPs and database extracts outside Git because logs and settings can contain
+private search details or credentials. The debug log has a 5 MiB rolling cap;
+the rootful Podman log has a 10 MiB cap. The unprivileged `fdm` SSH account
+cannot read the rootful Podman log or database; the operator ran the narrowly
+scoped read-only diagnostics with sudo in their own terminal and kept the
+password private. If the issue recurs, collect a current ZIP and compare
+per-provider runs, filter rejects, new rows, Telegram receipts,
+and the live container cgroup's memory/swap/pressure. Recheck the job's saved
+provider list before attributing a run near an edit to the new configuration.
 
 ## DNS and HTTPS preparation
 
