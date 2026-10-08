@@ -4,7 +4,7 @@ Read only what the task needs:
 
 - [Architecture](architecture.md): where configuration lives and how hosts share it.
 - [Validation and deployment](deployment.md): checks, host acceptance and generation recovery.
-- [VPS recovery and maintenance](vps-recovery.md): backup, mail state, secrets and legacy recovery.
+- [VPS recovery and maintenance](vps-recovery.md): SSH access/troubleshooting, backup, mail state, secrets and legacy recovery.
 - [Decisions and limitations](decisions.md): reasons, retained policies and scoped historical exceptions.
 - [Fredy hosting plan](fredy-hosting-plan.md): agreed requirements and design record for the VPS apartment-search service.
 - [Fredy operations](fredy.md): staged first login, DNS, Telegram and constrained VPS trial.
