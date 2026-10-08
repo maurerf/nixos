@@ -87,17 +87,19 @@ do not run a heavy build on the 1 GiB mail host to satisfy a build check.
 
 ## 2026-10-08 search and notification investigation
 
-This is dated runtime evidence, not a change to the repository's Nix declaration.
 The VPS was running Fredy 29.2.1 at GHCR index digest
 `sha256:45fc1d36f8c79151f66c981c1aacde0f9d19409ffac0d9d084dcd2acecc9ea18`,
 activated on 2026-10-04 from source revision
 `8ca2b36774066a64362084179c94227eb3400424`. The container was healthy,
 with zero systemd restarts and no observed PID exhaustion or OOM kill. Its limits
-were 256 PIDs, 448 MiB RAM and 128 MiB swap. The repository's current
-`modules/fredy.nix` still declares the original 25.2.0 image and 128 PIDs;
-reconcile that drift against the deployed generation before any future VPS
-activation. A NixOS activation from this branch would not preserve the running
-Fredy version and PID limit.
+were 256 PIDs, 448 MiB RAM and 128 MiB swap. This PR restores the deployed
+image digest and PID limit to `modules/fredy.nix`; `main` still declared 25.2.0
+and 128 PIDs when this investigation began. The original 25.2.0-to-29.2.1
+activation applied database migrations, so reverting only the image or NixOS
+generation would not restore the earlier database schema. The operator made a
+protected copy of both Fredy state directories before the October 4 upgrade;
+follow [Fredy recovery](vps-recovery.md#fredy-backup-and-recovery) and obtain
+fresh deployment approval before any further VPS activation.
 
 The operator reported roughly one to three Telegram posts daily. Read-only
 diagnostics found one enabled job, an attached Telegram channel and hourly
