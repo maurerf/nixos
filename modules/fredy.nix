@@ -26,8 +26,9 @@ in
     virtualisation.podman.enable = true;
     virtualisation.oci-containers.backend = "podman";
     virtualisation.oci-containers.containers.fredy = {
-      # Fredy 25.2.0, Linux amd64, GHCR index digest (2026-09-29).
-      image = "ghcr.io/orangecoding/fredy@sha256:74e075c34a38223faaef7705c4f7de637d1dafc683bd61dfa46bb391980c665b";
+      # Fredy 29.2.1, Linux amd64, GHCR index digest (2026-10-03).
+      # Its /usr/bin/tini entrypoint reaps orphaned Chromium children.
+      image = "ghcr.io/orangecoding/fredy@sha256:45fc1d36f8c79151f66c981c1aacde0f9d19409ffac0d9d084dcd2acecc9ea18";
       pull = "missing";
       # Keep application logs from displacing the mail journal on this small disk.
       log-driver = "k8s-file";
@@ -40,7 +41,8 @@ in
         "--memory=448m"
         "--memory-swap=576m"
         "--cpus=0.5"
-        "--pids-limit=128"
+        # A 29.2.1 search reached 124 PIDs; allow overlapping browser work.
+        "--pids-limit=256"
         # Podman does not retain the health check in this upstream OCI image.
         "--health-cmd=curl -f http://127.0.0.1:9998/"
         "--health-interval=120s"

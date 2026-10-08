@@ -2,6 +2,59 @@
 
 [Knowledge index](README.md) · [Deployment and acceptance](deployment.md)
 
+## SSH access from the Mac
+
+The operator's macOS `~/.ssh/config` selects the existing VPS key and enables
+Keychain retrieval when the SSH agent starts empty:
+
+```sshconfig
+Host maurerf.com mail.maurerf.com
+  User fdm
+  IdentityFile ~/.ssh/id_ed25519_maurerf
+  IdentitiesOnly yes
+  UseKeychain yes
+  AddKeysToAgent yes
+```
+
+This is operator-managed client configuration, not a Nix declaration. Keep the
+private key and its passphrase out of repository files and diagnostic output.
+Check access with `ssh -o BatchMode=yes -o ConnectTimeout=10 fdm@mail.maurerf.com whoami`.
+If the host block is missing, the previously successful explicit equivalent is:
+
+```sh
+ssh -o BatchMode=yes -o ConnectTimeout=10 -o IdentitiesOnly=yes \
+  -o UseKeychain=yes -i ~/.ssh/id_ed25519_maurerf fdm@maurerf.com whoami
+```
+
+Diagnose failures in order, in the same local execution environment that failed:
+
+1. **Local account lookup:** `No user exists for uid 501` occurs before SSH
+   connects. Run `whoami`, `id` and `ssh -V` locally, not in an existing VPS
+   shell. UID 501 comes from the operating system, not an SSH instruction.
+   If these work in the operator's Mac terminal but fail in the agent environment,
+   restart the terminal/application hosting that session and retry. Do not change
+   account IDs or server configuration on this evidence.
+2. **Sandbox networking:** if hostname resolution or network access fails inside
+   the sandbox, retry the read-only check through the supported network approval
+   mechanism before concluding that DNS or the VPS is broken.
+3. **Authentication:** inspect `ssh -G mail.maurerf.com` and `ssh-add -l` to check
+   the selected identity and loaded agent keys; agent access may itself need
+   sandbox approval. An empty agent does not mean the key is missing. Confirm
+   Keychain support for this host and retry the explicit command above before
+   falling back to password access. If needed, use `ssh -v` to distinguish a
+   rejected public key from a key the server accepts but the client cannot use
+   to sign. Unlock an unavailable key privately in the operator's terminal;
+   never request a password or passphrase in chat.
+
+Observation, 2026-10-08 (local command checks and read-only SSH in the Fredy
+investigation): restarting the hosting terminal restored UID 501 resolution to
+`fdm`. The agent initially had no identities, and the existing Keychain setting
+applied only to GitHub. The VPS accepted the explicit public key, but batch login
+failed until `UseKeychain=yes` was supplied. After the operator added the host
+block above, batch SSH without key/Keychain overrides returned `fdm`. A connection
+to `maurerf.com` matched its known host key. Logout/login was suspected as the
+trigger for the local lookup failure, but its underlying cause was not established.
+
 ## Maintenance and preparation
 
 The operator owns a full-system Vultr snapshot before each major change. Retain the
