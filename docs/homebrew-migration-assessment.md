@@ -5,10 +5,11 @@
 ## Intent and authorization
 
 The user requested an A–F assessment of moving every explicitly installed
-Homebrew package to Nix on their M2 Mac. The assessment was delivered; on
-2026-10-08 the user asked to persist the plan and context for a later return.
-Migration has **not** been requested or approved. No packages, configuration,
-lockfiles, or runtime state were changed as part of this assessment.
+Homebrew package to Nix on their M2 Mac. The assessment was delivered and saved
+on 2026-10-08. The user then requested refreshed facts and a concrete first
+batch proposal, while reserving approval before activation or Homebrew removal.
+No packages, configuration, lockfiles, or runtime state were changed for this
+assessment and proposal.
 
 Grades assume actual Nix packages, not simply declaring Homebrew casks through
 nix-darwin. A means straightforward; B minor adjustments; C moderate work;
@@ -120,14 +121,55 @@ Relevant primary sources:
   `baa80bd5f8b5ca2b0834239a4a0ac06b68482645` and
   `4d2ef692a57011f6dc49e20ee2d6dd7444e71d6b`; it is not a fresh build result.
 
-## Recommended sequence when resumed
+## Refreshed inventory and proposed first batch (2026-10-08)
+
+Read-only checks on the M2 Mac found the same 21 explicitly requested formulas
+from Cellar installation receipts and the same seven casks as the assessment.
+`brew list --formula --versions` and `brew list --cask --versions` succeeded;
+none of the assessed installed versions changed. `flake.lock` still pins nixpkgs
+`f5c082a40f7571c266e74e80ae2e68aadd8a9fc7`. With the host's
+`aarch64-darwin` and `allowUnfree` policy, the locked package versions evaluate
+as follows:
+
+| First batch | Homebrew installed | Locked Nix | Acceptance focus |
+| --- | --- | --- | --- |
+| `autoconf` | 2.72 | 2.73 | Generated configure scripts for an actual project. |
+| `autogen` | 5.18.16_3 | 5.18.16 | CLI invocation and a representative template if used. |
+| `automake` | 1.18.1 | 1.18.1 | Autotools generation in the same project. |
+| `doxygen` | 1.15.0 | 1.16.1 | Render a representative documentation project. |
+| `yt-dlp` | 2025.12.8 | 2026.08.19 | Download/postprocess a permitted sample; Nix's default package provides FFmpeg and a Deno runtime. |
+| `claude-code` | 2.0.69 | 2.1.223 | Direct Nix CLI launch, sign-in/session and normal workflow; Nix disables its self-updater. |
+
+**Proposal:** add these six packages to `home.packages` in
+`profiles/home-darwin.nix` as one Mac-only change. They are standalone CLI
+tools, with no shared module or VPS change. Evaluate and build the locked Darwin
+system before proposing activation. The version changes above warrant the
+representative checks, even though these are the easiest migration candidates.
+Do not include OpenSCAD or development libraries in this first batch; OpenSCAD
+still needs a separate native build/launch trial, and libraries need consuming
+projects and development environments identified first.
+
+Current shell evidence: `/opt/homebrew/bin` precedes
+`/Users/fdm/.nix-profile/bin`, and all six commands currently resolve to
+Homebrew symlinks. During the coexistence period, exercise each Nix command by
+its explicit profile path and check its version and required workflow. A later
+ownership cutover must make the Nix command win in fresh shells, then verify
+`command -v` and versions. Do not infer cutover success from a Nix build or from
+the presence of `home.packages` alone. Keep the Homebrew installations until
+the replacement is accepted and removal is separately approved. For Claude
+Code, preserve the user's application data and authentication state.
+
+No Nix declaration, build, activation, or Homebrew removal is part of this
+proposal. The Mac currently uses `targets.darwin.copyApps.enable = true` and
+`linkApps.enable = false`; this CLI batch does not need an app-link change.
+
+## Recommended sequence
 
 1. Refresh explicit Homebrew inventory, installed versions, current lock revision,
    and package ownership. Read the current host/profile and relevant knowledge;
    this snapshot must not override newer Nix declarations or runtime evidence.
-2. Confirm which migration scope the user now wants. The recommendation was to
-   start with A-grade packages: Autoconf, AutoGen, Automake, Doxygen, yt-dlp and
-   Claude Code. OpenSCAD is the strongest next GUI candidate for a build trial.
+2. Confirm the proposed first batch above. OpenSCAD is the strongest next GUI
+   candidate for a separate build trial.
 3. Identify consuming projects before migrating development libraries. Move
    their toolchains and dependencies together into development environments;
    check minimum versions and avoid accidental downgrades.
@@ -147,9 +189,10 @@ Relevant primary sources:
 
 At assessment time, `machines/m2-macbook-air.nix` enabled Homebrew with empty
 `brews`/`casks`, `cleanup = "none"`, and updates/upgrades disabled on activation.
-`profiles/home-darwin.nix` already enabled `targets.darwin.linkApps` and declared
-other Nix GUI apps. Keep those ownership details in mind when planning PATH and
-application discovery changes; consult the current files for authoritative values.
+`profiles/home-darwin.nix` now enables `targets.darwin.copyApps` and disables
+`linkApps`, while declaring other Nix GUI apps. Keep those ownership details in
+mind when planning PATH and application discovery changes; consult the current
+files for authoritative values.
 
-This is a completed assessment with deferred implementation, not an active
-deployment plan or authorization to migrate packages.
+This is a completed assessment and first-batch proposal with deferred
+implementation, not an active deployment plan.
