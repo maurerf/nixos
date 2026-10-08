@@ -7,9 +7,8 @@
 The user requested an A–F assessment of moving every explicitly installed
 Homebrew package to Nix on their M2 Mac. The assessment was delivered and saved
 on 2026-10-08. The user then requested refreshed facts and a concrete first
-batch proposal, while reserving approval before activation or Homebrew removal.
-No packages, configuration, lockfiles, or runtime state were changed for this
-assessment and proposal.
+batch, while reserving approval before activation or Homebrew removal. The
+first batch is now declared in Nix but has not been activated.
 
 Grades assume actual Nix packages, not simply declaring Homebrew casks through
 nix-darwin. A means straightforward; B minor adjustments; C moderate work;
@@ -140,14 +139,15 @@ as follows:
 | `yt-dlp` | 2025.12.8 | 2026.08.19 | Download/postprocess a permitted sample; Nix's default package provides FFmpeg and a Deno runtime. |
 | `claude-code` | 2.0.69 | 2.1.223 | Direct Nix CLI launch, sign-in/session and normal workflow; Nix disables its self-updater. |
 
-**Proposal:** add these six packages to `home.packages` in
+**First batch prepared:** these six packages are declared in `home.packages` in
 `profiles/home-darwin.nix` as one Mac-only change. They are standalone CLI
-tools, with no shared module or VPS change. Evaluate and build the locked Darwin
-system before proposing activation. The version changes above warrant the
-representative checks, even though these are the easiest migration candidates.
-Do not include OpenSCAD or development libraries in this first batch; OpenSCAD
-still needs a separate native build/launch trial, and libraries need consuming
-projects and development environments identified first.
+tools, with no shared module or VPS change. The locked Darwin system evaluated
+and built successfully on the M2 Mac on 2026-10-08. Direct Nix-store `--version`
+checks passed for all six commands. This establishes build and basic executable
+viability; the version changes above still warrant representative workflow checks
+after activation. OpenSCAD remains a separate native build/launch trial, and
+development libraries need consuming projects and development environments
+identified first.
 
 Current shell evidence: `/opt/homebrew/bin` precedes
 `/Users/fdm/.nix-profile/bin`, and all six commands currently resolve to
@@ -159,8 +159,9 @@ the presence of `home.packages` alone. Keep the Homebrew installations until
 the replacement is accepted and removal is separately approved. For Claude
 Code, preserve the user's application data and authentication state.
 
-No Nix declaration, build, activation, or Homebrew removal is part of this
-proposal. The Mac currently uses `targets.darwin.copyApps.enable = true` and
+No activation or Homebrew removal has occurred. Before activation, build the
+clean, committed candidate and follow the Mac deployment approval and recovery
+procedure. The Mac currently uses `targets.darwin.copyApps.enable = true` and
 `linkApps.enable = false`; this CLI batch does not need an app-link change.
 
 ## Recommended sequence
@@ -168,12 +169,12 @@ proposal. The Mac currently uses `targets.darwin.copyApps.enable = true` and
 1. Refresh explicit Homebrew inventory, installed versions, current lock revision,
    and package ownership. Read the current host/profile and relevant knowledge;
    this snapshot must not override newer Nix declarations or runtime evidence.
-2. Confirm the proposed first batch above. OpenSCAD is the strongest next GUI
-   candidate for a separate build trial.
+2. The first batch above is declared and built. OpenSCAD is the strongest next
+   GUI candidate for a separate build trial.
 3. Identify consuming projects before migrating development libraries. Move
    their toolchains and dependencies together into development environments;
    check minimum versions and avoid accidental downgrades.
-4. Use the `nix-engineer` skill for implementation on a focused feature branch.
+4. Use the `nix-engineer` skill for further changes on a focused feature branch.
    Put host package declarations in `profiles/home-darwin.nix`, reusable settings
    in `modules/`, and any host settings in `machines/m2-macbook-air.nix`.
 5. Evaluate and build the affected Darwin host with locked inputs, then prepare
@@ -194,5 +195,5 @@ At assessment time, `machines/m2-macbook-air.nix` enabled Homebrew with empty
 mind when planning PATH and application discovery changes; consult the current
 files for authoritative values.
 
-This is a completed assessment and first-batch proposal with deferred
-implementation, not an active deployment plan.
+This is a completed assessment and built first-batch candidate, not an active
+deployment plan.

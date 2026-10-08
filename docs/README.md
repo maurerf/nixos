@@ -6,7 +6,7 @@ Read only what the task needs:
 - [Validation and deployment](deployment.md): checks, host acceptance and generation recovery.
 - [VPS recovery and maintenance](vps-recovery.md): SSH access/troubleshooting, backup, mail state, secrets and legacy recovery.
 - [Decisions and limitations](decisions.md): reasons, retained policies and scoped historical exceptions.
-- [Homebrew migration assessment](homebrew-migration-assessment.md): explicit Mac inventory, A–F feasibility grades and deferred migration handoff.
+- [Homebrew migration assessment](homebrew-migration-assessment.md): explicit Mac inventory, A–F feasibility grades and built first-batch candidate.
 - [Fredy hosting plan](fredy-hosting-plan.md): agreed requirements and design record for the VPS apartment-search service.
 - [Fredy operations](fredy.md): staged first login, DNS, Telegram, constrained VPS trial and dated 2026-10-08 search investigation.
 - [Completed checkup archive](archive/01-checkup/README.md): original evidence and its provenance.
