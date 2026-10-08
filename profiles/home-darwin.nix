@@ -5,6 +5,12 @@
   home.packages = with pkgs; [
     vim
     htop
+    autoconf
+    autogen
+    automake
+    doxygen
+    yt-dlp
+    claude-code
     vscode
     # spotify  # Temporarily disabled due to hash mismatch
     keepassxc
