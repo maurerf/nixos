@@ -1,0 +1,288 @@
+# Homebrew migration assessment and handoff
+
+[Knowledge index](README.md) · [Architecture](architecture.md) · [Deployment](deployment.md)
+
+## Intent and authorization
+
+The user requested an A–F assessment of moving every explicitly installed
+Homebrew package to Nix on their M2 Mac. The assessment was delivered and saved
+on 2026-10-08. The user then requested refreshed facts and a concrete first
+batch, while reserving approval before activation or Homebrew removal. The
+first batch is now declared and activated in Nix; workflow acceptance and
+Homebrew ownership cutover remain pending.
+
+Grades assume actual Nix packages, not simply declaring Homebrew casks through
+nix-darwin. A means straightforward; B minor adjustments; C moderate work;
+D substantial work; E poor fit; F impractical. Grades include maintenance effort
+and are estimates, not build or launch certifications.
+
+## Evidence and scope
+
+Source: live local Homebrew inventory and read-only Nix evaluation during the
+2026-10-05 conversation, saved on 2026-10-08. Refresh before implementation.
+
+- Target: `m2-macbook-air`, `aarch64-darwin`.
+- Homebrew: `/opt/homebrew/bin/brew`.
+- Explicit inventory: **21 formulas** with `installed_on_request: true` in
+  `/opt/homebrew/Cellar/*/*/INSTALL_RECEIPT.json`, plus **7 installed casks**.
+- `brew leaves` returned 19 formulas, omitting explicitly requested `autoconf`
+  and `pkgconf` because other installed packages depend on them. Do not use
+  leaves alone to reconstruct the requested scope.
+- Commands included `HOMEBREW_NO_AUTO_UPDATE=1 brew leaves`,
+  `brew list --formula --versions`, `brew list --cask --versions`, and
+  `brew info --json=v2 --installed --formula` / `--cask` with the same environment.
+  Formula receipts provided installation intent.
+- The full cask listing succeeded. The historical Chromium `command_wrapper`
+  inventory error in the checkup archive did not reproduce. Current casks also
+  differ from that historical inventory; do not restore removed entries from it.
+- Evaluated pinned nixpkgs revision:
+  `f5c082a40f7571c266e74e80ae2e68aadd8a9fc7` from `flake.lock`.
+  Its local source was
+  `/nix/store/q6zfrswar6d0fkihnxc198vmkdxrmvq5-source`.
+- All 19 formulas with identified equivalents evaluated to derivation paths,
+  as did Claude Code and OpenSCAD. No builds, cache-availability checks, app
+  launches, or consuming-project tests were performed.
+- Evaluation used `system = "aarch64-darwin"` and `config.allowUnfree = true`,
+  matching the host policy. An initial Claude Code evaluation without that
+  policy failed; the corrected evaluation succeeded. This is not a package bug.
+- Nix daemon access required sandbox escalation. Successful evaluations were
+  read-only; no activation or package installation was performed.
+
+## Formula assessment
+
+Versions below are the observed installed Homebrew versions, not current release
+claims. Nix version differences refer only to the revision above.
+
+| Formula | Installed | Grade | Nix route and remaining work |
+| --- | --- | :---: | --- |
+| `autoconf` | 2.72 | A | `autoconf`; routine migration. |
+| `autogen` | 5.18.16_3 | A | `autogen`; same upstream version. |
+| `automake` | 1.18.1 | A | `automake`; same version. |
+| `binutils` | 2.45.1 | B | `binutils`; check command naming and precedence against Apple tools. |
+| `boost` | 1.90.0 | B | `boost` in project development environments; pinned default is 1.89.0. |
+| `ccache` | 4.12.2 | B | `ccache`; check compiler integration and cache configuration. |
+| `cmake` | 4.2.1 | B | `cmake`; pinned default 4.1.6 may not meet all project requirements. |
+| `coreutils` | 9.9 | B | `coreutils`; check Homebrew `g` prefixes and PATH ordering. |
+| `doxygen` | 1.15.0 | A | `doxygen`; routine migration. |
+| `expat` | 2.7.3 | B | `expat`; expose headers/libraries through project development environments. |
+| `ffmpeg` | 8.0.1 | B | `ffmpeg` or appropriate variant; verify required codecs and hardware acceleration. |
+| `graphviz` | 14.1.1 | B | `graphviz`; pinned default 12.2.1 requires feature/rendering comparison. |
+| `hidapi` | 0.15.0 | B | `hidapi`; same version, check build discovery and device access. |
+| `libpgm` | 5.3.128 | C | No package found; custom derivation likely required, including Homebrew's ARM patch. |
+| `libunwind-headers` | 201 | C | No exact equivalent; inspect consuming project before choosing SDK headers or custom packaging. |
+| `libusb` | 1.0.29 | B | `libusb1`; same version, adjust project dependency discovery. |
+| `miniupnpc` | 2.3.3 | B | `miniupnpc`; same version, adjust library paths in consuming projects. |
+| `pkgconf` | 2.5.1 | B | `pkgconf` exists; Nix project builds generally use the `pkg-config` wrapper. |
+| `protobuf` | 33.2 | B | `protobuf`; pinned default 34.1 requires matching compiler, generated code and runtime. |
+| `tor` | 0.4.8.21 | B | `tor`; CLI easy, but any existing background service requires configuration and launchd migration. Service use was not inspected. |
+| `yt-dlp` | 2025.12.8 | A | `yt-dlp`; check FFmpeg integration. |
+
+For libraries, a project `devShell` is usually the useful migration target.
+Adding libraries only to `home.packages` does not reproduce Homebrew's global
+include/library discovery. The actual consuming projects and their required
+versions have not been identified. Explicit installation metadata does not prove
+that a package is still used.
+
+The installed Homebrew recipe for `libpgm` uses OpenPGM release `5-3-128`,
+Autoconf/Automake/Libtool, an ARM fix at upstream commit
+`8d507fc0af472762f95da44036fb77662ff4cd2a`, and a pkg-config filename adjustment.
+The recipe can be inspected under its Cellar version's `.brew/libpgm.rb`.
+
+Homebrew's `libunwind-headers` recipe installs public and internal headers from
+Apple's `libunwind-201`. Nix's Darwin `libunwind` only creates a compatibility
+pkg-config file and relies on libSystem for linking; it is not a replacement
+for that complete header bundle. See pinned
+`pkgs/os-specific/darwin/by-name/li/libunwind/package.nix`.
+
+## Cask assessment
+
+| Cask | Installed | Grade | Nix route and remaining work |
+| --- | --- | :---: | --- |
+| `chromium` | latest | D | Pinned `chromium` supports Linux only. Custom macOS binary package and ongoing browser update maintenance required. `latest` does not establish the installed binary version. |
+| `claude` | 0.14.10,fe3f5688c1c2a4b648d1bf6d9784d62ef9fc336a | C | No `claude-desktop` attribute. Packaging the official Mac app is plausible; download pinning, updater behavior and integration remain untested. |
+| `claude-code` | 2.0.69 | A | Existing Apple Silicon `claude-code` package evaluates; pinned version 2.1.223. Package disables its self-updater so Nix owns updates. |
+| `monero-wallet` | 0.18.4.5 | D | `monero-gui` 0.18.5.2 fails evaluation through `monero-cli` 0.18.5.1, whose metadata supports Linux and excludes aarch64-darwin. Package official Mac binary or repair source build. |
+| `openscad` | 2021.01 | C | `openscad` 2021.01 evaluates and explicitly installs a Darwin `.app`; native build and launch still needed. Historical repo evidence records Qt5 trouble. |
+| `steam` | 4.0 | D | Existing Nix package provides no usable macOS route. Custom Mac bootstrap must accommodate writable updater and app layout. |
+| `tor-browser` | 15.0.3 | D | Pinned `tor-browser` supports i686/x86_64 Linux only. Custom official Mac bundle packaging and update/data behavior need work. |
+
+Do not infer working support solely from `meta.platforms`: Monero GUI advertises
+broad support but its dependency fails; Steam's permissive/empty metadata also
+did not produce a usable derivation. `tor-browser-bundle-bin` is a throwing
+renamed alias; use `tor-browser` when querying.
+
+Relevant primary sources:
+
+- [Pinned nixpkgs tree](https://github.com/NixOS/nixpkgs/tree/f5c082a40f7571c266e74e80ae2e68aadd8a9fc7), especially `pkgs/by-name/{cl/claude-code,mo/monero-gui,mo/monero-cli,op/openscad,to/tor-browser,st/steam-unwrapped}/package.nix` and `pkgs/applications/networking/browsers/chromium/browser.nix`.
+- [Steam Darwin dependency issue](https://github.com/NixOS/nixpkgs/issues/411274).
+- [Claude Desktop package request](https://github.com/NixOS/nixpkgs/issues/366213); external Linux repackaging is not evidence of a working Mac package.
+- Historical OpenSCAD migration/reversal is recorded in
+  [checkup evidence](archive/01-checkup/EVIDENCE.md) around commits
+  `baa80bd5f8b5ca2b0834239a4a0ac06b68482645` and
+  `4d2ef692a57011f6dc49e20ee2d6dd7444e71d6b`; it is not a fresh build result.
+
+## Refreshed inventory and proposed first batch (2026-10-08)
+
+Read-only checks on the M2 Mac found the same 21 explicitly requested formulas
+from Cellar installation receipts and the same seven casks as the assessment.
+`brew list --formula --versions` and `brew list --cask --versions` succeeded;
+none of the assessed installed versions changed. `flake.lock` still pins nixpkgs
+`f5c082a40f7571c266e74e80ae2e68aadd8a9fc7`. With the host's
+`aarch64-darwin` and `allowUnfree` policy, the locked package versions evaluate
+as follows:
+
+| First batch | Homebrew installed | Locked Nix | Acceptance focus |
+| --- | --- | --- | --- |
+| `autoconf` | 2.72 | 2.73 | Generated configure scripts for an actual project. |
+| `autogen` | 5.18.16_3 | 5.18.16 | CLI invocation and a representative template if used. |
+| `automake` | 1.18.1 | 1.18.1 | Autotools generation in the same project. |
+| `doxygen` | 1.15.0 | 1.16.1 | Render a representative documentation project. |
+| `yt-dlp` | 2025.12.8 | 2026.08.19 | Download/postprocess a permitted sample; Nix's default package provides FFmpeg and a Deno runtime. |
+| `claude-code` | 2.0.69 | 2.1.223 | Direct Nix CLI launch, sign-in/session and normal workflow; Nix disables its self-updater. |
+
+**First batch prepared:** these six packages are declared in `home.packages` in
+`profiles/home-darwin.nix` as one Mac-only change. They are standalone CLI
+tools, with no shared module or VPS change. The locked Darwin system evaluated
+and built successfully on the M2 Mac on 2026-10-08. Direct Nix-store `--version`
+checks passed for all six commands. This establishes build and basic executable
+viability; the version changes above still warrant representative workflow checks
+after activation. OpenSCAD remains a separate native build/launch trial, and
+development libraries need consuming projects and development environments
+identified first.
+
+Before the PATH cutover, 2026-10-14 shell checks showed `/opt/homebrew/bin`
+before `/Users/fdm/.nix-profile/bin`; all six commands resolved to Homebrew
+symlinks. During coexistence, commands can also be exercised by their
+explicit Nix profile paths. Keep the Homebrew installations until removal is
+separately approved. For Claude Code, preserve the user's application data and
+authentication state.
+
+The Mac uses `targets.darwin.copyApps.enable = true` and
+`linkApps.enable = false`; this CLI batch did not need an app-link change.
+
+## First-batch activation (2026-10-14)
+
+The operator approved activation of the pinned commit
+`c60b02a5fea46a292816a65b6bf9e207fdd7cc12` and explicitly waived a Time
+Machine backup for this switch after `tmutil latestbackup` reported that its
+destination could not be mounted. The committed candidate rebuilt successfully
+with unchanged `flake.lock` hash
+`sha256-SXw/9jciRkqk8p/Eb4pttg8U33OpUH8J8GLKzvfEDZ4=`. Its output was
+`/nix/store/6hvziidn7gsd5msmicbx0mkda5j3gri7-darwin-system-26.05.c3e90c8`;
+the old generation 37 at
+`/nix/store/hrxffikgdlwy9i0wvxpwbspl5rb8whji-darwin-system-26.05.c3e90c8`
+passed recursive store verification and remains retained. The candidate closure
+is 612,144,224 bytes larger, and `nix store diff-closures` reported package
+additions without removals. `/nix` had 37 GiB free before activation.
+
+The operator ran the pinned `darwin-rebuild switch` command locally. It exited
+successfully; subsequent read-only checks found the expected revision active,
+generation 38 selected at the candidate closure, and the Nix daemon responding.
+Direct `/Users/fdm/.nix-profile/bin` version checks passed for all six commands.
+The Nix Autotools tools generated a source archive from a temporary sample
+project, and Nix Doxygen generated HTML from that project. The six Homebrew
+installations remain present and still win command lookup in a fresh login shell.
+The existing Home Manager Apps directory lists the six previously declared GUI
+apps. The operator confirmed a fresh Terminal, usual apps, and the Nix Claude
+Code session work after the switch. Representative yt-dlp download/post-processing
+and actual consuming-project workflows had not yet been reported. Homebrew
+packages remained installed at this stage.
+
+## PATH cutover activation (2026-10-14)
+
+The Mac-only Home Manager profile adds an interactive Zsh change that
+puts `/Users/fdm/.nix-profile/bin` first in `PATH`. It runs from the generated
+`.zshrc`, after the existing unmanaged `~/.zprofile` executes Homebrew's
+`brew shellenv`. This leaves the user's `~/.zprofile` and Homebrew installations
+untouched. A fresh login or interactive Zsh shell resolves the six first-batch
+commands to Nix. Noninteractive shells that do not load `.zshrc`
+are outside this cutover and should use explicit paths when needed.
+
+The 2026-10-14 command-name overlap between `/opt/homebrew/bin` and the Nix user
+profile was limited to the first-batch commands and related Autotools/AutoGen
+commands. Future package additions may introduce further overlaps. The operator
+approved activation of pinned commit
+`c40177cc9825a87d153647a2e19b41d1f7fe3ba5`, waived the unavailable Time
+Machine backup for this separate switch, and confirmed local recovery access.
+The clean committed candidate built to
+`/nix/store/g9b4i29jy9m3r5h8fsn6wgyklfwmxxnm-darwin-system-26.05.c3e90c8`.
+Its closure has the same packages as generation 38 and is 56 bytes larger.
+Generation 38 passed recursive store verification and remains available for
+rollback.
+
+The operator reported that the pinned switch succeeded. Subsequent checks found
+the expected revision active, generation 39 selected at the candidate closure,
+and the Nix daemon responding. In a fresh interactive Zsh, `command -v` resolves
+all six first-batch commands to `/Users/fdm/.nix-profile/bin`; their reported
+versions match the locked Nix packages. The Homebrew installations remained
+present at this stage. The operator chose to proceed without a representative
+yt-dlp download test because they do not depend heavily on that program. They
+confirmed normal Terminal, Git and Claude Code workflow after this PATH switch.
+
+## First-batch Homebrew removal (2026-10-14)
+
+The operator separately authorized removal of the five first-batch Homebrew
+formulas and the Claude Code cask. Homebrew `automake` was removed before its
+runtime dependency `autoconf`; `autogen`, `doxygen`, and `yt-dlp` followed.
+Homebrew automatically removed eight now-unneeded dependency formulas:
+`bdw-gc`, `certifi`, `deno`, `guile`, `mpdecimal`, `python@3.14`, `readline`, and
+`sqlite`. None belonged to the assessed explicitly requested inventory.
+The Claude Code cask was uninstalled without `--zap`; its `~/.claude` directory,
+`~/.claude.json`, and Claude application-support directory remained present.
+
+The resulting receipt inventory has 16 explicitly requested formulas and six
+casks. None of the six first-batch Homebrew installations remains, and
+`brew missing` reported no broken installed formula dependencies. After removal,
+a fresh interactive Zsh still resolved all six commands to the Nix user profile,
+and their version checks passed. The operator confirmed the Nix Claude Code
+session still worked after cask removal. No Nix configuration change or new
+system activation was needed for this removal.
+
+## Remaining formula cleanup (2026-10-14)
+
+The operator confirmed they no longer build the local C/C++ projects that used
+the remaining development tools and libraries, and do not use the remaining
+standalone commands. Tor Browser does not require the separate Homebrew `tor`
+formula: its installed cask declares no formula dependency, the Homebrew `tor`
+service was not running, and the [Tor Project says Tor Browser includes what is
+needed for browsing](https://support.torproject.org/about-tor/using-and-sharing/torifying/).
+After separate approval, the 16 remaining explicitly requested formulas were
+uninstalled: `binutils`, `boost`, `ccache`, `cmake`, `coreutils`, `expat`,
+`ffmpeg`, `graphviz`, `hidapi`, `libpgm`, `libunwind-headers`, `libusb`,
+`miniupnpc`, `pkgconf`, `protobuf`, and `tor`. Homebrew also automatically
+removed 110 now-unneeded dependency formulas. It retained configuration under
+`/opt/homebrew/etc` for several formulas; these files were not manually deleted.
+
+After removal, `brew list --formula` is empty and `brew missing` reports no
+broken formula dependencies. All six casks remain in `brew list --cask`:
+`chromium`, `claude`, `monero-wallet`, `openscad`, `steam`, and `tor-browser`.
+The Tor Browser and Monero Wallet application bundles remain under
+`/Applications`; this check does not establish a successful launch. No Nix
+configuration change or new system activation was needed.
+
+## Migration scope complete (2026-10-14)
+
+The operator chose to keep all six remaining casks under Homebrew: Steam,
+Claude Desktop, Tor Browser, Monero Wallet, Chromium, and OpenSCAD. No further
+package migration is planned in this PR. The Chromium and OpenSCAD feasibility
+findings above remain historical assessment evidence, not open work items.
+
+If the scope changes later, refresh the inventory and pinned lock first. An
+OpenSCAD Nix migration would require a native build and launch trial given the
+historical Qt5 failure. Chromium would require custom macOS binary packaging,
+explicit version pinning, and an update process because
+[Chromium snapshots do not update themselves](https://www.chromium.org/getting-involved/download-chromium/).
+Resume project development libraries only with a consuming project's dev shell.
+Any future Nix change belongs in a separate focused branch, with native build,
+[deployment approval and recovery checks](deployment.md#deployment), and
+separate authorization before removing Homebrew ownership.
+
+At assessment time, `machines/m2-macbook-air.nix` enabled Homebrew with empty
+`brews`/`casks`, `cleanup = "none"`, and updates/upgrades disabled on activation.
+`profiles/home-darwin.nix` now enables `targets.darwin.copyApps` and disables
+`linkApps`, while declaring other Nix GUI apps. Keep those ownership details in
+mind when planning PATH and application discovery changes; consult the current
+files for authoritative values.
+
+This is a completed assessment and formula cutover record. No Homebrew formulas
+remain installed, and the six casks are intentionally retained under Homebrew.

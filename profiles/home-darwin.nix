@@ -5,6 +5,12 @@
   home.packages = with pkgs; [
     vim
     htop
+    autoconf
+    autogen
+    automake
+    doxygen
+    yt-dlp
+    claude-code
     vscode
     # spotify  # Temporarily disabled due to hash mismatch
     keepassxc
@@ -19,6 +25,10 @@
   programs.home-manager = {
     enable = true;
   };
+  programs.zsh.initContent = ''
+    path=("$HOME/.nix-profile/bin" $path)
+    typeset -U path
+  '';
   imports = [
     ../modules/git.nix
     ../modules/zsh.nix
