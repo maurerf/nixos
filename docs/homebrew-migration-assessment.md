@@ -260,41 +260,22 @@ The Tor Browser and Monero Wallet application bundles remain under
 `/Applications`; this check does not establish a successful launch. No Nix
 configuration change or new system activation was needed.
 
-## Remaining cask scope (2026-10-14)
+## Migration scope complete (2026-10-14)
 
-The operator prefers to keep Steam, Claude Desktop, Tor Browser, and Monero
-Wallet on Homebrew. Only Chromium and OpenSCAD remain under consideration for
-Nix ownership. OpenSCAD is the practical first trial: the pinned Nix package
-defines a Darwin app, but a native build and launch have not been verified and
-historical Qt5 build trouble remains relevant. Chromium is substantially more
-work: the pinned Nix package is Linux-only, and the installed Homebrew cask uses
-a moving `latest` Mac ARM snapshot. A Nix-owned Chromium app would need custom
-binary packaging, explicit version pinning, and a reliable update process because
+The operator chose to keep all six remaining casks under Homebrew: Steam,
+Claude Desktop, Tor Browser, Monero Wallet, Chromium, and OpenSCAD. No further
+package migration is planned in this PR. The Chromium and OpenSCAD feasibility
+findings above remain historical assessment evidence, not open work items.
+
+If the scope changes later, refresh the inventory and pinned lock first. An
+OpenSCAD Nix migration would require a native build and launch trial given the
+historical Qt5 failure. Chromium would require custom macOS binary packaging,
+explicit version pinning, and an update process because
 [Chromium snapshots do not update themselves](https://www.chromium.org/getting-involved/download-chromium/).
-No cask removal is approved by this scope decision.
-
-## Recommended sequence
-
-1. Keep the four excluded casks on Homebrew. Refresh the inventory and pinned
-   lock before new work; no formula migration remains to perform.
-2. If OpenSCAD is still used, run a separate native Nix build and launch trial.
-   Do not infer success from derivation evaluation alone. Revisit development
-   libraries only if a consuming project is resumed, using a project dev shell.
-   Consider Chromium separately only if its custom packaging and update burden
-   is justified by current use.
-3. Use the `nix-engineer` skill for further changes on a focused feature branch.
-   Put host package declarations in `profiles/home-darwin.nix`, reusable settings
-   in `modules/`, and any host settings in `machines/m2-macbook-air.nix`.
-4. Evaluate and build the affected Darwin host with locked inputs, then prepare
-   command/app acceptance checks, ownership transition and recovery. Metadata
-   and derivation evaluation alone do not establish successful builds or launches.
-5. Follow [deployment approval boundaries](deployment.md#deployment) before
-   activation. Obtain appropriate authorization for removing Homebrew ownership;
-   preserve app data and verify Nix replacements before removal. Assess each
-   custom GUI package separately instead of assuming an immutable app bundle
-   accepts the vendor's updater behavior.
-6. Before first push, run the repository's `nix-reviewer` workflow against the
-   full proposed diff. Update directly affected docs with dated results.
+Resume project development libraries only with a consuming project's dev shell.
+Any future Nix change belongs in a separate focused branch, with native build,
+[deployment approval and recovery checks](deployment.md#deployment), and
+separate authorization before removing Homebrew ownership.
 
 At assessment time, `machines/m2-macbook-air.nix` enabled Homebrew with empty
 `brews`/`casks`, `cleanup = "none"`, and updates/upgrades disabled on activation.
@@ -304,4 +285,4 @@ mind when planning PATH and application discovery changes; consult the current
 files for authoritative values.
 
 This is a completed assessment and formula cutover record. No Homebrew formulas
-remain installed; the six cask decisions remain open.
+remain installed, and the six casks are intentionally retained under Homebrew.
