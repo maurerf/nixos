@@ -234,18 +234,17 @@ The resulting receipt inventory has 16 explicitly requested formulas and six
 casks. None of the six first-batch Homebrew installations remains, and
 `brew missing` reported no broken installed formula dependencies. After removal,
 a fresh interactive Zsh still resolved all six commands to the Nix user profile,
-and their version checks passed. A post-removal Claude Code session check awaits
-operator confirmation. No Nix configuration change or new system activation was
-needed for this removal.
+and their version checks passed. The operator confirmed the Nix Claude Code
+session still worked after cask removal. No Nix configuration change or new
+system activation was needed for this removal.
 
 ## Recommended sequence
 
 1. Refresh explicit Homebrew inventory, installed versions, current lock revision,
    and package ownership. Read the current host/profile and relevant knowledge;
    this snapshot must not override newer Nix declarations or runtime evidence.
-2. Confirm the Claude Code session after Homebrew removal. OpenSCAD is the
-   strongest next GUI candidate for a separate native build and launch trial;
-   do not infer success from derivation evaluation alone.
+2. Run a separate OpenSCAD native build and launch trial; it is the strongest
+   next GUI candidate. Do not infer success from derivation evaluation alone.
 3. Identify consuming projects before migrating development libraries. Move
    their toolchains and dependencies together into development environments;
    check minimum versions and avoid accidental downgrades.
