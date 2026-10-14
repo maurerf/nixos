@@ -238,28 +238,48 @@ and their version checks passed. The operator confirmed the Nix Claude Code
 session still worked after cask removal. No Nix configuration change or new
 system activation was needed for this removal.
 
+## Remaining formula cleanup (2026-10-14)
+
+The operator confirmed they no longer build the local C/C++ projects that used
+the remaining development tools and libraries, and do not use the remaining
+standalone commands. Tor Browser does not require the separate Homebrew `tor`
+formula: its installed cask declares no formula dependency, the Homebrew `tor`
+service was not running, and the [Tor Project says Tor Browser includes what is
+needed for browsing](https://support.torproject.org/about-tor/using-and-sharing/torifying/).
+After separate approval, the 16 remaining explicitly requested formulas were
+uninstalled: `binutils`, `boost`, `ccache`, `cmake`, `coreutils`, `expat`,
+`ffmpeg`, `graphviz`, `hidapi`, `libpgm`, `libunwind-headers`, `libusb`,
+`miniupnpc`, `pkgconf`, `protobuf`, and `tor`. Homebrew also automatically
+removed 110 now-unneeded dependency formulas. It retained configuration under
+`/opt/homebrew/etc` for several formulas; these files were not manually deleted.
+
+After removal, `brew list --formula` is empty and `brew missing` reports no
+broken formula dependencies. All six casks remain in `brew list --cask`:
+`chromium`, `claude`, `monero-wallet`, `openscad`, `steam`, and `tor-browser`.
+The Tor Browser and Monero Wallet application bundles remain under
+`/Applications`; this check does not establish a successful launch. No Nix
+configuration change or new system activation was needed.
+
 ## Recommended sequence
 
-1. Refresh explicit Homebrew inventory, installed versions, current lock revision,
-   and package ownership. Read the current host/profile and relevant knowledge;
-   this snapshot must not override newer Nix declarations or runtime evidence.
-2. Run a separate OpenSCAD native build and launch trial; it is the strongest
-   next GUI candidate. Do not infer success from derivation evaluation alone.
-3. Identify consuming projects before migrating development libraries. Move
-   their toolchains and dependencies together into development environments;
-   check minimum versions and avoid accidental downgrades.
-4. Use the `nix-engineer` skill for further changes on a focused feature branch.
+1. Review which of the six remaining casks are still used. Keep an app under
+   Homebrew if its current macOS Nix route is unsuitable; no formula migration
+   remains to perform. Refresh the inventory and pinned lock before new work.
+2. If OpenSCAD is still used, run a separate native Nix build and launch trial.
+   Do not infer success from derivation evaluation alone. Revisit development
+   libraries only if a consuming project is resumed, using a project dev shell.
+3. Use the `nix-engineer` skill for further changes on a focused feature branch.
    Put host package declarations in `profiles/home-darwin.nix`, reusable settings
    in `modules/`, and any host settings in `machines/m2-macbook-air.nix`.
-5. Evaluate and build the affected Darwin host with locked inputs, then prepare
+4. Evaluate and build the affected Darwin host with locked inputs, then prepare
    command/app acceptance checks, ownership transition and recovery. Metadata
    and derivation evaluation alone do not establish successful builds or launches.
-6. Follow [deployment approval boundaries](deployment.md#deployment) before
+5. Follow [deployment approval boundaries](deployment.md#deployment) before
    activation. Obtain appropriate authorization for removing Homebrew ownership;
    preserve app data and verify Nix replacements before removal. Assess each
    custom GUI package separately instead of assuming an immutable app bundle
    accepts the vendor's updater behavior.
-7. Before first push, run the repository's `nix-reviewer` workflow against the
+6. Before first push, run the repository's `nix-reviewer` workflow against the
    full proposed diff. Update directly affected docs with dated results.
 
 At assessment time, `machines/m2-macbook-air.nix` enabled Homebrew with empty
@@ -269,5 +289,5 @@ At assessment time, `machines/m2-macbook-air.nix` enabled Homebrew with empty
 mind when planning PATH and application discovery changes; consult the current
 files for authoritative values.
 
-This is a completed assessment and first-batch cutover record. The six named
-Homebrew installations have been removed; further migrations remain open.
+This is a completed assessment and formula cutover record. No Homebrew formulas
+remain installed; the six cask decisions remain open.
