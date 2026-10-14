@@ -25,6 +25,10 @@
   programs.home-manager = {
     enable = true;
   };
+  programs.zsh.initContent = ''
+    path=("$HOME/.nix-profile/bin" $path)
+    typeset -U path
+  '';
   imports = [
     ../modules/git.nix
     ../modules/zsh.nix

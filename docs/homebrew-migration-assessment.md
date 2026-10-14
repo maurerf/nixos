@@ -191,6 +191,22 @@ Code session work after the switch. Representative yt-dlp download/post-processi
 and actual consuming-project workflows have not yet been reported. No Homebrew
 packages have been removed.
 
+## PATH cutover candidate (2026-10-14)
+
+The Mac-only Home Manager profile now prepares an interactive Zsh change that
+puts `/Users/fdm/.nix-profile/bin` first in `PATH`. It runs from the generated
+`.zshrc`, after the existing unmanaged `~/.zprofile` executes Homebrew's
+`brew shellenv`. This leaves the user's `~/.zprofile` and Homebrew installations
+untouched. A fresh login or interactive Zsh shell should then resolve the six
+first-batch commands to Nix. Noninteractive shells that do not load `.zshrc`
+are outside this cutover and should use explicit paths when needed.
+
+The 2026-10-14 command-name overlap between `/opt/homebrew/bin` and the Nix user
+profile was limited to the first-batch commands and related Autotools/AutoGen
+commands. Future package additions may introduce further overlaps. The candidate
+has not been activated; verify actual command resolution and normal Zsh/Git and
+Claude Code workflows after a separately approved switch.
+
 ## Recommended sequence
 
 1. Refresh explicit Homebrew inventory, installed versions, current lock revision,
