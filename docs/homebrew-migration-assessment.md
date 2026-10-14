@@ -186,8 +186,9 @@ The Nix Autotools tools generated a source archive from a temporary sample
 project, and Nix Doxygen generated HTML from that project. The six Homebrew
 installations remain present and still win command lookup in a fresh login shell.
 The existing Home Manager Apps directory lists the six previously declared GUI
-apps. User confirmation of fresh Terminal/app launches, Claude Code session,
-and representative yt-dlp and project workflows is still pending. No Homebrew
+apps. The operator confirmed a fresh Terminal, usual apps, and the Nix Claude
+Code session work after the switch. Representative yt-dlp download/post-processing
+and actual consuming-project workflows have not yet been reported. No Homebrew
 packages have been removed.
 
 ## Recommended sequence
