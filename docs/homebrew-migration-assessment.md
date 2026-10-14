@@ -185,8 +185,8 @@ installations remain present and still win command lookup in a fresh login shell
 The existing Home Manager Apps directory lists the six previously declared GUI
 apps. The operator confirmed a fresh Terminal, usual apps, and the Nix Claude
 Code session work after the switch. Representative yt-dlp download/post-processing
-and actual consuming-project workflows have not yet been reported. No Homebrew
-packages have been removed.
+and actual consuming-project workflows had not yet been reported. Homebrew
+packages remained installed at this stage.
 
 ## PATH cutover activation (2026-10-14)
 
@@ -214,18 +214,38 @@ The operator reported that the pinned switch succeeded. Subsequent checks found
 the expected revision active, generation 39 selected at the candidate closure,
 and the Nix daemon responding. In a fresh interactive Zsh, `command -v` resolves
 all six first-batch commands to `/Users/fdm/.nix-profile/bin`; their reported
-versions match the locked Nix packages. The Homebrew installations remain
-present. The operator chose to proceed without a representative yt-dlp download
-test because they do not depend heavily on that program. The operator confirmed
-normal Terminal, Git and Claude Code workflow after this PATH switch.
+versions match the locked Nix packages. The Homebrew installations remained
+present at this stage. The operator chose to proceed without a representative
+yt-dlp download test because they do not depend heavily on that program. They
+confirmed normal Terminal, Git and Claude Code workflow after this PATH switch.
+
+## First-batch Homebrew removal (2026-10-14)
+
+The operator separately authorized removal of the five first-batch Homebrew
+formulas and the Claude Code cask. Homebrew `automake` was removed before its
+runtime dependency `autoconf`; `autogen`, `doxygen`, and `yt-dlp` followed.
+Homebrew automatically removed eight now-unneeded dependency formulas:
+`bdw-gc`, `certifi`, `deno`, `guile`, `mpdecimal`, `python@3.14`, `readline`, and
+`sqlite`. None belonged to the assessed explicitly requested inventory.
+The Claude Code cask was uninstalled without `--zap`; its `~/.claude` directory,
+`~/.claude.json`, and Claude application-support directory remained present.
+
+The resulting receipt inventory has 16 explicitly requested formulas and six
+casks. None of the six first-batch Homebrew installations remains, and
+`brew missing` reported no broken installed formula dependencies. After removal,
+a fresh interactive Zsh still resolved all six commands to the Nix user profile,
+and their version checks passed. A post-removal Claude Code session check awaits
+operator confirmation. No Nix configuration change or new system activation was
+needed for this removal.
 
 ## Recommended sequence
 
 1. Refresh explicit Homebrew inventory, installed versions, current lock revision,
    and package ownership. Read the current host/profile and relevant knowledge;
    this snapshot must not override newer Nix declarations or runtime evidence.
-2. Obtain separate approval before any Homebrew removal. OpenSCAD is the
-   strongest next GUI candidate for a separate build trial.
+2. Confirm the Claude Code session after Homebrew removal. OpenSCAD is the
+   strongest next GUI candidate for a separate native build and launch trial;
+   do not infer success from derivation evaluation alone.
 3. Identify consuming projects before migrating development libraries. Move
    their toolchains and dependencies together into development environments;
    check minimum versions and avoid accidental downgrades.
@@ -250,5 +270,5 @@ At assessment time, `machines/m2-macbook-air.nix` enabled Homebrew with empty
 mind when planning PATH and application discovery changes; consult the current
 files for authoritative values.
 
-This is a completed assessment and first-batch activation record. Nix now wins
-first-batch command lookup in interactive Zsh; Homebrew removal remains open.
+This is a completed assessment and first-batch cutover record. The six named
+Homebrew installations have been removed; further migrations remain open.
