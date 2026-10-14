@@ -150,15 +150,12 @@ after activation. OpenSCAD remains a separate native build/launch trial, and
 development libraries need consuming projects and development environments
 identified first.
 
-Shell evidence, reconfirmed on 2026-10-14: `/opt/homebrew/bin` precedes
-`/Users/fdm/.nix-profile/bin`, and all six commands currently resolve to
-Homebrew symlinks. During the coexistence period, exercise each Nix command by
-its explicit profile path and check its version and required workflow. A later
-ownership cutover must make the Nix command win in fresh shells, then verify
-`command -v` and versions. Do not infer cutover success from a Nix build or from
-the presence of `home.packages` alone. Keep the Homebrew installations until
-the replacement is accepted and removal is separately approved. For Claude
-Code, preserve the user's application data and authentication state.
+Before the PATH cutover, 2026-10-14 shell checks showed `/opt/homebrew/bin`
+before `/Users/fdm/.nix-profile/bin`; all six commands resolved to Homebrew
+symlinks. During coexistence, commands can also be exercised by their
+explicit Nix profile paths. Keep the Homebrew installations until removal is
+separately approved. For Claude Code, preserve the user's application data and
+authentication state.
 
 The Mac uses `targets.darwin.copyApps.enable = true` and
 `linkApps.enable = false`; this CLI batch did not need an app-link change.
@@ -191,29 +188,43 @@ Code session work after the switch. Representative yt-dlp download/post-processi
 and actual consuming-project workflows have not yet been reported. No Homebrew
 packages have been removed.
 
-## PATH cutover candidate (2026-10-14)
+## PATH cutover activation (2026-10-14)
 
-The Mac-only Home Manager profile now prepares an interactive Zsh change that
+The Mac-only Home Manager profile adds an interactive Zsh change that
 puts `/Users/fdm/.nix-profile/bin` first in `PATH`. It runs from the generated
 `.zshrc`, after the existing unmanaged `~/.zprofile` executes Homebrew's
 `brew shellenv`. This leaves the user's `~/.zprofile` and Homebrew installations
-untouched. A fresh login or interactive Zsh shell should then resolve the six
-first-batch commands to Nix. Noninteractive shells that do not load `.zshrc`
+untouched. A fresh login or interactive Zsh shell resolves the six first-batch
+commands to Nix. Noninteractive shells that do not load `.zshrc`
 are outside this cutover and should use explicit paths when needed.
 
 The 2026-10-14 command-name overlap between `/opt/homebrew/bin` and the Nix user
 profile was limited to the first-batch commands and related Autotools/AutoGen
-commands. Future package additions may introduce further overlaps. The candidate
-has not been activated; verify actual command resolution and normal Zsh/Git and
-Claude Code workflows after a separately approved switch.
+commands. Future package additions may introduce further overlaps. The operator
+approved activation of pinned commit
+`c40177cc9825a87d153647a2e19b41d1f7fe3ba5`, waived the unavailable Time
+Machine backup for this separate switch, and confirmed local recovery access.
+The clean committed candidate built to
+`/nix/store/g9b4i29jy9m3r5h8fsn6wgyklfwmxxnm-darwin-system-26.05.c3e90c8`.
+Its closure has the same packages as generation 38 and is 56 bytes larger.
+Generation 38 passed recursive store verification and remains available for
+rollback.
+
+The operator reported that the pinned switch succeeded. Subsequent checks found
+the expected revision active, generation 39 selected at the candidate closure,
+and the Nix daemon responding. In a fresh interactive Zsh, `command -v` resolves
+all six first-batch commands to `/Users/fdm/.nix-profile/bin`; their reported
+versions match the locked Nix packages. The Homebrew installations remain
+present. The operator chose to proceed without a representative yt-dlp download
+test because they do not depend heavily on that program. The operator confirmed
+normal Terminal, Git and Claude Code workflow after this PATH switch.
 
 ## Recommended sequence
 
 1. Refresh explicit Homebrew inventory, installed versions, current lock revision,
    and package ownership. Read the current host/profile and relevant knowledge;
    this snapshot must not override newer Nix declarations or runtime evidence.
-2. Finish first-batch workflow acceptance, then plan Nix command precedence and
-   obtain separate approval before any Homebrew removal. OpenSCAD is the
+2. Obtain separate approval before any Homebrew removal. OpenSCAD is the
    strongest next GUI candidate for a separate build trial.
 3. Identify consuming projects before migrating development libraries. Move
    their toolchains and dependencies together into development environments;
@@ -239,5 +250,5 @@ At assessment time, `machines/m2-macbook-air.nix` enabled Homebrew with empty
 mind when planning PATH and application discovery changes; consult the current
 files for authoritative values.
 
-This is a completed assessment and first-batch activation record. Workflow
-acceptance and Homebrew ownership cutover remain open.
+This is a completed assessment and first-batch activation record. Nix now wins
+first-batch command lookup in interactive Zsh; Homebrew removal remains open.
