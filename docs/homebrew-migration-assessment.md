@@ -8,7 +8,8 @@ The user requested an A–F assessment of moving every explicitly installed
 Homebrew package to Nix on their M2 Mac. The assessment was delivered and saved
 on 2026-10-08. The user then requested refreshed facts and a concrete first
 batch, while reserving approval before activation or Homebrew removal. The
-first batch is now declared in Nix but has not been activated.
+first batch is now declared and activated in Nix; workflow acceptance and
+Homebrew ownership cutover remain pending.
 
 Grades assume actual Nix packages, not simply declaring Homebrew casks through
 nix-darwin. A means straightforward; B minor adjustments; C moderate work;
@@ -149,7 +150,7 @@ after activation. OpenSCAD remains a separate native build/launch trial, and
 development libraries need consuming projects and development environments
 identified first.
 
-Current shell evidence: `/opt/homebrew/bin` precedes
+Shell evidence, reconfirmed on 2026-10-14: `/opt/homebrew/bin` precedes
 `/Users/fdm/.nix-profile/bin`, and all six commands currently resolve to
 Homebrew symlinks. During the coexistence period, exercise each Nix command by
 its explicit profile path and check its version and required workflow. A later
@@ -159,18 +160,44 @@ the presence of `home.packages` alone. Keep the Homebrew installations until
 the replacement is accepted and removal is separately approved. For Claude
 Code, preserve the user's application data and authentication state.
 
-No activation or Homebrew removal has occurred. Before activation, build the
-clean, committed candidate and follow the Mac deployment approval and recovery
-procedure. The Mac currently uses `targets.darwin.copyApps.enable = true` and
-`linkApps.enable = false`; this CLI batch does not need an app-link change.
+The Mac uses `targets.darwin.copyApps.enable = true` and
+`linkApps.enable = false`; this CLI batch did not need an app-link change.
+
+## First-batch activation (2026-10-14)
+
+The operator approved activation of the pinned commit
+`c60b02a5fea46a292816a65b6bf9e207fdd7cc12` and explicitly waived a Time
+Machine backup for this switch after `tmutil latestbackup` reported that its
+destination could not be mounted. The committed candidate rebuilt successfully
+with unchanged `flake.lock` hash
+`sha256-SXw/9jciRkqk8p/Eb4pttg8U33OpUH8J8GLKzvfEDZ4=`. Its output was
+`/nix/store/6hvziidn7gsd5msmicbx0mkda5j3gri7-darwin-system-26.05.c3e90c8`;
+the old generation 37 at
+`/nix/store/hrxffikgdlwy9i0wvxpwbspl5rb8whji-darwin-system-26.05.c3e90c8`
+passed recursive store verification and remains retained. The candidate closure
+is 612,144,224 bytes larger, and `nix store diff-closures` reported package
+additions without removals. `/nix` had 37 GiB free before activation.
+
+The operator ran the pinned `darwin-rebuild switch` command locally. It exited
+successfully; subsequent read-only checks found the expected revision active,
+generation 38 selected at the candidate closure, and the Nix daemon responding.
+Direct `/Users/fdm/.nix-profile/bin` version checks passed for all six commands.
+The Nix Autotools tools generated a source archive from a temporary sample
+project, and Nix Doxygen generated HTML from that project. The six Homebrew
+installations remain present and still win command lookup in a fresh login shell.
+The existing Home Manager Apps directory lists the six previously declared GUI
+apps. User confirmation of fresh Terminal/app launches, Claude Code session,
+and representative yt-dlp and project workflows is still pending. No Homebrew
+packages have been removed.
 
 ## Recommended sequence
 
 1. Refresh explicit Homebrew inventory, installed versions, current lock revision,
    and package ownership. Read the current host/profile and relevant knowledge;
    this snapshot must not override newer Nix declarations or runtime evidence.
-2. The first batch above is declared and built. OpenSCAD is the strongest next
-   GUI candidate for a separate build trial.
+2. Finish first-batch workflow acceptance, then plan Nix command precedence and
+   obtain separate approval before any Homebrew removal. OpenSCAD is the
+   strongest next GUI candidate for a separate build trial.
 3. Identify consuming projects before migrating development libraries. Move
    their toolchains and dependencies together into development environments;
    check minimum versions and avoid accidental downgrades.
@@ -195,5 +222,5 @@ At assessment time, `machines/m2-macbook-air.nix` enabled Homebrew with empty
 mind when planning PATH and application discovery changes; consult the current
 files for authoritative values.
 
-This is a completed assessment and built first-batch candidate, not an active
-deployment plan.
+This is a completed assessment and first-batch activation record. Workflow
+acceptance and Homebrew ownership cutover remain open.
