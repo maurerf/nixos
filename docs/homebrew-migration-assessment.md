@@ -260,14 +260,28 @@ The Tor Browser and Monero Wallet application bundles remain under
 `/Applications`; this check does not establish a successful launch. No Nix
 configuration change or new system activation was needed.
 
+## Remaining cask scope (2026-10-14)
+
+The operator prefers to keep Steam, Claude Desktop, Tor Browser, and Monero
+Wallet on Homebrew. Only Chromium and OpenSCAD remain under consideration for
+Nix ownership. OpenSCAD is the practical first trial: the pinned Nix package
+defines a Darwin app, but a native build and launch have not been verified and
+historical Qt5 build trouble remains relevant. Chromium is substantially more
+work: the pinned Nix package is Linux-only, and the installed Homebrew cask uses
+a moving `latest` Mac ARM snapshot. A Nix-owned Chromium app would need custom
+binary packaging, explicit version pinning, and a reliable update process because
+[Chromium snapshots do not update themselves](https://www.chromium.org/getting-involved/download-chromium/).
+No cask removal is approved by this scope decision.
+
 ## Recommended sequence
 
-1. Review which of the six remaining casks are still used. Keep an app under
-   Homebrew if its current macOS Nix route is unsuitable; no formula migration
-   remains to perform. Refresh the inventory and pinned lock before new work.
+1. Keep the four excluded casks on Homebrew. Refresh the inventory and pinned
+   lock before new work; no formula migration remains to perform.
 2. If OpenSCAD is still used, run a separate native Nix build and launch trial.
    Do not infer success from derivation evaluation alone. Revisit development
    libraries only if a consuming project is resumed, using a project dev shell.
+   Consider Chromium separately only if its custom packaging and update burden
+   is justified by current use.
 3. Use the `nix-engineer` skill for further changes on a focused feature branch.
    Put host package declarations in `profiles/home-darwin.nix`, reusable settings
    in `modules/`, and any host settings in `machines/m2-macbook-air.nix`.
