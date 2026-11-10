@@ -7,6 +7,7 @@ Read only what the task needs:
 - [VPS recovery and maintenance](vps-recovery.md): SSH access/troubleshooting, backup, mail state, secrets and legacy recovery.
 - [Decisions and limitations](decisions.md): reasons, retained policies and scoped historical exceptions.
 - [Homebrew migration assessment](homebrew-migration-assessment.md): Mac inventory, feasibility grades, completed formula cutover and retained casks.
+- [Niri on NVIDIA research](niri-nvidia-research.md): dated 2026-11-10 source findings and recommendation for the planned `desktop-pc` Niri/NVIDIA setup.
 - [Fredy hosting plan](fredy-hosting-plan.md): agreed requirements and design record for the VPS apartment-search service.
 - [Fredy operations](fredy.md): staged first login, DNS, Telegram, constrained VPS trial and dated 2026-10-08 search investigation.
 - [Completed checkup archive](archive/01-checkup/README.md): original evidence and its provenance.
