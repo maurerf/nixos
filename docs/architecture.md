@@ -11,18 +11,32 @@ nix-darwin and simple-nixos-mailserver follow the shared nixpkgs input.
 | `m2-macbook-air`, aarch64-darwin | [machine](../machines/m2-macbook-air.nix) + Home Manager [profile](../profiles/home-darwin.nix), which imports the [Workstation module](../modules/home-workstation.nix); nix-darwin owns system activation |
 | `vps`, x86_64-linux | [machine](../machines/vps.nix) imports [Linux base](../modules/nixos-base.nix) and [Fredy](../modules/fredy.nix); flake adds [hardware](../hardware/vultr-vps.nix), mailserver and Home Manager [profile](../profiles/home-vps.nix) |
 | `vps-fredy-bootstrap`, x86_64-linux | Same VPS configuration with external Fredy requests denied during first login; see [Fredy operations](fredy.md#first-login-and-public-switch). |
+| `desktop-pc`, x86_64-linux | [machine](../machines/desktop-pc.nix) imports the [Linux base](../modules/nixos-base.nix); flake adds hand-written [hardware](../hardware/desktop-pc.nix) and Home Manager [profile](../profiles/home-desktop-pc.nix), which imports the Workstation module. Not yet installed. |
 
-Both profiles use shared [Git](../modules/git.nix) and [Zsh](../modules/zsh.nix)
-settings: the VPS profile imports them directly, the Mac through the Workstation
-module. The Workstation module is the Home Manager setup for hosts the user works
-at (today the Mac; a planned `desktop-pc` will import it too): the shared apps and
-fonts, Ghostty with colours from the [palette](../modules/palette.nix), and
-`~/.local/bin` on `PATH`. Each profile keeps its per-OS exceptions, such as
-Notion, the Ghostty package and the Darwin app copying on the Mac. Change one
-host's packages in its profile; shared modules can affect several hosts.
-Do not import the Linux base into Darwin. The Mac integrates Homebrew without
+All profiles use shared [Git](../modules/git.nix) and [Zsh](../modules/zsh.nix)
+settings: the VPS profile imports them directly, the Workstations through the
+Workstation module. The Workstation module is the Home Manager setup for hosts the
+user works at (the Mac and `desktop-pc`): the shared apps and fonts, Ghostty with
+colours from the [palette](../modules/palette.nix), and `~/.local/bin` on `PATH`.
+Each profile keeps its per-OS exceptions, such as Notion, the Ghostty package and
+the Darwin app copying on the Mac. Change one host's packages in its profile;
+shared modules can affect several hosts. Do not import the Linux base into Darwin. The Mac integrates Homebrew without
 managing its manually installed packages; application ownership matters when
 checking launches or contemplating removal.
+
+The Linux base keeps unfree packages off by default (`lib.mkDefault false`), and each
+NixOS machine sets its own `system.stateVersion`; `desktop-pc` alone allows unfree.
+`desktop-pc` is a Workstation with a Niri desktop and Steam, dual-booted beside
+Windows. System-level parts live in its machine file: the bootloader (systemd-boot
+on the Windows ESP at `/efi`, kernels on XBOOTLDR at `/boot`), NVIDIA, Niri started
+by greetd + tuigreet, PipeWire, Bluetooth, Steam and `nix-ld` for the self-installed
+coding tools. Per-user session parts (Waybar, fuzzel, mako, swaylock, swayidle,
+crystal-dock) live in its profile. The Niri configuration is a KDL template in
+[`profiles/desktop-pc/`](../profiles/desktop-pc/niri.kdl): the profile fills its
+`@placeholders@` (palette colours, modifier key) and runs `niri validate` at build
+time. The VM variant (`config.system.build.vm`) is the same host with its own disk
+image, no NVIDIA, a throwaway password and Alt as the Niri modifier; it is declared
+inline in the machine file. The disk layout reasons are in [decisions](decisions.md).
 
 Claude Code and the Codex CLI are deliberately not managed by Nix, so their own
 updaters deliver new releases immediately. They are installed manually into
@@ -47,7 +61,7 @@ failure; see [decisions](decisions.md). A listening port is not automatically a
 public service requirement. Runtime credentials are absolute host-file references,
 not Nix store contents; see [secret recovery](vps-recovery.md#runtime-secrets).
 
-Both outputs use `self.rev or null` for configuration revision. A clean committed
+All outputs use `self.rev or null` for configuration revision. A clean committed
 candidate is needed for meaningful deployment provenance; Git HEAD alone does not
 prove what runs. Compare host revision and active/selected paths as described in
 [deployment](deployment.md). Hardware declarations likewise do not prove a working

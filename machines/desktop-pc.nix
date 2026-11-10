@@ -1,0 +1,118 @@
+# desktop-pc: Workstation with a Niri desktop and Steam, dual-booted beside
+# Windows. Decisions: https://github.com/maurerf/nixos/issues/21
+{ lib, pkgs, ... }:
+
+{
+  imports = [
+    ../modules/nixos-base.nix
+  ];
+
+  networking.hostName = "desktop-pc";
+  nixpkgs.config.allowUnfree = true;
+  system.stateVersion = "26.05";
+
+  # systemd-boot on the Windows ESP (/efi), kernels on XBOOTLDR (/boot).
+  # Windows Boot Manager is detected on the shared ESP. The menu defaults to
+  # the newest generation (NixOS rewrites loader.conf on every switch).
+  boot.loader.systemd-boot = {
+    enable = true;
+    xbootldrMountPoint = "/boot";
+    configurationLimit = 10;
+    editor = false;
+  };
+  boot.loader.efi = {
+    efiSysMountPoint = "/efi";
+    canTouchEfiVariables = true;
+  };
+  boot.loader.timeout = 5;
+  zramSwap.enable = true;
+
+  # SSH from the Mac is the rescue route; its key is placed by hand at install.
+  services.openssh.settings.PasswordAuthentication = false;
+  users.users.fdm.extraGroups = [ "networkmanager" "gamemode" ];
+
+  # NVIDIA open kernel modules on the default driver branch.
+  services.xserver.videoDrivers = [ "nvidia" ];
+  hardware.nvidia.open = true;
+  # Niri wiki: stop the driver keeping a large free buffer pool for niri.
+  environment.etc."nvidia/nvidia-application-profiles-rc.d/50-limit-free-buffer-pool-in-wayland-compositors.json".text =
+    builtins.toJSON {
+      rules = [
+        {
+          pattern = { feature = "procname"; matches = "niri"; };
+          profile = "Limit Free Buffer Pool On Wayland Compositors";
+        }
+      ];
+      profiles = [
+        {
+          name = "Limit Free Buffer Pool On Wayland Compositors";
+          settings = [ { key = "GLVidHeapReuseRatio"; value = 0; } ];
+        }
+      ];
+    };
+
+  # Session: Niri started by greetd + tuigreet. The module also brings the
+  # swaylock PAM entry, polkit, portals, gnome-keyring and Nautilus.
+  programs.niri.enable = true;
+  services.greetd = {
+    enable = true;
+    useTextGreeter = true;
+    settings.default_session.command =
+      "${pkgs.tuigreet}/bin/tuigreet --time --remember --asterisks --cmd niri-session";
+  };
+  environment.sessionVariables.NIXOS_OZONE_WL = "1";
+
+  # Audio and Bluetooth: module defaults, no WirePlumber overrides.
+  hardware.bluetooth.enable = true;
+  security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+  };
+
+  # Gaming: plain Proton through Xwayland by default; gamescope per game only.
+  programs.steam = {
+    enable = true;
+    extraCompatPackages = [ pkgs.proton-ge-bin ];
+  };
+  programs.gamescope.enable = true;
+  programs.gamemode.enable = true;
+
+  # Claude Code (glibc) runs through nix-ld; both coding tools sandbox with
+  # bubblewrap, Claude Code also needs socat.
+  programs.nix-ld.enable = true;
+
+  environment.systemPackages = with pkgs; [
+    xwayland-satellite # Niri spawns it on demand for X11 apps (Steam)
+    polkit_gnome # agent, started from niri.kdl
+    bubblewrap
+    socat
+    mangohud
+  ];
+
+  # `nixos-rebuild build-vm` / config.system.build.vm, run from NixOS-WSL with
+  # nested KVM and virgl through WSLg. The VM uses its own disk image, so the
+  # mounts above do not apply, and qemu-vm forces the modesetting driver, so
+  # NVIDIA is off.
+  virtualisation.vmVariant = {
+    virtualisation = {
+      memorySize = 4096;
+      cores = 4;
+      qemu.forceAccel = true;
+      qemu.options = [
+        "-vga none"
+        "-device virtio-vga-gl,xres=1920,yres=1080"
+        "-display gtk,gl=on"
+      ];
+    };
+    # Throwaway login for the dry run only.
+    users.users.fdm = {
+      hashedPasswordFile = lib.mkForce null;
+      initialPassword = "fdm";
+    };
+    # Windows captures Super, so the VM uses Alt as the Niri modifier.
+    home-manager.users.fdm.desktopPc.niriModKey = "Alt";
+  };
+}

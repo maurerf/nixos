@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   # NOTE: as this base module is hardware agnostic, you need to adjust boot loader settings locally before rebuilding
@@ -32,8 +32,7 @@
     extraGroups = [ "wheel" ];
    };
    
-  nixpkgs.config.allowUnfree = false;
+  nixpkgs.config.allowUnfree = lib.mkDefault false;
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
-  system.stateVersion = "24.05";
 }

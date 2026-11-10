@@ -41,7 +41,11 @@
   partitions: growth adds a new partition with `btrfs device add` instead of moving
   partitions. The layout uses zram only, with no hibernation and no Windows
   mounts. Windows has Fast Startup and hibernation off and keeps the RTC in UTC.
-  [Layout decision](https://github.com/maurerf/nixos/issues/30#issuecomment-6769006073).
+  The boot menu defaults to the newest NixOS generation, not `@saved`: NixOS
+  rewrites `loader.conf`'s `default` on every switch, so `@saved` would keep
+  booting the last-picked entry instead of a new generation.
+  [Layout decision](https://github.com/maurerf/nixos/issues/30#issuecomment-6769006073),
+  [boot default amendment](https://github.com/maurerf/nixos/issues/30#issuecomment-6772325555).
 - The operator's ongoing [snapshot and monthly/quarterly maintenance policy](vps-recovery.md#maintenance-and-preparation)
   remains applicable. Legacy entry points were retired with protected recovery copies;
   use [the canonical recovery procedure](vps-recovery.md#retained-legacy-source-recovery).
