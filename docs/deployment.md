@@ -52,12 +52,13 @@ optional and change no configuration: they give a scriptable serial console
 on `ttyS0`, which systemd does not do on its own here. The VM login is `fdm`
 with the throwaway password `fdm`, and Niri's modifier is Alt.
 
-The guest resolution follows the QEMU window; press Ctrl+Alt+F for fullscreen
-(1920x1080 on the 4K monitor at 200 % Windows scaling). Windows keeps Alt+Space,
-Alt+Escape and the other Alt shortcuts it owns, and QEMU's input grab does not
-change that; send them through the monitor instead, for example
-`echo "sendkey alt-spc" | socat - UNIX-CONNECT:/tmp/vm-mon.sock`
-([observations](https://github.com/maurerf/nixos/issues/36)).
+Observed in the first dry run (2026-11-10,
+[findings](https://github.com/maurerf/nixos/issues/36)): the guest resolution
+follows the QEMU window, and Ctrl+Alt+F (fullscreen) gives 1920x1080 on the 4K
+monitor at 200 % Windows scaling. Windows keeps Alt+Space, Alt+Escape and the
+other Alt shortcuts it owns, and Ctrl+Alt+G (input grab) did not change that.
+Send those keys through the monitor instead, for example
+`echo "sendkey alt-spc" | nix shell nixpkgs#socat -c socat - UNIX-CONNECT:/tmp/vm-mon.sock`.
 
 PR CI evaluates the outputs and checks the flake; it does not replace native builds.
 The [Fredy candidate](fredy.md) has two VPS outputs; evaluate and build both
