@@ -22,7 +22,6 @@ in
     keepassxc
     telegram-desktop
     obsidian
-    anki-bin
     rar
     nerd-fonts.fira-code
     nerd-fonts.droid-sans-mono
