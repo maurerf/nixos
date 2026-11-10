@@ -45,6 +45,20 @@
         specialArgs = { inherit inputs; };
         modules = vpsModules ++ [ { services.fredy.bootstrapOnly = true; } ];
       };
+      "desktop-pc" = nixpkgs.lib.nixosSystem {
+        system = nixosSystem;
+        specialArgs = { inherit inputs; };
+        modules = [
+          ./machines/desktop-pc.nix
+          ./hardware/desktop-pc.nix
+          home-manager.nixosModules.home-manager
+          {
+            system.configurationRevision = self.rev or null;
+            home-manager.useGlobalPkgs = true;
+            home-manager.users.fdm = ./profiles/home-desktop-pc.nix;
+          }
+        ];
+      };
     };
 
     darwinConfigurations = {

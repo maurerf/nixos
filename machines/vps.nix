@@ -8,6 +8,7 @@
     ];
 
   networking.hostName = "nixos-vps";
+  system.stateVersion = "24.05";
 
   boot.loader.grub.enable = true;
   boot.loader.grub.device = "nodev";

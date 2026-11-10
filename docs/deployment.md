@@ -22,6 +22,26 @@ nix build .#darwinConfigurations.m2-macbook-air.system --no-update-lock-file --n
 nix build .#nixosConfigurations.vps.config.system.build.toplevel --no-update-lock-file --no-write-lock-file
 ```
 
+`desktop-pc` has two outputs to evaluate and build: the toplevel and its VM
+(`config.system.build.vm`). A change to the Linux base or the Workstation module
+affects it too. Changes to the Linux base must leave the VPS toplevel `drvPath`
+unchanged unless a VPS change is intended. Without a native Linux machine, build
+in NixOS-WSL on the Windows PC (WSL 3.0.5 + NixOS-WSL 2605.7.2, set up 2026-11-10):
+
+```sh
+nix eval --raw .#nixosConfigurations.desktop-pc.config.system.build.toplevel.drvPath --no-update-lock-file --no-write-lock-file
+nix eval --raw .#nixosConfigurations.desktop-pc.config.system.build.vm.drvPath --no-update-lock-file --no-write-lock-file
+nix build .#nixosConfigurations.desktop-pc.config.system.build.toplevel --no-update-lock-file --no-write-lock-file
+nix build .#nixosConfigurations.desktop-pc.config.system.build.vm --no-update-lock-file --no-write-lock-file
+```
+
+To run the VM from NixOS-WSL with nested KVM and GL through WSLg, delete any old
+`desktop-pc.qcow2` in the working directory for a fresh disk, then run
+`LD_LIBRARY_PATH=/run/opengl-driver/lib GALLIUM_DRIVER=d3d12 ./result/bin/run-desktop-pc-vm`.
+Both variables are needed; without them QEMU falls back to software GL
+([observation](https://github.com/maurerf/nixos/issues/32)). The VM login is
+`fdm` with the throwaway password `fdm`, and Niri's modifier is Alt.
+
 PR CI evaluates the outputs and checks the flake; it does not replace native builds.
 The [Fredy candidate](fredy.md) has two VPS outputs; evaluate and build both
 `vps-fredy-bootstrap` and `vps` before its staged activation. The Mac output is
