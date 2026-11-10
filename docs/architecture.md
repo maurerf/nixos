@@ -8,15 +8,26 @@ nix-darwin and simple-nixos-mailserver follow the shared nixpkgs input.
 
 | Host | Configuration relationship |
 | --- | --- |
-| `m2-macbook-air`, aarch64-darwin | [machine](../machines/m2-macbook-air.nix) + Home Manager [profile](../profiles/home-darwin.nix); nix-darwin owns system activation |
+| `m2-macbook-air`, aarch64-darwin | [machine](../machines/m2-macbook-air.nix) + Home Manager [profile](../profiles/home-darwin.nix), which imports the [Workstation module](../modules/home-workstation.nix); nix-darwin owns system activation |
 | `vps`, x86_64-linux | [machine](../machines/vps.nix) imports [Linux base](../modules/nixos-base.nix) and [Fredy](../modules/fredy.nix); flake adds [hardware](../hardware/vultr-vps.nix), mailserver and Home Manager [profile](../profiles/home-vps.nix) |
 | `vps-fredy-bootstrap`, x86_64-linux | Same VPS configuration with external Fredy requests denied during first login; see [Fredy operations](fredy.md#first-login-and-public-switch). |
 
-Both profiles import shared [Git](../modules/git.nix) and [Zsh](../modules/zsh.nix)
-settings. Change one host's packages in its profile; shared modules can affect both.
+Both profiles use shared [Git](../modules/git.nix) and [Zsh](../modules/zsh.nix)
+settings: the VPS profile imports them directly, the Mac through the Workstation
+module. The Workstation module is the Home Manager setup for hosts the user works
+at (today the Mac; a planned `desktop-pc` will import it too): the shared apps and
+fonts, Ghostty with colours from the [palette](../modules/palette.nix), and
+`~/.local/bin` on `PATH`. Each profile keeps its per-OS exceptions, such as
+Notion, the Ghostty package and the Darwin app copying on the Mac. Change one
+host's packages in its profile; shared modules can affect several hosts.
 Do not import the Linux base into Darwin. The Mac integrates Homebrew without
 managing its manually installed packages; application ownership matters when
 checking launches or contemplating removal.
+
+Claude Code and the Codex CLI are deliberately not managed by Nix, so their own
+updaters deliver new releases immediately. They are installed manually into
+`~/.local/bin`; see [manual tools](deployment.md#manual-tools) and the
+[decision](decisions.md).
 
 Home Manager copies apps from the Mac user's `home.packages` into
 `~/Applications/Home Manager Apps` for Spotlight discovery. Its activation syncs

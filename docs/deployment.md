@@ -146,3 +146,23 @@ sudo /nix/var/nix/profiles/system/bin/switch-to-configuration switch
 Use the console if SSH fails; for boot failure select the recorded old boot-menu
 entry. Kernel/boot transitions may require a reviewed reboot. For incompatible mail
 state, stop generation downgrade and use the [restore assessment](vps-recovery.md#snapshot-recovery).
+
+## Manual tools
+
+Claude Code and the Codex CLI are installed by hand on each Workstation, not by
+Nix ([decision](decisions.md)). Their official installers put them in
+`~/.local/bin` and keep them updated; the Workstation module adds that directory
+to `PATH`. Installers fetched 2026-11-10:
+
+```sh
+curl -fsSL https://claude.ai/install.sh | bash
+curl -fsSL https://chatgpt.com/codex/install.sh | sh
+```
+
+Install Claude Code before a rebuild that removes a Nix copy, and check
+`~/.local/bin/claude --version` and the existing login. Before installing Codex,
+remove any Homebrew or npm `codex`, which its installer treats as a conflict.
+After the rebuild, in a fresh shell, `which -a claude` and `which -a codex` must
+each resolve to a single `~/.local/bin` copy; delete other script-installed copies.
+On NixOS the binaries need `programs.nix-ld` enabled before the installers run;
+see the [research notes](https://github.com/maurerf/nixos/issues/33).
