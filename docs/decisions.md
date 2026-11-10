@@ -24,6 +24,15 @@
   retirement decision. Do not run GC or delete generations as incidental maintenance.
   Automatic GC evaluated false during the checkup; external cleanup was not proved
   absent. [Retention decision](archive/01-checkup/EVIDENCE.md#legacy-source-investigation-and-maintenance-decision-2026-09-29t090807z091606z).
+- Planned `desktop-pc` dual-boot layout (decided 2026-11-10, not yet installed):
+  systemd-boot on the existing Windows ESP, which had only 61.6 MB free, with
+  kernels on a 1 GiB XBOOTLDR partition. Windows is detected on the shared ESP, so
+  no chain-load setup or second ESP is needed. The NixOS root is btrfs (`@`,
+  `@home`, `@nix`) because space freed from `C:` later lands in front of the NixOS
+  partitions: growth adds a new partition with `btrfs device add` instead of moving
+  partitions. The layout uses zram only, with no hibernation and no Windows
+  mounts. Windows has Fast Startup and hibernation off and keeps the RTC in UTC.
+  [Layout decision](https://github.com/maurerf/nixos/issues/30#issuecomment-6769006073).
 - The operator's ongoing [snapshot and monthly/quarterly maintenance policy](vps-recovery.md#maintenance-and-preparation)
   remains applicable. Legacy entry points were retired with protected recovery copies;
   use [the canonical recovery procedure](vps-recovery.md#retained-legacy-source-recovery).
