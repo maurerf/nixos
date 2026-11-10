@@ -204,3 +204,21 @@ After the rebuild, in a fresh shell, `which -a claude` and `which -a codex` must
 each resolve to a single `~/.local/bin` copy; delete other script-installed copies.
 On NixOS the binaries need `programs.nix-ld` enabled before the installers run;
 see the [research notes](https://github.com/maurerf/nixos/issues/33).
+
+### desktop-pc first login
+
+Rehearsed in the [VM dry run](https://github.com/maurerf/nixos/issues/36)
+(2026-11-10, Claude Code 2.1.322, Codex 0.167.0). After the first login at
+tuigreet, in Ghostty:
+
+1. Run both installers above; the Codex installer must not try to write
+   `~/.zshrc`, which stays the Home Manager link (`readlink -f ~/.zshrc`).
+2. In a new Ghostty window, `which -a claude codex` lists only the
+   `~/.local/bin` copies, and `claude --version` and `codex --version` answer.
+3. `ldd ~/.local/bin/claude` resolves `/lib64/ld-linux-x86-64.so.2` into the
+   Nix store (`nix-ld`); `ldd` on the Codex binary reports it statically linked.
+4. Log in to Claude Code and have it make one Bash tool call; the host has no
+   `/bin/bash`, and the tool runs through the login shell instead.
+5. On bare metal only: pair the AirPods and the MX Master 3S with `bluetui`.
+
+There is no Dock to set up; apps start from fuzzel (Super+Space).
