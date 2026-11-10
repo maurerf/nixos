@@ -60,7 +60,6 @@ screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 // Session daemons. No app autostart.
 spawn-at-startup "waybar"
 spawn-at-startup "mako"
-spawn-at-startup "crystal-dock"
 spawn-at-startup "@polkitAgent@"
 spawn-at-startup "swayidle" "-w" "timeout" "600" "swaylock -f" "timeout" "900" "niri msg action power-off-monitors" "before-sleep" "swaylock -f"
 
