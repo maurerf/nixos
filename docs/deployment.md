@@ -36,11 +36,29 @@ nix build .#nixosConfigurations.desktop-pc.config.system.build.vm --no-update-lo
 ```
 
 To run the VM from NixOS-WSL with nested KVM and GL through WSLg, delete any old
-`desktop-pc.qcow2` in the working directory for a fresh disk, then run
-`LD_LIBRARY_PATH=/run/opengl-driver/lib GALLIUM_DRIVER=d3d12 ./result/bin/run-desktop-pc-vm`.
-Both variables are needed; without them QEMU falls back to software GL
-([observation](https://github.com/maurerf/nixos/issues/32)). The VM login is
-`fdm` with the throwaway password `fdm`, and Niri's modifier is Alt.
+`desktop-pc.qcow2` in the working directory for a fresh disk, then run:
+
+```sh
+export LD_LIBRARY_PATH=/run/opengl-driver/lib GALLIUM_DRIVER=d3d12
+export QEMU_OPTS="-chardev socket,id=ser0,path=/tmp/vm-serial.sock,server=on,wait=off,logfile=$PWD/serial.log -serial chardev:ser0 -monitor unix:/tmp/vm-mon.sock,server=on,wait=off"
+export QEMU_KERNEL_PARAMS="systemd.wants=serial-getty@ttyS0.service"
+./result/bin/run-desktop-pc-vm
+```
+
+Both GL variables are needed; without them QEMU falls back to software GL
+([observation](https://github.com/maurerf/nixos/issues/32)). The other two are
+optional and change no configuration: they give a scriptable serial console
+(write to the socket, read `serial.log`) and a QEMU monitor, and start a getty
+on `ttyS0`, which systemd does not do on its own here. The VM login is `fdm`
+with the throwaway password `fdm`, and Niri's modifier is Alt.
+
+Observed in the first dry run (2026-11-10,
+[findings](https://github.com/maurerf/nixos/issues/36)): the guest resolution
+follows the QEMU window, and Ctrl+Alt+F (fullscreen) gives 1920x1080 on the 4K
+monitor at 200 % Windows scaling. Windows keeps Alt+Space, Alt+Escape and the
+other Alt shortcuts it owns, and Ctrl+Alt+G (input grab) did not change that.
+Send those keys through the monitor instead, for example
+`echo "sendkey alt-spc" | nix shell nixpkgs#socat -c socat - UNIX-CONNECT:/tmp/vm-mon.sock`.
 
 PR CI evaluates the outputs and checks the flake; it does not replace native builds.
 The [Fredy candidate](fredy.md) has two VPS outputs; evaluate and build both

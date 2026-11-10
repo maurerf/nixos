@@ -30,12 +30,13 @@ NixOS machine sets its own `system.stateVersion`; `desktop-pc` alone allows unfr
 Windows. System-level parts live in its machine file: the bootloader (systemd-boot
 on the Windows ESP at `/efi`, kernels on XBOOTLDR at `/boot`), NVIDIA, Niri started
 by greetd + tuigreet, PipeWire, Bluetooth, Steam and `nix-ld` for the self-installed
-coding tools. Per-user session parts (Waybar, fuzzel, mako, swaylock, swayidle,
-crystal-dock) live in its profile. The Niri configuration is a KDL template in
+coding tools. Per-user session parts (Waybar, fuzzel, mako, swaylock, swayidle)
+live in its profile; there is no Dock. The Niri configuration is a KDL template in
 [`profiles/desktop-pc/`](../profiles/desktop-pc/niri.kdl): the profile fills its
 `@placeholders@` (palette colours, modifier key) and runs `niri validate` at build
 time. The VM variant (`config.system.build.vm`) is the same host with its own disk
-image, no NVIDIA, a throwaway password and Alt as the Niri modifier; it is declared
+image, no NVIDIA, a throwaway password, Alt as the Niri modifier and an OpenGL
+version override for virgl; it is declared
 inline in the machine file. The disk layout reasons are in [decisions](decisions.md).
 
 Claude Code and the Codex CLI are deliberately not managed by Nix, so their own

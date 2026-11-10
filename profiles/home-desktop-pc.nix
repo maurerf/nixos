@@ -1,5 +1,5 @@
 # Home Manager profile for desktop-pc: the Workstation module plus the
-# Linux-only Niri session (Waybar, fuzzel, mako, swaylock/swayidle, Dock).
+# Linux-only Niri session (Waybar, fuzzel, mako, swaylock/swayidle).
 { config, lib, pkgs, ... }:
 
 let
@@ -40,7 +40,6 @@ in
     home.packages = with pkgs; [
       firefox
       thunderbird
-      crystal-dock # Dock; pins and auto-hide are set by hand on first login
       swayidle
       bluetui
       wl-clipboard
@@ -122,6 +121,8 @@ in
       settings = {
         main = {
           font = "FiraCode Nerd Font:size=12";
+          # Follow Niri's output scale instead of the monitor's reported DPI.
+          dpi-aware = "no";
           terminal = "ghostty -e";
         };
         colors = {
@@ -184,8 +185,13 @@ in
       };
     };
 
-    # Stock Adwaita dark for GTK; no custom theme.
+    # Stock Adwaita dark for GTK; no custom theme. GTK4 reads the colour
+    # scheme, GTK3 apps (the polkit agent) need the settings.ini preference.
     dconf.settings."org/gnome/desktop/interface".color-scheme = "prefer-dark";
+    gtk = {
+      enable = true;
+      gtk3.extraConfig.gtk-application-prefer-dark-theme = true;
+    };
 
     home.pointerCursor = {
       name = "Adwaita";

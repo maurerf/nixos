@@ -28,7 +28,11 @@
   zramSwap.enable = true;
 
   # SSH from the Mac is the rescue route; its key is placed by hand at install.
-  services.openssh.settings.PasswordAuthentication = false;
+  # Keyboard-interactive is off too, or PAM would still accept the password.
+  services.openssh.settings = {
+    PasswordAuthentication = false;
+    KbdInteractiveAuthentication = false;
+  };
   users.users.fdm.extraGroups = [ "networkmanager" "gamemode" ];
 
   # NVIDIA open kernel modules on the default driver branch.
@@ -52,7 +56,8 @@
     };
 
   # Session: Niri started by greetd + tuigreet. The module also brings the
-  # swaylock PAM entry, polkit, portals, gnome-keyring and Nautilus.
+  # swaylock PAM entry, polkit, portals and gnome-keyring; Nautilus is listed
+  # below.
   programs.niri.enable = true;
   services.greetd = {
     enable = true;
@@ -87,6 +92,8 @@
   environment.systemPackages = with pkgs; [
     xwayland-satellite # Niri spawns it on demand for X11 apps (Steam)
     polkit_gnome # agent, started from niri.kdl
+    nautilus
+    libnotify # notify-send
     bubblewrap
     socat
     mangohud
@@ -100,6 +107,8 @@
     virtualisation = {
       memorySize = 4096;
       cores = 4;
+      # Steam's bootstrap alone needs about 600 MB; the default 1 GiB is too small.
+      diskSize = 10240;
       qemu.forceAccel = true;
       qemu.options = [
         "-vga none"
@@ -112,7 +121,12 @@
       hashedPasswordFile = lib.mkForce null;
       initialPassword = "fdm";
     };
-    # Windows captures Super, so the VM uses Alt as the Niri modifier.
+    # Windows captures Super, so the VM uses Alt as the Niri modifier. Windows
+    # still takes Alt+Space and Alt+Escape; the run injects those through the
+    # QEMU monitor (docs/deployment.md).
     home-manager.users.fdm.desktopPc.niriModKey = "Alt";
+    # virgl through WSLg offers OpenGL 4.2; Ghostty needs 4.3 and renders
+    # correctly with the version raised.
+    environment.sessionVariables.MESA_GL_VERSION_OVERRIDE = "4.3";
   };
 }
