@@ -14,6 +14,15 @@
   explicit Dovecot `fileinto` workaround was removed because Dovecot 2.4 enables it
   and the old option failed evaluation. Reassess changes against actual use, not
   cosmetic cleanup. [Source preparation](archive/01-checkup/EVIDENCE.md#release-and-migration-matrix).
+- Keep Claude Code and the Codex CLI out of Nix on every host (decided 2026-11-10).
+  The user wants new releases, such as new models, as soon as they ship, and the
+  nixpkgs `claude-code` package switches its self-updater off. Both are installed
+  with their official self-updating installers into `~/.local/bin` (see
+  [manual tools](deployment.md#manual-tools)). This reverses the 2026-10-14 move of
+  Claude Code from Homebrew to Nix recorded in the
+  [Homebrew migration assessment](homebrew-migration-assessment.md#claude-code-leaves-nix-2026-11-10).
+  The Autotools, AutoGen and Doxygen leftovers were dropped at the same time.
+  [Decision ticket](https://github.com/maurerf/nixos/issues/29).
 - Keep the Postfix outbound IPv4 override: the old source's Gmail delivery failed
   with `5.7.25` and an IPv6 sender without matching reverse/forward identity.
   Target delivery and SPF/DKIM/DMARC later passed. Changing that route requires

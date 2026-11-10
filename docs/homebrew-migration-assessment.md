@@ -286,3 +286,15 @@ files for authoritative values.
 
 This is a completed assessment and formula cutover record. No Homebrew formulas
 remain installed, and the six casks are intentionally retained under Homebrew.
+
+## Claude Code leaves Nix (2026-11-10)
+
+The user decided to take Claude Code out of Nix again so that its own updater
+delivers new releases immediately; the Nix package disables that updater. Claude
+Code and the Codex CLI are now installed manually with their official installers
+into `~/.local/bin` (see [manual tools](deployment.md#manual-tools) and
+[decisions](decisions.md)). The user also confirmed that `autoconf`, `autogen`,
+`automake` and `doxygen` were leftovers; they were dropped from Nix, not moved
+elsewhere. `yt-dlp` stays in Nix through the shared Workstation module. This
+supersedes the first-batch ownership above for these five packages; the earlier
+sections remain the historical record.

@@ -3,37 +3,16 @@
   home.username = "fdm";
   home.stateVersion = "24.05";
   home.packages = with pkgs; [
-    vim
-    htop
-    autoconf
-    autogen
-    automake
-    doxygen
-    yt-dlp
-    claude-code
-    vscode
-    # spotify  # Temporarily disabled due to hash mismatch
-    keepassxc
     notion-app
-    telegram-desktop
-    obsidian
-    anki-bin
-    rar
-    pkgs.nerd-fonts.fira-code
-    pkgs.nerd-fonts.droid-sans-mono
   ];
-  programs.home-manager = {
-    enable = true;
-  };
+  programs.ghostty.package = pkgs.ghostty-bin;
   programs.zsh.initContent = ''
     path=("$HOME/.nix-profile/bin" $path)
     typeset -U path
   '';
   imports = [
-    ../modules/git.nix
-    ../modules/zsh.nix
+    ../modules/home-workstation.nix
   ];
-  fonts.fontconfig.enable = true;
   targets.darwin.linkApps.enable = false;
   targets.darwin.copyApps.enable = true;
 }
