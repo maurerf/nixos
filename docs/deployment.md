@@ -185,6 +185,231 @@ Use the console if SSH fails; for boot failure select the recorded old boot-menu
 entry. Kernel/boot transitions may require a reviewed reboot. For incompatible mail
 state, stop generation downgrade and use the [restore assessment](vps-recovery.md#snapshot-recovery).
 
+## desktop-pc bare-metal install
+
+Installs `desktop-pc` beside Windows on the NVMe, following the
+[layout decision](https://github.com/maurerf/nixos/issues/30) and the
+[procedure decisions](https://github.com/maurerf/nixos/issues/43). Written
+2026-11-11 and **not yet run**: the commands were checked against the pinned
+nixpkgs installer sources, not on the machine. Running it needs explicit approval
+and the [verified Windows backup](https://github.com/maurerf/nixos/issues/42),
+including its copy of the ESP contents.
+
+The Dell stays on HDMI for the install; the Niri output block matches the monitor
+itself and takes the highest refresh rate the link offers. Record the reviewed
+`main` commit as `CANDIDATE` before starting. Stop at each **checkpoint** if the
+output differs from what is described.
+
+### 1. Prepare on Windows
+
+1. Download `latest-nixos-minimal-x86_64-linux.iso` and its `.sha256` file from
+   `https://channels.nixos.org/nixos-26.05/`. Compare
+   `Get-FileHash -Algorithm SHA256 <iso>` with the `.sha256` content, then write
+   the ISO to a USB stick with Rufus in DD image mode. Keep the stick unchanged
+   until install acceptance; it is also the rescue tool.
+2. In an elevated PowerShell, turn off hibernation and Fast Startup, and make
+   Windows keep the hardware clock in UTC:
+
+   ```powershell
+   powercfg /h off
+   reg add "HKLM\SYSTEM\CurrentControlSet\Control\TimeZoneInformation" /v RealTimeIsUniversal /t REG_DWORD /d 1 /f
+   ```
+
+3. Shrink `C:` by 200 GiB. First check that the limit allows it; if `SizeMin`
+   is too high, shrink by the largest amount offered instead:
+
+   ```powershell
+   $c = Get-Partition -DriveLetter C
+   ($c.Size - (Get-PartitionSupportedSize -DriveLetter C).SizeMin) / 1GB   # must be at least 200
+   Resize-Partition -DriveLetter C -Size ($c.Size - 200GB)
+   (Get-Partition -DiskNumber $c.DiskNumber -PartitionNumber 1).Guid         # the ESP
+   ```
+
+   The last line must print `{66b88416-5d45-4cf6-8cf4-3c9a4523fc79}`, the
+   PARTUUID in `hardware/desktop-pc.nix`. If it differs, stop and correct the
+   hardware file by PR first.
+
+**Checkpoint 1:** restart Windows. It must boot normally, `C:` must be about
+730 GiB with about 200 GiB unallocated directly after it, and the clock must be
+right (run `w32tm /resync` if it is off by the UTC offset after the switch).
+Nothing outside Windows has changed yet; undoing this step is extending `C:`
+again in Disk Management.
+
+### 2. Boot the installer and connect from the Mac
+
+1. Boot the stick through the ASRock boot menu (F11) and pick its UEFI entry.
+2. At the console (US layout until `sudo loadkeys de`): connect Wi-Fi with
+   `nmtui`, set a temporary password with `passwd`, and read the address from
+   `ip -4 addr`.
+3. From the Mac, `ssh nixos@<address>` and `sudo -i`. Paste the remaining
+   commands there. The installer has `sshd`, NetworkManager, `git`, `sgdisk`,
+   `efibootmgr` and btrfs tools on board.
+
+**Checkpoint 2:** identify the disk and the gap before creating anything.
+
+```sh
+lsblk -d -o NAME,MODEL,SIZE
+DISK=/dev/nvme0n1    # the Samsung 970 EVO from the line above
+lsblk -o NAME,SIZE,FSTYPE,PARTLABEL,PARTUUID "$DISK"
+parted "$DISK" unit MiB print free
+```
+
+Expected: ESP (100 MiB, PARTUUID `66b88416-…`), MSR, the NTFS `C:` partition,
+then about 204800 MiB of free space, then the Recovery partition. No existing
+partition is labelled `BOOT` or `nixos`. Only small alignment gaps besides the
+big one.
+
+### 3. Partition, format and mount
+
+`sgdisk` with start `0` uses the largest free block, which is the gap.
+
+```sh
+sgdisk -n 0:0:+1G -t 0:ea00 -c 0:BOOT "$DISK"
+sgdisk -n 0:0:0 -t 0:8300 -c 0:nixos "$DISK"
+partprobe "$DISK"; udevadm settle
+lsblk -o NAME,SIZE,PARTLABEL "$DISK"    # BOOT 1G and nixos about 199G, Windows partitions unchanged
+
+mkfs.fat -F 32 -n BOOT /dev/disk/by-partlabel/BOOT
+mkfs.btrfs -L nixos /dev/disk/by-partlabel/nixos
+udevadm settle
+
+mount /dev/disk/by-label/nixos /mnt
+btrfs subvolume create /mnt/@
+btrfs subvolume create /mnt/@home
+btrfs subvolume create /mnt/@nix
+umount /mnt
+```
+
+The mounts below are also the first step of every rescue from the stick:
+
+```sh
+O=compress=zstd,noatime
+mount -o subvol=@,$O /dev/disk/by-label/nixos /mnt
+mkdir -p /mnt/home /mnt/nix /mnt/boot /mnt/efi
+mount -o subvol=@home,$O /dev/disk/by-label/nixos /mnt/home
+mount -o subvol=@nix,$O /dev/disk/by-label/nixos /mnt/nix
+mount -o fmask=0077,dmask=0077 /dev/disk/by-label/BOOT /mnt/boot
+mount -o fmask=0077,dmask=0077 /dev/disk/by-partuuid/66b88416-5d45-4cf6-8cf4-3c9a4523fc79 /mnt/efi
+```
+
+**Checkpoint 3:** before anything is written to the ESP.
+
+```sh
+findmnt -R /mnt          # /, /home, /nix (btrfs subvolumes), /boot and /efi (vfat)
+ls /mnt/efi/EFI          # Microsoft and Boot; no systemd directory
+df -h /mnt/efi           # about 60 MB free
+nixos-generate-config --root /mnt --show-hardware-config
+```
+
+The last command only prints. Compare its `availableKernelModules` with
+`hardware/desktop-pc.nix`: if a module needed to reach the disk (`nvme`) is
+missing from the file, fix it in the clone below before installing. Note any
+other difference and fix it by PR after the first boot.
+
+### 4. Install
+
+Remove the stale firmware entries (one `Manjaro` and seven `Linux Boot Manager`
+[observed 2026-11-10](https://github.com/maurerf/nixos/issues/27)), whose files
+are absent from the ESP as checkpoint 3 showed. Never delete
+`Windows Boot Manager` or the stick's own entry.
+
+```sh
+efibootmgr                 # list
+efibootmgr -b 0003 -B      # repeat with each stale entry's number
+```
+
+Place the checkout, the login password hash and the Wi-Fi connection, then
+install. Copying the connection lets the installed system join Wi-Fi at first
+boot, so SSH from the Mac works even if the desktop does not.
+
+```sh
+git clone https://github.com/maurerf/nixos /mnt/home/fdm/git/nixos
+git -C /mnt/home/fdm/git/nixos checkout --detach "$CANDIDATE"
+
+install -d -m 700 /mnt/etc/checkup-secrets
+mkpasswd -m yescrypt > /mnt/etc/checkup-secrets/fdm-login.hash   # or: nix-shell -p mkpasswd --run 'mkpasswd -m yescrypt'
+chmod 600 /mnt/etc/checkup-secrets/fdm-login.hash
+grep -c '^\$y\$' /mnt/etc/checkup-secrets/fdm-login.hash          # 1
+
+install -d -m 700 /mnt/etc/NetworkManager/system-connections
+cp -p /etc/NetworkManager/system-connections/*.nmconnection /mnt/etc/NetworkManager/system-connections/
+
+nixos-install --root /mnt --flake /mnt/home/fdm/git/nixos#desktop-pc --no-root-passwd --no-update-lock-file --no-write-lock-file
+nixos-enter --root /mnt -c 'chown -R fdm:users /home/fdm'
+```
+
+Root stays locked; `fdm` with `sudo` is the way in, and the Mac's SSH key is
+declared in `machines/desktop-pc.nix`. Unfree packages such as the NVIDIA driver
+and Steam may build locally instead of coming from the binary cache, so the
+install can take a while. The hash file is read only when `fdm` is first
+created; later password changes go through `passwd`.
+
+Check the result, then restart without the stick:
+
+```sh
+ls /mnt/efi/EFI                 # Microsoft, Boot and now systemd
+cat /mnt/efi/loader/loader.conf # timeout 5, default nixos-generation-1.conf, editor off
+ls /mnt/boot/EFI/nixos          # kernel and initrd
+efibootmgr                      # Linux Boot Manager first, Windows Boot Manager present
+umount -R /mnt && reboot
+```
+
+`bootctl install` also replaces the fallback loader `EFI/BOOT/BOOTX64.EFI` on
+the ESP; the original is in the ESP copy of the backup.
+
+### 5. First boot
+
+The systemd-boot menu lists NixOS and Windows Boot Manager. Do not press `d` in
+the menu and do not run `bootctl set-default`: either pins a default that
+overrides `loader.conf`. Log in as `fdm` at tuigreet, remove the old host key on
+the Mac (`ssh-keygen -R <address>`) and check `ssh fdm@<address>`. Then follow
+[desktop-pc first login](#desktop-pc-first-login) and the
+[install acceptance checks](https://github.com/maurerf/nixos/issues/44). Reach
+Windows from the menu or with
+`systemctl reboot --boot-loader-entry=auto-windows`. Pushing from the checkout
+needs a GitHub login, set up after acceptance.
+
+### Recovery
+
+These are the stop-and-recover routes of the acceptance criteria; every other
+failed check is fixed forward by PR and `nixos-rebuild` on the running system.
+
+- **The machine boots straight into Windows** (also after a Windows update put
+  itself first): pick Linux Boot Manager in the F11 menu, then restore the order
+  from NixOS with `sudo efibootmgr -o <linux>,<windows>`.
+- **NixOS reaches no login:** try a text console (Ctrl+Alt+F2) and SSH from the
+  Mac first. Otherwise boot the stick, repeat the mounts of step 3 (never the
+  `sgdisk` or `mkfs` commands), correct the checkout and run the `nixos-install`
+  line again; it adds a generation and keeps `/home`. An older generation can be
+  picked in the boot menu once one exists.
+- **The login is rejected:** from the stick, after the mounts,
+  `nixos-enter --root /mnt -c 'passwd fdm'`.
+- **Windows does not start from the menu:** pick Windows Boot Manager in the F11
+  menu, which bypasses systemd-boot. If the firmware entry is gone, recreate it
+  from the stick: `efibootmgr -c -d "$DISK" -p 1 -L "Windows Boot Manager" -l '\EFI\Microsoft\Boot\bootmgfw.efi'`.
+  If files on the ESP are damaged, mount it from the stick and copy them back
+  from the ESP copy of the backup (fetch it on the Mac, then `scp` to the
+  installer). If Windows itself is damaged, let its recovery environment run
+  Startup Repair; a clean reinstall from the backup is the
+  [accepted worst case](https://github.com/maurerf/nixos/issues/42).
+
+### Back out
+
+To remove NixOS again, from the stick with only the ESP mounted:
+
+```sh
+mount /dev/disk/by-partuuid/66b88416-5d45-4cf6-8cf4-3c9a4523fc79 /mnt
+rm -r /mnt/EFI/systemd /mnt/loader
+umount /mnt
+efibootmgr                           # then -b <number> -B for Linux Boot Manager
+lsblk -o NAME,PARTLABEL "$DISK"      # read the numbers of BOOT and nixos
+sgdisk -d <nixos number> -d <BOOT number> "$DISK"
+```
+
+Then boot Windows, extend `C:` into the free space in Disk Management, and
+restore `EFI\BOOT\BOOTX64.EFI` from the ESP copy if wanted. `powercfg /h on` and
+deleting `RealTimeIsUniversal` return Windows to its earlier settings.
+
 ## Manual tools
 
 Claude Code and the Codex CLI are installed by hand on each Workstation, not by
@@ -219,6 +444,7 @@ tuigreet, in Ghostty:
    Nix store (`nix-ld`); `ldd` on the Codex binary reports it statically linked.
 4. Log in to Claude Code and have it make one Bash tool call; the host has no
    `/bin/bash`, and the tool runs through the login shell instead.
-5. On bare metal only: pair the AirPods and the MX Master 3S with `bluetui`.
+5. On bare metal only: pair the AirPods with `bluetui`. The MX Master 3S runs
+   on its USB receiver and needs no pairing.
 
 There is no Dock to set up; apps start from fuzzel (Super+Space).

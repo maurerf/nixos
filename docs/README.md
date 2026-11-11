@@ -3,7 +3,7 @@
 Read only what the task needs:
 
 - [Architecture](architecture.md): where configuration lives and how hosts share it.
-- [Validation and deployment](deployment.md): checks, host acceptance and generation recovery.
+- [Validation and deployment](deployment.md): checks, host acceptance, generation recovery and the `desktop-pc` bare-metal install.
 - [VPS recovery and maintenance](vps-recovery.md): SSH access/troubleshooting, backup, mail state, secrets and legacy recovery.
 - [Decisions and limitations](decisions.md): reasons, retained policies and scoped historical exceptions.
 - [Homebrew migration assessment](homebrew-migration-assessment.md): Mac inventory, feasibility grades, completed formula cutover and retained casks.
