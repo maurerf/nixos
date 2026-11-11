@@ -27,8 +27,12 @@
   boot.loader.timeout = 5;
   zramSwap.enable = true;
 
-  # SSH from the Mac is the rescue route; its key is placed by hand at install.
-  # Keyboard-interactive is off too, or PAM would still accept the password.
+  # SSH from the Mac is the rescue route, so its public key is declared here
+  # and works from the first boot. Keyboard-interactive is off too, or PAM
+  # would still accept the password.
+  users.users.fdm.openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDeyUTBQK0BYz/cdQR8n6mzpGCrKPBTl+hcbqifCq8aK"
+  ];
   services.openssh.settings = {
     PasswordAuthentication = false;
     KbdInteractiveAuthentication = false;
