@@ -65,9 +65,11 @@ in
           format-muted = "vol muted";
         };
         bluetooth = {
-          format = "";
+          format = "bt {status}";
+          format-disabled = "bt off";
           format-connected = "bt {device_alias}";
           format-connected-battery = "bt {device_alias} {device_battery_percentage}%";
+          on-click = "${pkgs.ghostty}/bin/ghostty --class=com.maurerf.bluetui --title=Bluetooth -e ${pkgs.bluetui}/bin/bluetui";
         };
         network = {
           format-ethernet = "";
