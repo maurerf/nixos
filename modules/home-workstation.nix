@@ -31,6 +31,10 @@ in
   # self-updating installers, which put them in ~/.local/bin.
   home.sessionPath = [ "$HOME/.local/bin" ];
 
+  # GitHub CLI; also registers itself as Git's credential helper for github.com.
+  # Log in once per Workstation with `gh auth login`.
+  programs.gh.enable = true;
+
   programs.home-manager.enable = true;
   fonts.fontconfig.enable = true;
 
