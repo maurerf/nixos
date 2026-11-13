@@ -189,10 +189,11 @@ state, stop generation downgrade and use the [restore assessment](vps-recovery.m
 
 Installs `desktop-pc` beside Windows on the NVMe, following the
 [layout decision](https://github.com/maurerf/nixos/issues/30) and the
-[procedure decisions](https://github.com/maurerf/nixos/issues/43). Written
-2026-11-11 and **not yet run**: the commands were checked against the pinned
-nixpkgs installer sources, not on the machine. Running it needs explicit approval
-and the [verified Windows backup](https://github.com/maurerf/nixos/issues/42),
+[procedure decisions](https://github.com/maurerf/nixos/issues/43). First run
+2026-11-11 at `fead80f` and accepted 2026-11-13 without changes to the commands
+([run and results](https://github.com/maurerf/nixos/issues/45)). Running it
+again needs explicit approval and the
+[verified Windows backup](https://github.com/maurerf/nixos/issues/42),
 including its copy of the ESP contents.
 
 The Dell stays on HDMI for the install; the Niri output block matches the monitor
@@ -242,7 +243,9 @@ again in Disk Management.
    `nmtui`, set a temporary password with `passwd`, and read the address from
    `ip -4 addr`.
 3. From the Mac, `ssh nixos@<address>` and `sudo -i`. Paste the remaining
-   commands there. The installer has `sshd`, NetworkManager, `git`, `sgdisk`,
+   commands there. If `ssh` reports `No route to host` while `ping` works, allow
+   the terminal app under macOS Privacy & Security > Local Network
+   ([observed 2026-11-13](https://github.com/maurerf/nixos/issues/45#issuecomment-6859354376)). The installer has `sshd`, NetworkManager, `git`, `sgdisk`,
    `efibootmgr` and btrfs tools on board.
 
 **Checkpoint 2:** identify the disk and the gap before creating anything.
@@ -341,8 +344,11 @@ nixos-enter --root /mnt -c 'chown -R fdm:users /home/fdm'
 Root stays locked; `fdm` with `sudo` is the way in, and the Mac's SSH key is
 declared in `machines/desktop-pc.nix`. Unfree packages such as the NVIDIA driver
 and Steam may build locally instead of coming from the binary cache, so the
-install can take a while. The hash file is read only when `fdm` is first
-created; later password changes go through `passwd`.
+install can take a while. In the first run (2026-11-11) the kernel and the NVIDIA
+open module came from the cache; only small derivations such as `nvidia-x11` and
+`nvidia-settings` built locally, beside a 4.6 GiB download over Wi-Fi ([observation](https://github.com/maurerf/nixos/issues/45#issuecomment-6859354376)). The hash
+file is read only when `fdm` is first created; later password changes go through
+`passwd`.
 
 Check the result, then restart without the stick:
 
@@ -355,7 +361,10 @@ umount -R /mnt && reboot
 ```
 
 `bootctl install` also replaces the fallback loader `EFI/BOOT/BOOTX64.EFI` on
-the ESP; the original is in the ESP copy of the backup.
+the ESP; the original is in the ESP copy of the backup. Its log reports
+`Created directory "/efi/EFI"` and `"/efi/EFI/BOOT"` although both exist; FAT
+ignores case, and the Windows files stayed intact in the first run
+([observation](https://github.com/maurerf/nixos/issues/45#issuecomment-6859354376)).
 
 ### 5. First boot
 
@@ -444,7 +453,8 @@ tuigreet, in Ghostty:
    Nix store (`nix-ld`); `ldd` on the Codex binary reports it statically linked.
 4. Log in to Claude Code and have it make one Bash tool call; the host has no
    `/bin/bash`, and the tool runs through the login shell instead.
-5. On bare metal only: pair the AirPods with `bluetui`. The MX Master 3S runs
-   on its USB receiver and needs no pairing.
+5. On bare metal, the MX Master 3S runs on its USB receiver and needs no
+   pairing. AirPods pairing waits for a Bluetooth GUI; `bluetui` was not wanted
+   ([issue](https://github.com/maurerf/nixos/issues/51)).
 
 There is no Dock to set up; apps start from fuzzel (Super+Space).
