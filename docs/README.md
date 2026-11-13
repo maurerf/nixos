@@ -9,6 +9,7 @@ Read only what the task needs:
 - [Homebrew migration assessment](homebrew-migration-assessment.md): Mac inventory, feasibility grades, completed formula cutover and retained casks.
 - [Fredy hosting plan](fredy-hosting-plan.md): agreed requirements and design record for the VPS apartment-search service.
 - [Fredy operations](fredy.md): staged first login, DNS, Telegram, constrained VPS trial and dated 2026-10-08 search investigation.
+- [Issue tracker](agents/issue-tracker.md): `gh` conventions and wayfinder map operations for agents.
 - [Completed checkup archive](archive/01-checkup/README.md): original evidence and its provenance.
 
 Nix files define declared configuration. These pages own operational context and
