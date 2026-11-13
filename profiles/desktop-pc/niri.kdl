@@ -31,7 +31,8 @@ layout {
         proportion 0.5
         proportion 0.66667
     }
-    default-column-width { proportion 0.5; }
+    // New windows open full-width; Mod+R cycles the presets.
+    default-column-width { proportion 1.0; }
 
     focus-ring {
         width 2

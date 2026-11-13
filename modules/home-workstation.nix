@@ -21,7 +21,6 @@ in
     # spotify  # Temporarily disabled due to hash mismatch
     keepassxc
     telegram-desktop
-    obsidian
     rar
     nerd-fonts.fira-code
     nerd-fonts.droid-sans-mono
