@@ -244,8 +244,8 @@ again in Disk Management.
    `ip -4 addr`.
 3. From the Mac, `ssh nixos@<address>` and `sudo -i`. Paste the remaining
    commands there. If `ssh` reports `No route to host` while `ping` works, allow
-   the terminal app under macOS Privacy & Security > Local Network (observed
-   2026-11-13). The installer has `sshd`, NetworkManager, `git`, `sgdisk`,
+   the terminal app under macOS Privacy & Security > Local Network
+   ([observed 2026-11-13](https://github.com/maurerf/nixos/issues/45#issuecomment-6859354376)). The installer has `sshd`, NetworkManager, `git`, `sgdisk`,
    `efibootmgr` and btrfs tools on board.
 
 **Checkpoint 2:** identify the disk and the gap before creating anything.
@@ -346,7 +346,7 @@ declared in `machines/desktop-pc.nix`. Unfree packages such as the NVIDIA driver
 and Steam may build locally instead of coming from the binary cache, so the
 install can take a while. In the first run (2026-11-11) the kernel and the NVIDIA
 open module came from the cache; only small derivations such as `nvidia-x11` and
-`nvidia-settings` built locally, beside a 4.6 GiB download over Wi-Fi. The hash
+`nvidia-settings` built locally, beside a 4.6 GiB download over Wi-Fi ([observation](https://github.com/maurerf/nixos/issues/45#issuecomment-6859354376)). The hash
 file is read only when `fdm` is first created; later password changes go through
 `passwd`.
 
@@ -363,7 +363,8 @@ umount -R /mnt && reboot
 `bootctl install` also replaces the fallback loader `EFI/BOOT/BOOTX64.EFI` on
 the ESP; the original is in the ESP copy of the backup. Its log reports
 `Created directory "/efi/EFI"` and `"/efi/EFI/BOOT"` although both exist; FAT
-ignores case, and the Windows files stayed intact in the first run.
+ignores case, and the Windows files stayed intact in the first run
+([observation](https://github.com/maurerf/nixos/issues/45#issuecomment-6859354376)).
 
 ### 5. First boot
 
