@@ -1,7 +1,8 @@
 # Hand-written before install so CI can evaluate the host. Mounts by label
 # (and the Windows ESP by PARTUUID), following the dual-boot layout decision:
 # https://github.com/maurerf/nixos/issues/30
-# At install, compare `nixos-generate-config` output for kernel modules only.
+# Kernel modules match `nixos-generate-config` on the machine (2026-11-11):
+# https://github.com/maurerf/nixos/issues/45
 { config, lib, modulesPath, ... }:
 
 let
@@ -14,7 +15,7 @@ in
 {
   imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
 
-  boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" ];
+  boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
   boot.kernelModules = [ "kvm-intel" ];
 
   fileSystems."/" = btrfsSubvolume "@";
