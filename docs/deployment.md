@@ -322,12 +322,13 @@ efibootmgr -b 0003 -B      # repeat with each stale entry's number
 ```
 
 Place the checkout, the login password hash and the Wi-Fi connection, then
-install. Copying the connection lets the installed system join Wi-Fi at first
+install. The checkout lives in `~/Documents/git/nixos` on `desktop-pc` (the first
+run used `~/git/nixos`; moved 2026-11-13). Copying the connection lets the installed system join Wi-Fi at first
 boot, so SSH from the Mac works even if the desktop does not.
 
 ```sh
-git clone https://github.com/maurerf/nixos /mnt/home/fdm/git/nixos
-git -C /mnt/home/fdm/git/nixos checkout --detach "$CANDIDATE"
+git clone https://github.com/maurerf/nixos /mnt/home/fdm/Documents/git/nixos
+git -C /mnt/home/fdm/Documents/git/nixos checkout --detach "$CANDIDATE"
 
 install -d -m 700 /mnt/etc/checkup-secrets
 mkpasswd -m yescrypt > /mnt/etc/checkup-secrets/fdm-login.hash   # or: nix-shell -p mkpasswd --run 'mkpasswd -m yescrypt'
@@ -337,7 +338,7 @@ grep -c '^\$y\$' /mnt/etc/checkup-secrets/fdm-login.hash          # 1
 install -d -m 700 /mnt/etc/NetworkManager/system-connections
 cp -p /etc/NetworkManager/system-connections/*.nmconnection /mnt/etc/NetworkManager/system-connections/
 
-nixos-install --root /mnt --flake /mnt/home/fdm/git/nixos#desktop-pc --no-root-passwd --no-update-lock-file --no-write-lock-file
+nixos-install --root /mnt --flake /mnt/home/fdm/Documents/git/nixos#desktop-pc --no-root-passwd --no-update-lock-file --no-write-lock-file
 nixos-enter --root /mnt -c 'chown -R fdm:users /home/fdm'
 ```
 
