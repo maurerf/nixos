@@ -17,6 +17,92 @@ the public `vps` closure
 was active and selected; the booted closure was the retained pre-Fredy
 generation. Compare live active and selected closures before future changes.
 
+## 2026-11-13 pagination candidate (not yet activated)
+
+The repository now builds a local image archive with a small pagination patch over
+Fredy 29.2.1. [The image recipe](../modules/fredy-pagination/default.nix) pins the
+original Linux amd64 manifest, its Nix archive hash and the matching upstream
+source commit. The two modified provider files were compared byte-for-byte with
+the original image's source layer. No dependencies, database migrations, settings,
+filters or notification adapters change. The base environment and tini entrypoint
+are retained. Nix loads the archive with `imageFile`; a content-derived tag and
+`pull = "never"` avoid a mutable registry tag or separate publishing step.
+
+Both providers fetch sequential pages of 100, starting at page 1, with at most
+five pages and a three-minute pagination budget per provider. ImmoScout requests
+have a 20-second timeout. Immowelt retains card batches of at most 30, with a
+20-second request timeout bounded by the remaining budget. Pages are spaced by
+one second and consecutive card batches by half a second. Listing IDs are
+deduplicated. A repeated page, premature empty response, timeout, refusal or cap
+stops fetching and logs incomplete coverage while retaining successful results.
+A 403/429 also suppresses subsequent provider detail requests in that run. The
+time budget covers pagination/card fetching, not the entire job's
+subsequent enrichment and notification pipeline. A cap is a deliberate limit,
+not a promise to retrieve every result for arbitrarily broad searches.
+
+Build-time offline tests exercise the pagination helper and the actual patched
+provider functions with mocked HTTP/browser responses. They cover additional
+pages, duplicate IDs, request errors, partial card batches, blocking responses,
+time/page limits and preservation of search parameters. The tests never open the
+live database or send notifications. To build the native VPS candidate:
+
+```sh
+nix build .#nixosConfigurations.vps.config.system.build.toplevel --no-update-lock-file --no-write-lock-file
+nix build .#nixosConfigurations.vps-fredy-bootstrap.config.system.build.toplevel --no-update-lock-file --no-write-lock-file
+```
+
+### Evidence and proposed job settings
+
+Operator-run read-only diagnostics on 2026-11-13 found that about 38.2% of the
+saved Fredy polygon lies outside the provider searches' 5 km radius (grid estimate;
+not a percentage of listings missed). With 2.5–4 rooms and €1,500 warm rent fixed,
+ImmoScout's complete polygon search had 15 title-blacklist survivors at 40–80 m²,
+and 22 at 40–90 m². Seven of the latter were beyond the first 50 raw results.
+The 40–90 m² polygon search returned 73 raw listings; 50 had swap terms in their
+titles. Explicitly adding or removing `exclusioncriteria=swapflat` returned the
+same 73 IDs. The deployed translator already supplied that exclusion, so relying
+on it did not solve the page coverage gap.
+
+Immowelt's original search returned 227 raw cards and 14 blacklist survivors;
+two survivors were beyond its first 100 results. The polygon plus 40–90 m²
+probe fetched only 300 of 344 results and found at least 15 survivors, eight
+beyond the first page. Those polygon counts are lower bounds. Counts are dated
+available candidates, not daily arrivals, guaranteed new rows or unique flats
+across both portals. Provider polygon membership can differ from Fredy's
+address-based geocoding.
+
+After accepting the patched service, preview and save provider URLs using the
+existing polygon directly, 40–90 m², 2.5–4 rooms and €1,500 warm rent, sorted newest
+first. Keep Fredy's existing blacklist and area filter; keep job-level minimum
+rooms 2.5, minimum size 40 and maximum price 1500. Two-room flats are explicitly
+outside the user's requirements. Exact polygon URLs belong in private job state,
+not Git. Listings previously stored and hidden remain known; changing the search
+does not automatically reconsider them or resend notifications. Review those
+separately, without clearing deduplication history.
+
+### Activation and recovery
+
+This candidate is not activation approval. Follow [deployment](deployment.md#deployment)
+and [backup preparation](vps-recovery.md#fredy-backup-and-recovery), build both VPS
+outputs on Linux, and obtain approval for the concrete committed candidate.
+Allow disk space for the Nix base/derived archives and Podman's loaded image; this
+uses more disk than a registry-only declaration. Build outside the mail VPS where
+possible. Check free bytes/inodes before transferring or loading it.
+
+After activation, confirm the loaded image tag, health and tini; observe one
+normal job with the saved searches, then the proposed URLs. Record unique fetched
+counts, reported totals, completeness warnings, stored/hidden rows and actual
+Telegram receipts. Check parent/child cgroup memory, swap, PIDs and mail services
+across that run. The first wider search can notify about older unseen flats.
+Do not infer failure from fewer posts than fetched listings.
+
+The patch changes no schema. Recovery is the retained pre-change generation and
+original image, followed by health/mail/search checks. If job URLs were also
+changed, restoring the generation does not restore them: keep their original
+values privately and restore them separately if desired. New listing history
+remains in the database; do not restore an old database merely to undo this code
+patch.
+
 ## Original 25.2.0 candidate and measured budget
 
 The candidate uses Fredy [25.2.0](https://github.com/orangecoding/fredy/releases/tag/25.2.0),

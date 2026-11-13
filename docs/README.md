@@ -7,7 +7,7 @@ Read only what the task needs:
 - [VPS recovery and maintenance](vps-recovery.md): SSH access/troubleshooting, backup, mail state, secrets and legacy recovery.
 - [Decisions and limitations](decisions.md): reasons, retained policies and scoped historical exceptions.
 - [Fredy hosting plan](fredy-hosting-plan.md): agreed requirements and design record for the VPS apartment-search service.
-- [Fredy operations](fredy.md): staged first login, DNS, Telegram, constrained VPS trial and dated 2026-10-08 search investigation.
+- [Fredy operations](fredy.md): staged first login, DNS, Telegram, dated search investigations and the pagination candidate.
 - [Issue tracker](agents/issue-tracker.md): `gh` conventions and wayfinder map operations for agents.
 - [Domain docs](agents/domain.md): where agent skills find the glossary and record decisions.
 - [Completed checkup archive](archive/01-checkup/README.md): original evidence and its provenance.
