@@ -33,7 +33,7 @@
   retirement decision. Do not run GC or delete generations as incidental maintenance.
   Automatic GC evaluated false during the checkup; external cleanup was not proved
   absent. [Retention decision](archive/01-checkup/EVIDENCE.md#legacy-source-investigation-and-maintenance-decision-2026-09-29t090807z091606z).
-- Planned `desktop-pc` dual-boot layout (decided 2026-11-10, not yet installed):
+- `desktop-pc` dual-boot layout (decided 2026-11-10, installed 2026-11-11):
   systemd-boot on the existing Windows ESP, which had only 61.6 MB free, with
   kernels on a 1 GiB XBOOTLDR partition. Windows is detected on the shared ESP, so
   no chain-load setup or second ESP is needed. The NixOS root is btrfs (`@`,

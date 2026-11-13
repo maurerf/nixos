@@ -11,7 +11,7 @@ nix-darwin and simple-nixos-mailserver follow the shared nixpkgs input.
 | `m2-macbook-air`, aarch64-darwin | [machine](../machines/m2-macbook-air.nix) + Home Manager [profile](../profiles/home-darwin.nix), which imports the [Workstation module](../modules/home-workstation.nix); nix-darwin owns system activation |
 | `vps`, x86_64-linux | [machine](../machines/vps.nix) imports [Linux base](../modules/nixos-base.nix) and [Fredy](../modules/fredy.nix); flake adds [hardware](../hardware/vultr-vps.nix), mailserver and Home Manager [profile](../profiles/home-vps.nix) |
 | `vps-fredy-bootstrap`, x86_64-linux | Same VPS configuration with external Fredy requests denied during first login; see [Fredy operations](fredy.md#first-login-and-public-switch). |
-| `desktop-pc`, x86_64-linux | [machine](../machines/desktop-pc.nix) imports the [Linux base](../modules/nixos-base.nix); flake adds hand-written [hardware](../hardware/desktop-pc.nix) and Home Manager [profile](../profiles/home-desktop-pc.nix), which imports the Workstation module. Not yet installed. |
+| `desktop-pc`, x86_64-linux | [machine](../machines/desktop-pc.nix) imports the [Linux base](../modules/nixos-base.nix); flake adds hand-written [hardware](../hardware/desktop-pc.nix) and Home Manager [profile](../profiles/home-desktop-pc.nix), which imports the Workstation module. Installed beside Windows 2026-11-11, accepted 2026-11-13 ([run](https://github.com/maurerf/nixos/issues/45)). |
 
 All profiles use shared [Git](../modules/git.nix) and [Zsh](../modules/zsh.nix)
 settings: the VPS profile imports them directly, the Workstations through the
