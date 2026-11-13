@@ -69,6 +69,14 @@ window-rule {
     open-floating true
 }
 
+// Bluetooth controls launched from Waybar use a dedicated Ghostty app ID.
+window-rule {
+    match app-id=r#"^com\.maurerf\.bluetui$"#
+    open-floating true
+    default-column-width { proportion 0.6; }
+    default-window-height { proportion 0.6; }
+}
+
 // Steam notification toasts float in the corner instead of tiling.
 window-rule {
     match app-id="steam" title=r#"^notificationtoasts_\d+_desktop$"#

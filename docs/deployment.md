@@ -455,7 +455,16 @@ tuigreet, in Ghostty:
 4. Log in to Claude Code and have it make one Bash tool call; the host has no
    `/bin/bash`, and the tool runs through the login shell instead.
 5. On bare metal, the MX Master 3S runs on its USB receiver and needs no
-   pairing. AirPods pairing waits for a Bluetooth GUI; `bluetui` was not wanted
-   ([issue](https://github.com/maurerf/nixos/issues/51)).
+   pairing. Click Bluetooth in Waybar to open `bluetui` in a floating Ghostty
+   window. For AirPods, open the case and enter pairing mode (flashing white),
+   ensure `bluetui` is scanning (`s` toggles scanning), use Tab to select the scanning pane, then
+   select the AirPods and press Enter to pair/connect. Use `t` to trust them
+   for subsequent connections. `bluetoothctl` is the fallback: `scan on`,
+   `pair <address>`, `trust <address>`, `connect <address>`, then `scan off`.
+   Discovery, bonding and connection with the default dual-mode BlueZ settings
+   were observed on 2026-11-13 ([AirPods discovery and bar launcher](https://github.com/maurerf/nixos/issues/57));
+   no controller-mode, privacy or WirePlumber overrides were needed.
+   After switching from Windows, re-pair if the other OS replaced the link key
+   ([Bluetooth limitations](https://github.com/maurerf/nixos/issues/26)).
 
 There is no Dock to set up; apps start from fuzzel (Super+Space).
