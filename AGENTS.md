@@ -24,6 +24,13 @@ do not load the entire knowledge base or archive by default.
 - Follow [deployment approval and recovery boundaries](docs/deployment.md#deployment).
   Historical waivers grant no permission for future work.
 
+## Agent skills
+
+### Issue tracker
+
+GitHub issues in `maurerf/nixos`, including wayfinder maps as sub-issue trees
+with native blocking. See [issue tracker](docs/agents/issue-tracker.md).
+
 ## Local review before push
 
 Before the first push, run [$nix-reviewer](.agents/skills/nix-reviewer/SKILL.md)
