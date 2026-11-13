@@ -42,6 +42,7 @@ in
       thunderbird
       swayidle
       bluetui
+      kdePackages.filelight
       wl-clipboard
     ];
 
@@ -188,6 +189,10 @@ in
     # Stock Adwaita dark for GTK; no custom theme. GTK4 reads the colour
     # scheme, GTK3 apps (the polkit agent) need the settings.ini preference.
     dconf.settings."org/gnome/desktop/interface".color-scheme = "prefer-dark";
+    # Qt does not recognise XDG_CURRENT_DESKTOP=niri and draws its own light
+    # file dialog; route Qt apps (Telegram, KeePassXC) to the portal chooser.
+    # Takes effect after re-login. https://github.com/maurerf/nixos/issues/58
+    home.sessionVariables.QT_QPA_PLATFORMTHEME = "xdgdesktopportal";
     gtk = {
       enable = true;
       gtk3.extraConfig.gtk-application-prefer-dark-theme = true;
