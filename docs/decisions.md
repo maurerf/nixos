@@ -34,6 +34,16 @@
   runtime, so a Home Manager symlink would make it read-only; activation merges
   only the `statusLine` key instead and leaves a file that is not a JSON object
   untouched. [Ticket](https://github.com/maurerf/nixos/issues/68).
+- On `desktop-pc`, `Super+C/V/X/A/Z` (and `Super+Shift+Z`) are Mac-style edit
+  keys, so `Ctrl+C` always means interrupt (decided 2026-11-14). xremap runs as
+  an fdm user service and asks Niri which app has focus. It turns those keys
+  into `Ctrl+…` everywhere except Ghostty, which binds `super+c/v/a` itself.
+  fdm is in `input` and `uinput`, so fdm's processes can read every keystroke.
+  This was accepted over keyd, whose app mapper needs socket access equivalent
+  to root. Niri's center-column and floating toggle moved to `Super+Shift+C/V`,
+  and its floating/tiling focus switch to `Super+Ctrl+V`. Nothing changes on
+  the Mac. [Research](https://github.com/maurerf/nixos/issues/59),
+  [scheme](https://github.com/maurerf/nixos/issues/65).
 - Keep the Postfix outbound IPv4 override: the old source's Gmail delivery failed
   with `5.7.25` and an IPv6 sender without matching reverse/forward identity.
   Target delivery and SPF/DKIM/DMARC later passed. Changing that route requires

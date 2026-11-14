@@ -37,7 +37,12 @@
     PasswordAuthentication = false;
     KbdInteractiveAuthentication = false;
   };
-  users.users.fdm.extraGroups = [ "networkmanager" "gamemode" ];
+  users.users.fdm.extraGroups = [ "networkmanager" "gamemode" "input" "uinput" ];
+
+  # Mac-style Super+C/V: the xremap user service (Home Manager profile) reads
+  # keyboards and writes a virtual one, so fdm needs input and uinput. The
+  # access trade-off is recorded in docs/decisions.md.
+  hardware.uinput.enable = true;
 
   # NVIDIA open kernel modules on the default driver branch.
   services.xserver.videoDrivers = [ "nvidia" ];
