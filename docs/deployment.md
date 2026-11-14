@@ -468,7 +468,8 @@ tuigreet, in Ghostty:
    After switching from Windows, re-pair if the other OS replaced the link key
    ([Bluetooth limitations](https://github.com/maurerf/nixos/issues/26)).
 
-There is no Dock to set up; apps start from fuzzel (Super+Space).
+There is no Dock to set up; apps start from fuzzel (Super+Space). Super+F1 shows
+Niri's hotkey overlay and Super+Shift+Space searches and runs any bind.
 
 ### desktop-pc edit keys
 

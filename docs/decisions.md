@@ -44,6 +44,15 @@
   and its floating/tiling focus switch to `Super+Ctrl+V`. Nothing changes on
   the Mac. [Research](https://github.com/maurerf/nixos/issues/59),
   [scheme](https://github.com/maurerf/nixos/issues/65).
+- Niri binds on `desktop-pc` come from one Nix list that also feeds the hotkey
+  overlay (`Super+F1`) and a fuzzel command palette (`Super+Shift+Space`)
+  (decided 2026-11-14). Niri matches the key without Shift or AltGr, so on the
+  de layout `/`, `=`, `[` and `]` can't be bound. Growing moved to `+` and
+  consume-or-expel to `ü`. `Super+Shift+1–9` move the column to a workspace
+  instead of Niri's `Super+Ctrl+1–9`. Screenshots use `Super+Shift/Ctrl/Alt+S`
+  because the small Apple keyboard has no Print key. The overlay hides
+  workspaces 2–9 and the media keys; the palette lists every bind.
+  [Bind help](https://github.com/maurerf/nixos/issues/66).
 - Keep the Postfix outbound IPv4 override: the old source's Gmail delivery failed
   with `5.7.25` and an IPv6 sender without matching reverse/forward identity.
   Target delivery and SPF/DKIM/DMARC later passed. Changing that route requires
