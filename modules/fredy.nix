@@ -41,7 +41,7 @@ in
       ];
       extraOptions = [
         # Raised from 448 MiB on 2026-11-14: paginated searches pinned the old
-        # limit and the 128 MiB swap allowance on every run (docs/fredy.md).
+        # limit and the 128 MiB swap allowance in both sampled runs (docs/fredy.md).
         "--memory=640m"
         "--memory-swap=768m"
         "--cpus=0.5"
