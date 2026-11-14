@@ -54,7 +54,8 @@
   hardware.nvidia.powerManagement.enable = true;
   # The sleep key (F6 on the Magic Keyboard) suspended through logind on key
   # press; one such suspend came back after 6 s and the next hung
-  # (2026-11-14). Niri binds the key with a delay instead (binds.nix).
+  # (2026-11-14). The key is left unbound; Super+Alt+Escape suspends. logind
+  # reads this on reload or reboot, not on a switch.
   services.logind.settings.Login.HandleSuspendKey = "ignore";
   # The Logitech Bolt receiver woke the PC from S3 at once; wake by keyboard.
   services.udev.extraRules = ''
