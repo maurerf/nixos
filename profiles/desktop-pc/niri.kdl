@@ -36,7 +36,7 @@ layout {
 
     focus-ring {
         width 2
-        active-color "@skyBlue@"
+        active-color "@muted@"
         inactive-color "@border@"
     }
 
@@ -63,6 +63,12 @@ spawn-at-startup "waybar"
 spawn-at-startup "mako"
 spawn-at-startup "@polkitAgent@"
 spawn-at-startup "swayidle" "-w" "timeout" "600" "swaylock -f" "timeout" "900" "niri msg action power-off-monitors" "before-sleep" "swaylock -f"
+
+// Round every window like libadwaita apps; the focus ring follows the radius.
+window-rule {
+    geometry-corner-radius 12
+    clip-to-geometry true
+}
 
 window-rule {
     match app-id=r#"firefox$"# title="^Picture-in-Picture$"
