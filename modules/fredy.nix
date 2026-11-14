@@ -27,7 +27,7 @@ in
     virtualisation.podman.enable = true;
     virtualisation.oci-containers.backend = "podman";
     virtualisation.oci-containers.containers.fredy = {
-      # Locally built pagination layer over the pinned Fredy 29.2.1 amd64 image.
+      # Local pagination and browser fixes over the pinned Fredy 29.2.1 amd64 image.
       # The base image and tini entrypoint are preserved; no schema migrations.
       image = "${paginationImage.imageName}:${paginationImage.imageTag}";
       imageFile = paginationImage;
