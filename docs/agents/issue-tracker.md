@@ -48,8 +48,8 @@ Used by `wayfinder`. The labels `wayfinder:map`, `wayfinder:research`,
   map order wins:
   `gh api --paginate repos/maurerf/nixos/issues/<map>/sub_issues --jq '.[] | select(.state == "open" and (.assignees | length) == 0 and .issue_dependencies_summary.blocked_by == 0) | "\(.number) \(.title)"'`.
 - **Claim**: `gh issue edit <n> --add-assignee @me`, the session's first write.
-  Claude Code and Codex both act as `maurerf`, so an assignee shows that a
-  ticket is taken, not which agent took it.
+  Every agent session acts as `maurerf`, so an assignee shows that a ticket
+  is taken, not which session took it.
 - **Resolve**: post the answer as a resolution comment, `gh issue close <n>`,
   then add one line (linked name and gist) to the map's Decisions so far.
   When the map's Notes carry an execution override, the comment also links the

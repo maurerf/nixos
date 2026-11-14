@@ -44,8 +44,7 @@ daily Fredy backup or a guarantee of recoverability.
 
 ## Repository context and authority
 
-Read [repository rules](../AGENTS.md), the
-[nix-engineer skill](../.agents/skills/nix-engineer/SKILL.md),
+Read [repository rules](../CLAUDE.md),
 [architecture](architecture.md), [deployment](deployment.md),
 [VPS recovery](vps-recovery.md) and applicable [decisions](decisions.md).
 Those documents remain authoritative for workflows, activation approval and
@@ -68,7 +67,7 @@ state versions and retained recovery generations.
 Use a feature branch, preserve unrelated work, keep reusable service settings in
 `modules/` and VPS choices in `machines/vps.nix`. Do not import this Linux service
 into Darwin. No flake input update is needed by default. Follow the local
-nix-reviewer workflow before the first push. No push or activation is requested
+pre-push review in `CLAUDE.md` before the first push. No push or activation is requested
 by the creation of this planning document.
 
 ## Research findings and limitations
@@ -237,7 +236,7 @@ VPS configuration with locked inputs, run the applicable flake checks and
 builders explicitly. Inspect the generated unit, port mapping, limits, data paths
 and nginx configuration. Verify the image separately as noted above.
 
-Run the [nix-reviewer](../.agents/skills/nix-reviewer/SKILL.md) workflow against the
+Run the [pre-push review](../CLAUDE.md#review-before-push) against the
 full proposed diff before pushing, resolve blocking findings and review corrections.
 Use focused commits/PRs and summarize validation and limits there. No new PRD,
 command log or separate evidence document is needed unless an actual consequential

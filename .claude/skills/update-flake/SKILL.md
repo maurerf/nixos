@@ -5,23 +5,22 @@ description: Guide requested flake input updates through compatibility research,
 
 # Update flake
 
-Read [repository rules](../../../AGENTS.md), relevant configuration and
+Follow [repository rules](../../../CLAUDE.md) and read applicable
 [decisions](../../../docs/decisions.md). Establish requested input and host scope.
 Do not update all inputs or deploy extra hosts by default; explain shared-input
-effects when scope cannot isolate them. Use `$nix-engineer` for necessary scoped
-compatibility fixes.
+effects when scope cannot isolate them.
 
 Research current official release/migration guidance for selected inputs and actual
 deployed versions, citing dated sources. Check nixpkgs, nix-darwin, Home Manager and
 mailserver compatibility as applicable, including state formats, removed options and
-required intermediate upgrades. Preserve state versions unless migration is explicitly
-intended. Historical checkup research is not current support evidence.
+required intermediate upgrades. Historical checkup research is not current support
+evidence.
 
 Update requested pins (for example `nix flake update INPUT`); review direct/transitive
-lock changes and follows relationships, explaining unavoidable changes. Run appropriate
-[evaluations and native builds](../../../docs/deployment.md#select-checks).
-Use `$nix-reviewer` for the full proposed PR diff before first push; resolve blockers
-and review correction effects. Tie review/build reuse to unchanged relevant inputs.
+lock changes and follows relationships, explaining unavoidable changes. Make any
+needed compatibility fixes as scoped Nix changes, then run the
+[evaluations and native builds](../../../docs/deployment.md#select-checks) and the
+pre-push review. Tie review/build reuse to unchanged relevant inputs.
 
 Prepare using [host procedures](../../../docs/deployment.md) and applicable
 [VPS recovery](../../../docs/vps-recovery.md). Record clean source commit, lock hash,
@@ -37,5 +36,4 @@ Apply the linked procedure within that approval, run post-activation checks and
 record dated sanitized outcomes. Stop failures for assessment; do not improvise
 recovery or inherit historical waivers.
 
-Update directly affected knowledge and report remaining work. Keep evidence
-proportional; no story workflow or new audit files are required by default.
+Update directly affected knowledge and report remaining work.
