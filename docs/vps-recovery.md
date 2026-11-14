@@ -106,7 +106,8 @@ the historical snapshot above predates it.
 ## Fredy backup and recovery
 
 No scheduled daily Fredy backup is configured for the initial trial. Before a
-Fredy image upgrade, record the running digest and state paths, verify free
+Fredy image upgrade, record the running image reference (registry digest or
+local tag) and state paths, verify free
 space and make a consistent protected copy of **both** `/var/lib/fredy/conf`
 and `/var/lib/fredy/db`. The simplest route is an approved brief stop of
 `podman-fredy.service`, then a root-only archive of all of `/var/lib/fredy`,
@@ -153,7 +154,7 @@ confirm neither destination already exists. Do not extract untrusted archives
 or silently overwrite live state. Restore the reviewed previous NixOS
 generation and image using [generation recovery](deployment.md#generation-recovery)
 before starting Fredy; that activation may itself start the service. Verify
-the active unit references the previous digest, start it if necessary, and
+the active unit references the previous image, start it if necessary, and
 repeat Fredy plus mail acceptance.
 Do not restore the whole mail VPS snapshot just to repair Fredy without a
 separate recovery decision. If Fredy harms mail or host resources during the

@@ -26,7 +26,7 @@ source commit. The two modified provider files and browser launcher were compare
 byte-for-byte with the original image's source layer. No dependencies, database
 migrations, settings, filters or notification adapters change. The base
 environment and tini entrypoint are retained. Nix loads the archive with
-`imageFile`. A content-derived tag and
+`imageFile`. A tag derived from the Nix output hash and
 `pull = "never"` avoid a mutable registry tag or separate publishing step.
 
 The browser launcher adds `--fingerprint-platform=linux` on Linux, matching
@@ -104,7 +104,21 @@ returned HTTP 403. Retained debug logs show 48 Immowelt search refusals
 during the prior 48 hours, before pagination was deployed. Those failures
 explain why live Immowelt pagination has not yet been accepted.
 
-As of the 16:45 UTC diagnostic, the browser fix had not been activated. Follow
+As of the 16:45 UTC diagnostic, the browser fix had not been activated. It was
+temporarily activated with explicit approval at about 17:11 UTC the same day,
+after a new protected Fredy backup; the selected persistent system again
+remained the older version (source: operator record in
+[PR #72](https://github.com/maurerf/nixos/pull/72)). The first saved-job run
+fetched ImmoScout 48/48 and 200 unique Immowelt cards of a reported 222: the
+third Immowelt search request returned HTTP 403, so coverage was logged as
+incomplete and the first 200 cards were retained. Fredy reached its 448 MiB
+memory limit and used about 122 MiB of the 128 MiB swap allowance without an
+OOM kill; no mail-service outage was observed. This restored Immowelt ingress
+but is not acceptance: full pagination, memory headroom over later scheduled
+runs and a permanent switch remain open, and the temporary test grants no
+approval for one.
+
+Before any further activation, follow
 [deployment](deployment.md#deployment)
 and [backup preparation](vps-recovery.md#fredy-backup-and-recovery), build both VPS
 outputs on Linux, and obtain approval for the concrete committed candidate.
