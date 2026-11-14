@@ -6,8 +6,8 @@ export async function collectSearchPages(fetchPage, {
   const deadline = now() + budgetMs;
   const items = new Map();
   const scanned = new Set();
-  let pages = 0, total = null;
-  const result = (complete, reason) => ({ items: [...items.values()], pages, total, complete, reason });
+  let pages = 0, total = null, missing = 0;
+  const result = (complete, reason) => ({ items: [...items.values()], pages, total, missing, complete, reason });
   for (let page = 1; page <= maxPages; page++) {
     if (page > 1) {
       if (now() + delayMs >= deadline) return result(false, 'time budget');
@@ -24,6 +24,7 @@ export async function collectSearchPages(fetchPage, {
     const before = scanned.size;
     for (const id of data.ids) if (id != null) scanned.add(String(id));
     for (const item of data.items) if (item?.id != null && !items.has(String(item.id))) items.set(String(item.id), item);
+    if (Number.isInteger(data.missing) && data.missing > 0) missing += data.missing;
     if (data.error) return result(false, data.error);
     if (total != null && scanned.size >= total) return result(true, 'reported total');
     if (data.ids.length === 0) return result(total == null, total == null ? 'empty page' : 'empty page before total');

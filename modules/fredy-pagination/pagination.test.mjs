@@ -35,6 +35,10 @@ test('empty or reported final page before total is incomplete', async () => {
     assert.equal((await collectSearchPages(async () => response, options)).complete, false);
   }
 });
+test('counts cards a page reports missing without stopping', async () => {
+  const r = await collectSearchPages(async n => n === 1 ? page([1, 2], 3, { missing: 1 }) : page([3], 3), options);
+  assert.equal(r.complete, true); assert.equal(r.pages, 2); assert.equal(r.missing, 1);
+});
 test('deadline prevents another request', async () => {
   let clock = 0, calls = 0;
   const r = await collectSearchPages(async () => { calls++; clock=200000; return page([1], 20); }, { ...options, now: () => clock });
@@ -112,7 +116,33 @@ test('actual Immowelt adapter retains partial batch and stops on blocked cards',
  });
  const rows=await p.exports.searchClassifieds({}, {criteria:{},paging:{page:1,size:100}},{host:'immowelt.de',origin:'https://www.immowelt.de',language:'de'});
  assert.equal(rows.length,30);assert.equal(searches,1);assert.equal(batches,2);assert.equal(p.closed.length,1);
- assert.match(p.warnings.join(' '),/incomplete.*403/);
+ assert.match(p.warnings.join(' '),/incomplete: cards HTTP 403/);
+});
+test('actual Immowelt adapter treats an empty card batch as incomplete',async()=>{
+ let searches=0;
+ const p=await loadProvider('lib/services/immowelt/immoweltBff.js',async(url)=>{
+  if(url==='/serp-bff/search'){searches++;return response({totalCount:5,classifieds:Array.from({length:5},(_,i)=>({id:i+1}))});}
+  return response([]);
+ });
+ const rows=await p.exports.searchClassifieds({}, {criteria:{},paging:{page:1,size:100}},{host:'immowelt.de',origin:'https://www.immowelt.de',language:'de'});
+ assert.equal(rows.length,0);assert.equal(searches,1);
+ assert.match(p.warnings.join(' '),/incomplete: empty card response/);
+});
+test('actual Immowelt adapter continues past a card that is no longer returned',async()=>{
+ const searches=[],batches=[];
+ const p=await loadProvider('lib/services/immowelt/immoweltBff.js',async(url,opts)=>{
+  if(url==='/serp-bff/search'){
+   const q=JSON.parse(opts.body);searches.push(q.paging.page);
+   const ids=q.paging.page===1?Array.from({length:35},(_,i)=>i+1):[36];
+   return response({totalCount:36,classifieds:ids.map(id=>({id}))});
+  }
+  const ids=url.split('/').pop().split(',');batches.push(ids.length);
+  return response(ids.filter(id=>id!=='2').map(id=>({id})));
+ });
+ const rows=await p.exports.searchClassifieds({}, {criteria:{},paging:{page:1,size:100}},{host:'immowelt.de',origin:'https://www.immowelt.de',language:'de'});
+ assert.equal(rows.length,35);assert.deepEqual(searches,[1,2]);assert.deepEqual(batches,[30,5,1]);
+ assert.equal(p.closed.length,0);assert.match(p.warnings.join(' '),/1 listed cards were not returned/);
+ assert.doesNotMatch(p.warnings.join(' '),/incomplete/);
 });
 test('ImmoScout block suppresses detail requests for that run',async()=>{
  let calls=0;
