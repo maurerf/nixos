@@ -46,6 +46,12 @@ Diagnose failures in order, in the same local execution environment that failed:
    to sign. Unlock an unavailable key privately in the operator's terminal;
    never request a password or passphrase in chat.
 
+**Garbled line editing** (e.g. backspace drawn as a space while the typed input
+is correct): Ghostty sends `TERM=xterm-ghostty`, which needs its terminfo on the
+VPS. The [VPS machine](../machines/vps.nix) installs `ghostty.terminfo`; if the
+problem returns, check `infocmp xterm-ghostty` on the VPS, and connect with
+`TERM=xterm-256color ssh …` as a workaround.
+
 Observation, 2026-10-08 (local command checks and read-only SSH in the Fredy
 investigation): restarting the hosting terminal restored UID 501 resolution to
 `fdm`. The agent initially had no identities, and the existing Keychain setting
