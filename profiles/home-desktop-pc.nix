@@ -98,8 +98,10 @@ in
 
     xdg.configFile."niri/config.kdl".source = validatedNiriConfig;
 
-    # Bar: workspace numbers left; volume, Bluetooth, network (only when
-    # relevant), Tray and clock right. Text only.
+    # Bar: workspace numbers left; volume bar, Bluetooth, network (only when
+    # offline), Tray and clock right. Nerd Font glyphs; workspace window icons wait
+    # for Waybar 0.16.0 (NixOS 26.11), see
+    # https://github.com/maurerf/nixos/issues/60
     programs.waybar = {
       enable = true;
       settings.main = {
@@ -110,22 +112,27 @@ in
         modules-left = [ "niri/workspaces" ];
         modules-right = [ "wireplumber" "bluetooth" "network" "tray" "clock" ];
         "niri/workspaces".format = "{index}";
+        # Glyphs are Nerd Font Material Design icons (md-volume_high,
+        # md-volume_off, md-bluetooth{,_connect,_off}, md-lan_disconnect).
+        # Speaker plus a six-cell text bar; Waybar picks the cells by volume range.
         wireplumber = {
-          format = "vol {volume}%";
-          format-muted = "vol muted";
+          format = "󰕾 {icon}";
+          format-muted = "󰖁 muted";
+          format-icons = [ "▯▯▯▯▯▯" "▮▯▯▯▯▯" "▮▮▯▯▯▯" "▮▮▮▯▯▯" "▮▮▮▮▯▯" "▮▮▮▮▮▯" "▮▮▮▮▮▮" ];
         };
         bluetooth = {
-          format = "bt {status}";
-          format-disabled = "bt off";
-          format-connected = "bt {device_alias}";
-          format-connected-battery = "bt {device_alias} {device_battery_percentage}%";
+          format = "󰂯";
+          format-disabled = "󰂲";
+          format-connected = "󰂱 {device_alias}";
+          format-connected-battery = "󰂱 {device_alias} {device_battery_percentage}%";
           on-click = "${pkgs.ghostty}/bin/ghostty --class=com.maurerf.bluetui --title=Bluetooth -e ${pkgs.bluetui}/bin/bluetui";
         };
+        # Hidden while online; only an orange "offline" warning remains.
         network = {
           format-ethernet = "";
-          format-wifi = "wifi {essid}";
-          format-linked = "net no ip";
-          format-disconnected = "offline";
+          format-wifi = "";
+          format-linked = "󰌙 offline";
+          format-disconnected = "󰌙 offline";
           tooltip = false;
         };
         tray.spacing = 8;
@@ -162,7 +169,7 @@ in
         #clock, #wireplumber, #bluetooth, #network, #tray {
           padding: 0 6px;
         }
-        #wireplumber.muted, #network.disconnected {
+        #wireplumber.muted, #network.linked, #network.disconnected {
           color: ${palette.orange};
         }
       '';
