@@ -18,6 +18,7 @@ in
   home.packages = with pkgs; [
     vim
     htop
+    fastfetch
     yt-dlp
     # spotify  # Temporarily disabled due to hash mismatch
     keepassxc
