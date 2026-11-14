@@ -490,3 +490,14 @@ commit `d461478`): an immediate re-login left xremap without `input` and
 15-second wait the groups applied, and the user confirmed every key check. `xremap --list-windows`
 listed Niri windows even though xremap 0.15.7 is built against niri-ipc 25.11
 and Niri is 26.04 ([research](https://github.com/maurerf/nixos/issues/59)).
+
+### Workstation VS Code
+
+[VS Code](../modules/vscode.nix) is fully declarative ([decision](decisions.md)).
+Before its first activation on each Workstation, remove the files VS Code made
+itself, or Home Manager stops because they would be clobbered: on `desktop-pc`
+`rm -rf ~/.vscode/extensions ~/.config/Code/User/settings.json`, on the Mac
+`rm -rf ~/.vscode/extensions "$HOME/Library/Application Support/Code/User/settings.json"`.
+The old Mac settings are discarded by agreement
+([ticket](https://github.com/maurerf/nixos/issues/67)). Afterwards, changing a
+setting in the UI fails; change `modules/vscode.nix` instead.

@@ -1,12 +1,20 @@
 # VS Code for the Workstations, tuned for reading Markdown specs, diffs and Git
 # rather than writing code. Fully declarative: settings.json is a read-only
 # Nix symlink and the extensions directory holds only the declared extensions,
-# so change both here. The Claude Code extension is left out; Claude runs in
-# the terminal outside Nix (docs/decisions.md).
+# so change both here. The Claude Code extension is left out because it would
+# pin Claude with the flake; Claude runs in the terminal (docs/decisions.md).
 { pkgs, lib, ... }:
 
 let
   palette = import ./palette.nix;
+
+  # Sky blue for added, orange for removed, yellow for modified; two
+  # alpha suffixes keep diff highlights from hiding the text.
+  added = palette.skyBlue;
+  removed = palette.orange;
+  modified = palette.yellow;
+  strong = "55";
+  faint = "33";
 in
 {
   programs.vscode = {
@@ -50,28 +58,32 @@ in
         "nix.enableLanguageServer" = true;
         "nix.serverPath" = lib.getExe pkgs.nixd;
 
-        # Default Dark Modern marks diffs and Git changes red vs green; use
-        # palette blue for added and orange for removed or deleted instead.
+        # Default Dark Modern marks diffs and Git changes red vs green.
         "workbench.colorCustomizations" = {
-          "diffEditor.insertedTextBackground" = "${palette.blue}55";
-          "diffEditor.insertedLineBackground" = "${palette.blue}33";
-          "diffEditor.removedTextBackground" = "${palette.orange}55";
-          "diffEditor.removedLineBackground" = "${palette.orange}33";
-          "diffEditorGutter.insertedLineBackground" = "${palette.blue}55";
-          "diffEditorGutter.removedLineBackground" = "${palette.orange}55";
-          "diffEditorOverview.insertedForeground" = palette.blue;
-          "diffEditorOverview.removedForeground" = palette.orange;
-          "editorGutter.addedBackground" = palette.skyBlue;
-          "editorGutter.modifiedBackground" = palette.yellow;
-          "editorGutter.deletedBackground" = palette.orange;
-          "editorOverviewRuler.addedForeground" = palette.skyBlue;
-          "editorOverviewRuler.modifiedForeground" = palette.yellow;
-          "editorOverviewRuler.deletedForeground" = palette.orange;
-          "gitDecoration.addedResourceForeground" = palette.skyBlue;
-          "gitDecoration.untrackedResourceForeground" = palette.skyBlue;
-          "gitDecoration.modifiedResourceForeground" = palette.yellow;
-          "gitDecoration.deletedResourceForeground" = palette.orange;
+          "diffEditor.insertedTextBackground" = added + strong;
+          "diffEditor.insertedLineBackground" = added + faint;
+          "diffEditor.removedTextBackground" = removed + strong;
+          "diffEditor.removedLineBackground" = removed + faint;
+          "diffEditorGutter.insertedLineBackground" = added + strong;
+          "diffEditorGutter.removedLineBackground" = removed + strong;
+          "diffEditorOverview.insertedForeground" = added;
+          "diffEditorOverview.removedForeground" = removed;
+          "editorGutter.addedBackground" = added;
+          "editorGutter.modifiedBackground" = modified;
+          "editorGutter.deletedBackground" = removed;
+          "editorOverviewRuler.addedForeground" = added;
+          "editorOverviewRuler.modifiedForeground" = modified;
+          "editorOverviewRuler.deletedForeground" = removed;
+          "gitDecoration.addedResourceForeground" = added;
+          "gitDecoration.untrackedResourceForeground" = added;
+          "gitDecoration.renamedResourceForeground" = added;
+          "gitDecoration.modifiedResourceForeground" = modified;
+          "gitDecoration.stageModifiedResourceForeground" = modified;
+          "gitDecoration.deletedResourceForeground" = removed;
+          "gitDecoration.stageDeletedResourceForeground" = removed;
           "gitDecoration.conflictingResourceForeground" = palette.reddishPurple;
+          "scmGraph.historyItemHoverAdditionsForeground" = added;
+          "scmGraph.historyItemHoverDeletionsForeground" = removed;
         };
       };
     };
