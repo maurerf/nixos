@@ -1,6 +1,6 @@
 // Niri configuration for desktop-pc. A template: profiles/home-desktop-pc.nix
-// fills the placeholders (palette colours, modifier key, polkit agent path)
-// and validates the result at build time.
+// fills the placeholders (palette colours, polkit agent path), appends the
+// binds from binds.nix and validates the result at build time.
 // Decisions: https://github.com/maurerf/nixos/issues/28
 
 input {
@@ -100,108 +100,5 @@ window-rule {
     block-out-from "screen-capture"
 }
 
-binds {
-    @modKey@+Shift+Slash { show-hotkey-overlay; }
-
-    @modKey@+Return hotkey-overlay-title="Open a Terminal: Ghostty" { spawn "ghostty"; }
-    @modKey@+Space hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
-    @modKey@+Escape hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
-    // Literal Super: with the VM's Alt modifier, @modKey@+Alt would repeat lock.
-    Super+Alt+Escape hotkey-overlay-title="Suspend" { spawn "systemctl" "suspend"; }
-
-    XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.05+ -l 1.0"; }
-    XF86AudioLowerVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.05-"; }
-    XF86AudioMute        allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"; }
-    XF86AudioMicMute     allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"; }
-
-    @modKey@+O repeat=false { toggle-overview; }
-    @modKey@+Q repeat=false { close-window; }
-
-    @modKey@+Left  { focus-column-left; }
-    @modKey@+Down  { focus-window-down; }
-    @modKey@+Up    { focus-window-up; }
-    @modKey@+Right { focus-column-right; }
-    @modKey@+H     { focus-column-left; }
-    @modKey@+J     { focus-window-down; }
-    @modKey@+K     { focus-window-up; }
-    @modKey@+L     { focus-column-right; }
-
-    @modKey@+Ctrl+Left  { move-column-left; }
-    @modKey@+Ctrl+Down  { move-window-down; }
-    @modKey@+Ctrl+Up    { move-window-up; }
-    @modKey@+Ctrl+Right { move-column-right; }
-    @modKey@+Ctrl+H     { move-column-left; }
-    @modKey@+Ctrl+J     { move-window-down; }
-    @modKey@+Ctrl+K     { move-window-up; }
-    @modKey@+Ctrl+L     { move-column-right; }
-
-    @modKey@+Home      { focus-column-first; }
-    @modKey@+End       { focus-column-last; }
-    @modKey@+Ctrl+Home { move-column-to-first; }
-    @modKey@+Ctrl+End  { move-column-to-last; }
-
-    @modKey@+Page_Down      { focus-workspace-down; }
-    @modKey@+Page_Up        { focus-workspace-up; }
-    @modKey@+U              { focus-workspace-down; }
-    @modKey@+I              { focus-workspace-up; }
-    @modKey@+Ctrl+Page_Down { move-column-to-workspace-down; }
-    @modKey@+Ctrl+Page_Up   { move-column-to-workspace-up; }
-    @modKey@+Ctrl+U         { move-column-to-workspace-down; }
-    @modKey@+Ctrl+I         { move-column-to-workspace-up; }
-
-    @modKey@+WheelScrollDown      cooldown-ms=150 { focus-workspace-down; }
-    @modKey@+WheelScrollUp        cooldown-ms=150 { focus-workspace-up; }
-    @modKey@+Ctrl+WheelScrollDown cooldown-ms=150 { move-column-to-workspace-down; }
-    @modKey@+Ctrl+WheelScrollUp   cooldown-ms=150 { move-column-to-workspace-up; }
-
-    // Workspace N, positional; no app is tied to a workspace.
-    @modKey@+1 { focus-workspace 1; }
-    @modKey@+2 { focus-workspace 2; }
-    @modKey@+3 { focus-workspace 3; }
-    @modKey@+4 { focus-workspace 4; }
-    @modKey@+5 { focus-workspace 5; }
-    @modKey@+6 { focus-workspace 6; }
-    @modKey@+7 { focus-workspace 7; }
-    @modKey@+8 { focus-workspace 8; }
-    @modKey@+9 { focus-workspace 9; }
-    // Niri's default move binds; Mod+Shift+4 is the screenshot key.
-    @modKey@+Ctrl+1 { move-column-to-workspace 1; }
-    @modKey@+Ctrl+2 { move-column-to-workspace 2; }
-    @modKey@+Ctrl+3 { move-column-to-workspace 3; }
-    @modKey@+Ctrl+4 { move-column-to-workspace 4; }
-    @modKey@+Ctrl+5 { move-column-to-workspace 5; }
-    @modKey@+Ctrl+6 { move-column-to-workspace 6; }
-    @modKey@+Ctrl+7 { move-column-to-workspace 7; }
-    @modKey@+Ctrl+8 { move-column-to-workspace 8; }
-    @modKey@+Ctrl+9 { move-column-to-workspace 9; }
-
-    @modKey@+BracketLeft  { consume-or-expel-window-left; }
-    @modKey@+BracketRight { consume-or-expel-window-right; }
-    @modKey@+Comma  { consume-window-into-column; }
-    @modKey@+Period { expel-window-from-column; }
-
-    @modKey@+R { switch-preset-column-width; }
-    @modKey@+Shift+R { switch-preset-column-width-back; }
-    @modKey@+F { maximize-column; }
-    @modKey@+Shift+F { fullscreen-window; }
-    // Super+C/V/X/A/Z are edit keys (xremap), so Niri's C/V binds take Shift.
-    @modKey@+Shift+C { center-column; }
-    @modKey@+Minus { set-column-width "-10%"; }
-    @modKey@+Equal { set-column-width "+10%"; }
-    @modKey@+Shift+Minus { set-window-height "-10%"; }
-    @modKey@+Shift+Equal { set-window-height "+10%"; }
-
-    @modKey@+Shift+V { toggle-window-floating; }
-    @modKey@+Ctrl+V  { switch-focus-between-floating-and-tiling; }
-    @modKey@+W { toggle-column-tabbed-display; }
-
-    Print { screenshot; }
-    @modKey@+Shift+4 { screenshot; }
-    Ctrl+Print { screenshot-screen; }
-    Alt+Print { screenshot-window; }
-
-    @modKey@+Shift+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
-    @modKey@+Shift+E { quit; }
-    Ctrl+Alt+Delete { quit; }
-    @modKey@+Shift+P { power-off-monitors; }
-}
+// binds {} is appended from binds.nix, which also feeds the hotkey overlay
+// titles and the fuzzel command palette.

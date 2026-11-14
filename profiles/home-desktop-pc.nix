@@ -11,15 +11,59 @@ let
 
   niriConfig = pkgs.replaceVars ./desktop-pc/niri.kdl {
     inherit (palette) background border muted;
-    modKey = config.desktopPc.niriModKey;
     polkitAgent = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
-    # wpctl targets, not placeholders.
-    DEFAULT_AUDIO_SINK = null;
-    DEFAULT_AUDIO_SOURCE = null;
   };
+
+  # One bind list renders Niri's binds (with hotkey-overlay titles) and the
+  # fuzzel command palette. https://github.com/maurerf/nixos/issues/66
+  binds = import ./desktop-pc/binds.nix { inherit lib; };
+  bindKey = bind: lib.replaceStrings [ "Mod+" ] [ "${config.desktopPc.niriModKey}+" ] bind.key;
+  kdlArg = arg: if builtins.isInt arg then toString arg else builtins.toJSON arg;
+  bindLine = bind: lib.concatStringsSep " " (
+    [ (bindKey bind) ]
+    ++ lib.optional (bind ? props) bind.props
+    ++ [
+      "hotkey-overlay-title=${if bind.overlay or true then builtins.toJSON bind.title else "null"}"
+      "{ ${lib.concatStringsSep " " ([ bind.action ] ++ map kdlArg bind.args)}; }"
+    ]
+  );
+  bindsKdl = pkgs.writeText "niri-binds.kdl" ''
+    binds {
+    ${lib.concatMapStringsSep "\n" (bind: "    ${bindLine bind}") binds}
+    }
+  '';
+
+  # Palette rows: title padded to a column, then the key as printed on it.
+  titleWidth = 2 + lib.foldl' lib.max 0 (map (bind: lib.stringLength bind.title) binds);
+  paletteRow = bind:
+    bind.title + lib.concatStrings (lib.replicate (titleWidth - lib.stringLength bind.title) " ")
+    + lib.replaceStrings [ "udiaeresis" "plus" ] [ "ü" "+" ] (bindKey bind);
+  paletteMenu = pkgs.writeText "niri-bind-palette.txt" (lib.concatMapStrings (bind: paletteRow bind + "\n") binds);
+  paletteCommand = bind: lib.escapeShellArgs (
+    [ "niri" "msg" "action" bind.action ]
+    ++ lib.optionals (bind.args != [ ]) ([ "--" ] ++ map toString bind.args)
+  );
+  niriBindPalette = pkgs.writeShellApplication {
+    name = "niri-bind-palette";
+    runtimeInputs = [ pkgs.niri config.programs.fuzzel.package ];
+    text = ''
+      choice=$(fuzzel --dmenu --index --width ${toString (titleWidth + 24)} --prompt "bind> " < ${paletteMenu}) || exit 0
+      case "$choice" in
+      ${lib.concatImapStrings (i: bind: "  ${toString (i - 1)}) exec ${paletteCommand bind} ;;\n") binds}
+      esac
+    '';
+  };
+
+  # niri validate checks the binds; `niri msg` parses each palette command
+  # before it needs a socket, so a parse error here is a broken palette row.
   validatedNiriConfig = pkgs.runCommand "niri-config.kdl" { nativeBuildInputs = [ pkgs.niri ]; } ''
-    niri validate -c ${niriConfig}
-    cp ${niriConfig} $out
+    cat ${niriConfig} ${bindsKdl} > config.kdl
+    niri validate -c config.kdl
+    ${lib.concatMapStrings (bind: ''
+      reply=$(NIRI_SOCKET=/nonexistent ${paletteCommand bind} 2>&1 || true)
+      [[ $reply == *"error connecting to the niri socket"* ]] || { echo "palette: niri rejects "${lib.escapeShellArg (paletteCommand bind)}": $reply"; exit 1; }
+    '') binds}
+    cp config.kdl $out
   '';
 in
 {
@@ -92,6 +136,7 @@ in
       bluetui
       kdePackages.filelight
       wl-clipboard
+      niriBindPalette
       # On PATH for `xremap --list-windows`; the service above runs it.
       xremap
     ];
