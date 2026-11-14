@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
   imports =
@@ -9,6 +9,10 @@
 
   networking.hostName = "nixos-vps";
   system.stateVersion = "24.05";
+
+  # Ghostty sends TERM=xterm-ghostty over SSH; without its terminfo, zsh line
+  # editing renders wrong (e.g. backspace drawn as a space).
+  environment.systemPackages = [ pkgs.ghostty.terminfo ];
 
   boot.loader.grub.enable = true;
   boot.loader.grub.device = "nodev";
