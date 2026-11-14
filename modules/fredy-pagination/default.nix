@@ -1,7 +1,7 @@
 { pkgs }:
 
 let
-  # This commit's two patched files were compared byte-for-byte with the
+  # The patched files were compared byte-for-byte with the
   # lib layer in the pinned amd64 image, not merely with a mutable release tag.
   source = pkgs.fetchFromGitHub {
     owner = "orangecoding";
@@ -16,15 +16,17 @@ let
     chmod -R u+w source
     cd source
     patch --fuzz=0 -p1 < ${./pagination.patch}
+    patch --fuzz=0 -p1 < ${./browser.patch}
     cp ${./pagination.js} lib/services/searchPagination.js
     mkdir tests-local
     cp ${./pagination.js} tests-local/pagination.js
     cp ${./pagination.test.mjs} tests-local/pagination.test.mjs
     FREDY_SOURCE="$PWD" node --experimental-vm-modules --test tests-local/pagination.test.mjs
-    mkdir -p "$out/fredy/lib/services/immoscout" "$out/fredy/lib/services/immowelt"
+    mkdir -p "$out/fredy/lib/services/immoscout" "$out/fredy/lib/services/immowelt" "$out/fredy/lib/services/extractor"
     cp lib/services/searchPagination.js "$out/fredy/lib/services/"
     cp lib/services/immoscout/mobileApi.js "$out/fredy/lib/services/immoscout/"
     cp lib/services/immowelt/immoweltBff.js "$out/fredy/lib/services/immowelt/"
+    cp lib/services/extractor/puppeteerExtractor.js "$out/fredy/lib/services/extractor/"
   '';
   base = pkgs.dockerTools.pullImage {
     imageName = "ghcr.io/orangecoding/fredy";
@@ -51,7 +53,7 @@ pkgs.dockerTools.buildImage {
     ExposedPorts."9998/tcp" = { };
     Volumes = { "/conf" = { }; "/db" = { }; };
     Labels = {
-      "org.opencontainers.image.version" = "29.2.1-pagination-1";
+      "org.opencontainers.image.version" = "29.2.1-pagination-2";
       "org.opencontainers.image.base.digest" = "sha256:1be69e57027924abba16a0d06f37697ae883322002e0fd2d2325f8ef459612cc";
     };
     # The service also sets an explicit Podman health check.

@@ -17,16 +17,30 @@ the public `vps` closure
 was active and selected; the booted closure was the retained pre-Fredy
 generation. Compare live active and selected closures before future changes.
 
-## 2026-11-13 pagination candidate (not yet activated)
+## 2026-11-14 pagination and Immowelt browser candidate
 
-The repository now builds a local image archive with a small pagination patch over
+The repository now builds a local image archive with pagination and browser fixes over
 Fredy 29.2.1. [The image recipe](../modules/fredy-pagination/default.nix) pins the
 original Linux amd64 manifest, its Nix archive hash and the matching upstream
-source commit. The two modified provider files were compared byte-for-byte with
-the original image's source layer. No dependencies, database migrations, settings,
-filters or notification adapters change. The base environment and tini entrypoint
-are retained. Nix loads the archive with `imageFile`; a content-derived tag and
+source commit. The two modified provider files and browser launcher were compared
+byte-for-byte with the original image's source layer. No dependencies, database
+migrations, settings, filters or notification adapters change. The base
+environment and tini entrypoint are retained. Nix loads the archive with
+`imageFile`. A content-derived tag and
 `pull = "never"` avoid a mutable registry tag or separate publishing step.
+
+The browser launcher adds `--fingerprint-platform=linux` on Linux, matching
+[Fredy 30.1.1's Immowelt fix](https://github.com/orangecoding/fredy/releases/tag/30.1.1).
+Upstream traced repeated Immowelt HTTP 403 searches to the browser presenting a
+Windows identity without matching fonts in its Linux container. This patch
+keeps the pinned Fredy 29.2.1 and CloakBrowser 0.5.11 dependencies.
+
+At 2026-11-14 16:45 UTC, a private, bounded diagnostic using the existing VPS
+container and this one browser argument confirmed a Linux user agent, a
+DataDome cookie, and HTTP 200 from the saved Immowelt search: 222 results,
+100 on the first page. The homepage returned HTTP 403, but Fredy's warm-up
+continues to the search using that cookie. The result supports the launcher
+fix for this request; it does not validate cards, later pages or notifications.
 
 Both providers fetch sequential pages of 100, starting at page 1, with at most
 five pages and a three-minute pagination budget per provider. ImmoScout requests
@@ -82,7 +96,16 @@ separately, without clearing deduplication history.
 
 ### Activation and recovery
 
-This candidate is not activation approval. Follow [deployment](deployment.md#deployment)
+The pagination-only image was temporarily activated with explicit approval on
+2026-11-14 after a consistent Fredy backup. The public UI and mail checks
+passed. The persistent selected NixOS system remained the older version; a
+reboot would select it. The first two Immowelt searches after test activation
+returned HTTP 403. Retained debug logs show 48 Immowelt search refusals
+during the prior 48 hours, before pagination was deployed. Those failures
+explain why live Immowelt pagination has not yet been accepted.
+
+As of the 16:45 UTC diagnostic, the browser fix had not been activated. Follow
+[deployment](deployment.md#deployment)
 and [backup preparation](vps-recovery.md#fredy-backup-and-recovery), build both VPS
 outputs on Linux, and obtain approval for the concrete committed candidate.
 Allow disk space for the Nix base/derived archives and Podman's loaded image; this
