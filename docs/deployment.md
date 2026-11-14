@@ -465,9 +465,8 @@ tuigreet, in Ghostty:
    Discovery, bonding and connection with the default dual-mode BlueZ settings
    were observed on 2026-11-13 ([AirPods discovery and bar launcher](https://github.com/maurerf/nixos/issues/57));
    no controller-mode, privacy or WirePlumber overrides were needed.
-   Windows and NixOS share the adapter address, so a pairing on one OS breaks
-   the other ([Bluetooth limitations](https://github.com/maurerf/nixos/issues/26));
-   share the key as in [desktop-pc dual-boot Bluetooth key](#desktop-pc-dual-boot-bluetooth-key).
+   For a device also used on Windows ([Bluetooth limitations](https://github.com/maurerf/nixos/issues/26)),
+   continue with [desktop-pc dual-boot Bluetooth key](#desktop-pc-dual-boot-bluetooth-key).
 
 There is no Dock to set up; apps start from fuzzel (Super+Space).
 
@@ -478,15 +477,19 @@ share the Intel adapter's address. Whichever OS pairs last holds the working
 key; the other connects without audio and drops
 ([symptom](https://github.com/maurerf/nixos/issues/51)). The fix
 ([decision](decisions.md)) is to pair on Windows last, then copy its key into
-BlueZ once. Background, formats and sources: [research](https://github.com/maurerf/nixos/issues/80).
+BlueZ once. Verified for the AirPods only. Background, formats, sources and the
+BitLocker fallback (export on Windows; the read-only mount fails on an
+encrypted volume): [research](https://github.com/maurerf/nixos/issues/80).
 
-1. On NixOS, list the device's groups without printing keys:
+1. Pair the device on NixOS first, so BlueZ has an `info` file to edit. List
+   its groups without printing keys:
    `sudo grep '^\[' /var/lib/bluetooth/<adapter>/<device>/info`. Continue only
    if `[LinkKey]` is the only key group; LE groups (`[LongTermKey]`,
    `[IdentityResolvingKey]`, …) need a conversion that has not been tested.
-   Back up the device directory: `sudo cp -a /var/lib/bluetooth/<adapter>/<device> /root/<device>-info.bak`.
+   Back up the device directory: `sudo cp -a /var/lib/bluetooth/<adapter>/<device> /root/<device>.bak`.
 2. On Windows, remove the device, pair it again and check it works. Restart
-   into NixOS (Fast Startup is off, so the volume is cleanly closed).
+   into NixOS; the read-only mount relies on Windows Fast Startup being off
+   ([dual-boot layout](decisions.md)).
 3. As root on NixOS, with nothing written to Windows:
    - Mount the Windows partition read-only under `/run` (`mount -o ro -t ntfs3`),
      copy `Windows/System32/config/SYSTEM` to `/run` (tmpfs) and unmount.
@@ -502,7 +505,8 @@ BlueZ once. Background, formats and sources: [research](https://github.com/maure
      repository, an issue or a kept shell history.
 4. Check the device on NixOS, then on Windows without re-pairing.
 
-Undo: stop `bluetooth`, restore `info` from the backup, start `bluetooth` (the
+Undo: stop `bluetooth`, copy `/root/<device>.bak/info` back over the device's
+`info`, start `bluetooth` (the
 device then works on Windows only). Re-pairing on either OS or resetting the
 device breaks the match; repeat from step 2. Unknown whether firmware updates
 change the key.
