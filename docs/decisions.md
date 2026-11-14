@@ -51,7 +51,9 @@
   `@home`, `@nix`) because space freed from `C:` later lands in front of the NixOS
   partitions: growth adds a new partition with `btrfs device add` instead of moving
   partitions. The layout uses zram only, with no hibernation and no Windows
-  mounts. Windows has Fast Startup and hibernation off and keeps the RTC in UTC.
+  mounts; suspend stays the only sleep state (confirmed 2026-11-14,
+  [suspend ticket](https://github.com/maurerf/nixos/issues/69)). Windows has Fast
+  Startup and hibernation off and keeps the RTC in UTC.
   The boot menu defaults to the newest NixOS generation, not `@saved`: NixOS
   rewrites `loader.conf`'s `default` on every switch, so `@saved` would keep
   booting the last-picked entry instead of a new generation.

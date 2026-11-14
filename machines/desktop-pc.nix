@@ -42,6 +42,11 @@
   # NVIDIA open kernel modules on the default driver branch.
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.nvidia.open = true;
+  # Keep VRAM across suspend: without it the GPU came back from S3 with lost
+  # memory (Xid 13, failed modeset) and the next suspend hung. With 595 and the
+  # open modules this uses kernel suspend notifiers, not nvidia-sleep.sh.
+  # Suspend only, no hibernation: https://github.com/maurerf/nixos/issues/69
+  hardware.nvidia.powerManagement.enable = true;
   # Niri wiki: stop the driver keeping a large free buffer pool for niri.
   environment.etc."nvidia/nvidia-application-profiles-rc.d/50-limit-free-buffer-pool-in-wayland-compositors.json".text =
     builtins.toJSON {

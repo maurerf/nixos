@@ -106,6 +106,8 @@ binds {
     @modKey@+Return hotkey-overlay-title="Open a Terminal: Ghostty" { spawn "ghostty"; }
     @modKey@+Space hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
     @modKey@+Escape hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
+    // Literal Super: with the VM's Alt modifier, @modKey@+Alt would repeat lock.
+    Super+Alt+Escape hotkey-overlay-title="Suspend" { spawn "systemctl" "suspend"; }
 
     XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.05+ -l 1.0"; }
     XF86AudioLowerVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.05-"; }
