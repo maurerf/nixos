@@ -87,8 +87,8 @@ in
       };
       style = ''
         * {
-          font-family: "FiraCode Nerd Font";
-          font-size: 13px;
+          font-family: "CaskaydiaCove Nerd Font";
+          font-size: 16px; /* matches fuzzel: 12pt at dpi-aware=no */
           border: none;
           border-radius: 0;
           min-height: 0;
@@ -123,7 +123,7 @@ in
       enable = true;
       settings = {
         main = {
-          font = "FiraCode Nerd Font:size=12";
+          font = "CaskaydiaCove Nerd Font:size=12";
           # Follow Niri's output scale instead of the monitor's reported DPI.
           dpi-aware = "no";
           terminal = "ghostty -e";
@@ -146,7 +146,7 @@ in
       settings = {
         anchor = "top-right";
         default-timeout = 5000;
-        font = "FiraCode Nerd Font 11";
+        font = "CaskaydiaCove Nerd Font 11";
         background-color = palette.surface;
         text-color = palette.foreground;
         border-color = palette.skyBlue;
@@ -163,7 +163,7 @@ in
       enable = true;
       settings = {
         color = hex palette.background;
-        font = "FiraCode Nerd Font";
+        font = "CaskaydiaCove Nerd Font";
         indicator-idle-visible = false;
         show-failed-attempts = true;
         inside-color = hex palette.surface;
