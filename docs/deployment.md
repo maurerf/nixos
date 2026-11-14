@@ -438,7 +438,8 @@ remove any Homebrew or npm `codex`, which its installer treats as a conflict.
 After the rebuild, in a fresh shell, `which -a claude` and `which -a codex` must
 each resolve to a single `~/.local/bin` copy; delete other script-installed copies.
 On NixOS the binaries need `programs.nix-ld` enabled before the installers run;
-see the [research notes](https://github.com/maurerf/nixos/issues/33).
+see the [research notes](https://github.com/maurerf/nixos/issues/33). Nix does own
+Claude's status-line setting; see [decisions](decisions.md).
 
 ### desktop-pc first login
 

@@ -9,6 +9,7 @@ let
 in
 {
   imports = [
+    ./claude-statusline.nix
     ./git.nix
     ./zsh.nix
   ];
