@@ -22,7 +22,7 @@ in
     keepassxc
     telegram-desktop
     rar
-    nerd-fonts.fira-code
+    nerd-fonts.caskaydia-cove
     nerd-fonts.droid-sans-mono
   ];
 
@@ -40,7 +40,7 @@ in
   programs.ghostty = {
     enable = true;
     settings = {
-      font-family = "FiraCode Nerd Font";
+      font-family = "CaskaydiaCove Nerd Font";
       background = palette.background;
       foreground = palette.foreground;
       cursor-color = palette.skyBlue;
