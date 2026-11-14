@@ -469,3 +469,9 @@ tuigreet, in Ghostty:
    ([Bluetooth limitations](https://github.com/maurerf/nixos/issues/26)).
 
 There is no Dock to set up; apps start from fuzzel (Super+Space).
+
+After the edit-key remap ([decision](decisions.md)) is first activated, log out
+and back in so the `input`/`uinput` groups apply. Check `systemctl --user status
+xremap` and `xremap --list-windows`; the latter must list Niri windows, since the
+niri-ipc version xremap ships is older than Niri. Then check that `Super+C/V`
+copy and paste in Firefox and in Ghostty, and that `Ctrl+C` interrupts in Ghostty.

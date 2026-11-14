@@ -182,14 +182,15 @@ binds {
     @modKey@+Shift+R { switch-preset-column-width-back; }
     @modKey@+F { maximize-column; }
     @modKey@+Shift+F { fullscreen-window; }
-    @modKey@+C { center-column; }
+    // Super+C/V/X/A/Z are edit keys (xremap), so Niri's C/V binds take Shift.
+    @modKey@+Shift+C { center-column; }
     @modKey@+Minus { set-column-width "-10%"; }
     @modKey@+Equal { set-column-width "+10%"; }
     @modKey@+Shift+Minus { set-window-height "-10%"; }
     @modKey@+Shift+Equal { set-window-height "+10%"; }
 
-    @modKey@+V       { toggle-window-floating; }
-    @modKey@+Shift+V { switch-focus-between-floating-and-tiling; }
+    @modKey@+Shift+V { toggle-window-floating; }
+    @modKey@+Ctrl+V  { switch-focus-between-floating-and-tiling; }
     @modKey@+W { toggle-column-tabbed-display; }
 
     Print { screenshot; }

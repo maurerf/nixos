@@ -36,6 +36,51 @@ in
     home.stateVersion = "26.05";
 
     programs.ghostty.package = pkgs.ghostty;
+    # Ghostty skips the xremap remap below and takes Super+C/V/A itself, like
+    # its macOS defaults, so Ctrl+C stays interrupt.
+    programs.ghostty.settings.keybind = [
+      "super+c=copy_to_clipboard"
+      "super+v=paste_from_clipboard"
+      "super+a=select_all"
+    ];
+
+    # Mac-style edit keys: Super+C/V/X/A/Z and Super+Shift+Z become Ctrl+…
+    # in every app except Ghostty. xremap asks Niri for the focused app on
+    # each key press. Keys are keycodes: on the de layout the key labelled Z
+    # is KEY_Y. Exact matching leaves Niri's Super+Shift+C/V binds alone.
+    # https://github.com/maurerf/nixos/issues/65
+    xdg.configFile."xremap/config.yml".text = builtins.toJSON {
+      keymap = [
+        {
+          name = "Mac-style edit keys";
+          exact_match = true;
+          application.not = [ "com.mitchellh.ghostty" ];
+          remap = {
+            "Super-c" = "C-c";
+            "Super-v" = "C-v";
+            "Super-x" = "C-x";
+            "Super-a" = "C-a";
+            "Super-y" = "C-y";
+            "Super-Shift-y" = "C-Shift-y";
+          };
+        }
+      ];
+    };
+    systemd.user.services.xremap = {
+      Unit = {
+        Description = "xremap Mac-style edit keys";
+        # Needs NIRI_SOCKET, which the Niri session exports.
+        PartOf = [ "graphical-session.target" ];
+        After = [ "graphical-session.target" ];
+        X-Restart-Triggers = [ config.xdg.configFile."xremap/config.yml".source ];
+      };
+      Service = {
+        ExecStart = "${pkgs.xremap.niri}/bin/xremap --watch=device %h/.config/xremap/config.yml";
+        Restart = "always";
+        IPAddressDeny = "any";
+      };
+      Install.WantedBy = [ "graphical-session.target" ];
+    };
 
     home.packages = with pkgs; [
       firefox
@@ -44,6 +89,8 @@ in
       bluetui
       kdePackages.filelight
       wl-clipboard
+      # On PATH for `xremap --list-windows`; the service above runs it.
+      xremap.niri
     ];
 
     xdg.configFile."niri/config.kdl".source = validatedNiriConfig;
