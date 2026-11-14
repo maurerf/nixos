@@ -472,16 +472,20 @@ There is no Dock to set up; apps start from fuzzel (Super+Space).
 
 ### desktop-pc edit keys
 
-After the edit-key remap ([decision](decisions.md)) is first activated, log out,
-wait at least 15 seconds at tuigreet, then log back in (or reboot). xremap takes
-its groups from the systemd user manager, which outlives a quick re-login
-(`UserStopDelaySec`, 10 s by default) and would keep the old groups. The service
-log must list the keyboards, not "No input devices". Then `xremap --list-windows`
-must list Niri windows, and `Super+C/V` must copy and paste in Firefox and in
-Ghostty, with `Ctrl+C` still interrupting in Ghostty.
+After the edit-key remap ([decision](decisions.md)) is first activated, log out
+with no other session open (SSH, TTY), wait at least 15 seconds at tuigreet, then
+log back in (or reboot). xremap takes its groups from the systemd user manager,
+which outlives a quick re-login (`UserStopDelaySec`, 10 s by default) and would
+keep the old groups. `grep Groups /proc/$(systemctl --user show xremap -p MainPID
+--value)/status` must include the `input` and `uinput` ids, and the service log
+must list the keyboards, not "No input devices". Then `xremap --list-windows`
+must list Niri windows, and `Super+C/V` must copy and paste in Firefox. Ghostty
+handles its own `Super+C/V`, so it passing proves nothing about xremap; check
+there that `Ctrl+C` still interrupts.
 
 First activation on 2026-11-14 ([edit-key PR](https://github.com/maurerf/nixos/pull/83),
-commit `d461478`): an immediate re-login left xremap without `input` and Firefox
-unremapped; after a 15-second wait every check passed. `xremap --list-windows`
+commit `d461478`): an immediate re-login left xremap without `input` and
+`uinput`; Ghostty worked but `Super+C/V` did nothing in Firefox. After a
+15-second wait the groups applied, and the user confirmed every key check. `xremap --list-windows`
 listed Niri windows even though xremap 0.15.7 is built against niri-ipc 25.11
 and Niri is 26.04 ([research](https://github.com/maurerf/nixos/issues/59)).
