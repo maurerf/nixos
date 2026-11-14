@@ -29,6 +29,11 @@
   [Homebrew migration record](archive/02-homebrew-migration/README.md#claude-code-leaves-nix-2026-11-10).
   The Autotools, AutoGen and Doxygen leftovers were dropped at the same time.
   [Decision ticket](https://github.com/maurerf/nixos/issues/29).
+- Share Claude Code's status line from Nix while Claude keeps
+  `~/.claude/settings.json` (decided 2026-11-14). Claude writes that file at
+  runtime, so a Home Manager symlink would make it read-only; activation merges
+  only the `statusLine` key instead and leaves a file that is not a JSON object
+  untouched. [Ticket](https://github.com/maurerf/nixos/issues/68).
 - Keep the Postfix outbound IPv4 override: the old source's Gmail delivery failed
   with `5.7.25` and an IPv6 sender without matching reverse/forward identity.
   Target delivery and SPF/DKIM/DMARC later passed. Changing that route requires

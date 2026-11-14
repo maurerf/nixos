@@ -47,11 +47,9 @@ inline in the machine file. The disk layout reasons are in [decisions](decisions
 Claude Code and the Codex CLI are deliberately not managed by Nix, so their own
 updaters deliver new releases immediately. They are installed manually into
 `~/.local/bin`; see [manual tools](deployment.md#manual-tools) and the
-[decision](decisions.md). The Workstation module does declare Claude Code's
-[status line](../modules/claude-statusline.nix): it links the script to
-`~/.claude/statusline.sh` and on activation merges only the `statusLine` key into
-`~/.claude/settings.json`, which otherwise stays Claude's to write. A file that is
-not a JSON object is left alone with a warning.
+[decision](decisions.md). The Workstation module still declares Claude Code's
+[status line](../modules/claude-statusline.nix), merging only that key into
+`~/.claude/settings.json`.
 
 Home Manager copies apps from the Mac user's `home.packages` into
 `~/Applications/Home Manager Apps` for Spotlight discovery. Its activation syncs
