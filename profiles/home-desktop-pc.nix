@@ -8,7 +8,7 @@ let
   hex = colour: lib.removePrefix "#" colour;
 
   niriConfig = pkgs.replaceVars ./desktop-pc/niri.kdl {
-    inherit (palette) background border skyBlue;
+    inherit (palette) background border muted;
     modKey = config.desktopPc.niriModKey;
     polkitAgent = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
     # wpctl targets, not placeholders.
