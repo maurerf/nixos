@@ -46,6 +46,7 @@ let
   niriBindPalette = pkgs.writeShellApplication {
     name = "niri-bind-palette";
     runtimeInputs = [ pkgs.niri config.programs.fuzzel.package ];
+    # Width in characters: the title column plus room for the longest key.
     text = ''
       choice=$(fuzzel --dmenu --index --width ${toString (titleWidth + 24)} --prompt "bind> " < ${paletteMenu}) || exit 0
       case "$choice" in

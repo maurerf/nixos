@@ -15,6 +15,9 @@ let
   bind = key: title: action: args: { inherit key title action args; };
   hidden = entry: entry // { overlay = false; };
   withProps = props: entry: entry // { inherit props; };
+  # Media keys work on the lock screen and stay out of the overlay.
+  mediaKey = key: title: command:
+    hidden (withProps "allow-when-locked=true" (bind key title "spawn-sh" [ command ]));
   workspaces = f: lib.genList (i: f (i + 1)) 9;
 in
 [
@@ -27,14 +30,10 @@ in
   # Literal Super: with the VM's Alt modifier, Mod+Alt would repeat lock.
   (bind "Super+Alt+Escape" "Suspend" "spawn" [ "systemctl" "suspend" ])
 
-  (hidden (withProps "allow-when-locked=true"
-    (bind "XF86AudioRaiseVolume" "Raise volume" "spawn-sh" [ "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.05+ -l 1.0" ])))
-  (hidden (withProps "allow-when-locked=true"
-    (bind "XF86AudioLowerVolume" "Lower volume" "spawn-sh" [ "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.05-" ])))
-  (hidden (withProps "allow-when-locked=true"
-    (bind "XF86AudioMute" "Mute or unmute audio" "spawn-sh" [ "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle" ])))
-  (hidden (withProps "allow-when-locked=true"
-    (bind "XF86AudioMicMute" "Mute or unmute the microphone" "spawn-sh" [ "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle" ])))
+  (mediaKey "XF86AudioRaiseVolume" "Raise volume" "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.05+ -l 1.0")
+  (mediaKey "XF86AudioLowerVolume" "Lower volume" "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.05-")
+  (mediaKey "XF86AudioMute" "Mute or unmute audio" "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle")
+  (mediaKey "XF86AudioMicMute" "Mute or unmute the microphone" "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle")
 
   (withProps "repeat=false" (bind "Mod+O" "Toggle the overview" "toggle-overview" [ ]))
   (withProps "repeat=false" (bind "Mod+Q" "Close the window" "close-window" [ ]))
