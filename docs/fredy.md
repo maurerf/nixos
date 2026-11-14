@@ -49,15 +49,22 @@ have a 20-second timeout. Immowelt retains card batches of at most 30, with a
 one second and consecutive card batches by half a second. Listing IDs are
 deduplicated. A repeated page, premature empty response, timeout, refusal or cap
 stops fetching and logs incomplete coverage while retaining successful results.
-A 403/429 also suppresses subsequent provider detail requests in that run. The
+A 403/429 also suppresses subsequent provider detail requests in that run.
+An Immowelt card that the search listed but its card request no longer returns
+is counted and logged as a warning; fetching continues. A card batch of more
+than one listing that returns nothing is treated as a refusal and stops
+fetching as incomplete. The image tested on
+2026-11-14 instead stopped the provider at the first such card. Immowelt
+refusals are logged as `search HTTP` or `cards HTTP` by the failing request;
+in that earlier image both read `search HTTP`. The
 time budget covers pagination/card fetching, not the entire job's
 subsequent enrichment and notification pipeline. A cap is a deliberate limit,
 not a promise to retrieve every result for arbitrarily broad searches.
 
 Build-time offline tests exercise the pagination helper and the actual patched
 provider functions with mocked HTTP/browser responses. They cover additional
-pages, duplicate IDs, request errors, partial card batches, blocking responses,
-time/page limits and preservation of search parameters. The tests never open the
+pages, duplicate IDs, request errors, partial, short and empty card batches,
+blocking responses, time/page limits and preservation of search parameters. The tests never open the
 live database or send notifications. To build the native VPS candidate:
 
 ```sh
