@@ -128,6 +128,19 @@ test('actual Immowelt adapter treats an empty card batch as incomplete',async()=
  assert.equal(rows.length,0);assert.equal(searches,1);
  assert.match(p.warnings.join(' '),/incomplete: empty card response/);
 });
+test('actual Immowelt adapter stops after two pages without refusing the site',async()=>{
+ const searches=[];
+ const p=await loadProvider('lib/services/immowelt/immoweltBff.js',async(url,opts)=>{
+  if(url==='/serp-bff/search'){
+   const n=JSON.parse(opts.body).paging.page;searches.push(n);
+   return response({totalCount:5,classifieds:[{id:n*2-1},{id:n*2}]});
+  }
+  return response(url.split('/').pop().split(',').map(id=>({id})));
+ });
+ const rows=await p.exports.searchClassifieds({}, {criteria:{},paging:{page:1,size:100}},{host:'immowelt.de',origin:'https://www.immowelt.de',language:'de'});
+ assert.equal(rows.length,4);assert.deepEqual(searches,[1,2]);assert.equal(p.closed.length,0);
+ assert.match(p.warnings.join(' '),/incomplete: page limit; keeping 4 listings/);
+});
 test('actual Immowelt adapter continues past a card that is no longer returned',async()=>{
  const searches=[],batches=[];
  const p=await loadProvider('lib/services/immowelt/immoweltBff.js',async(url,opts)=>{

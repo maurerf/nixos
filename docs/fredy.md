@@ -42,8 +42,12 @@ DataDome cookie, and HTTP 200 from the saved Immowelt search: 222 results,
 continues to the search using that cookie. The result supports the launcher
 fix for this request; it does not validate cards, later pages or notifications.
 
-Both providers fetch sequential pages of 100, starting at page 1, with at most
-five pages and a three-minute pagination budget per provider. ImmoScout requests
+Both providers fetch sequential pages of 100, starting at page 1, with a
+three-minute pagination budget per provider: at most five pages for ImmoScout
+and two for Immowelt. Immowelt refused the third search page in all four runs
+observed on 2026-11-14, and each refusal also suppressed that run's remaining
+Immowelt requests; with the newest-first order the two pages are the 200
+newest listings, and a larger result is logged as incomplete at the page limit. ImmoScout requests
 have a 20-second timeout. Immowelt retains card batches of at most 30, with a
 20-second request timeout bounded by the remaining budget. Pages are spaced by
 one second and consecutive card batches by half a second. Listing IDs are
@@ -138,6 +142,16 @@ the candidate raises the container limit to 640 MiB memory, keeping 128 MiB
 swap (`--memory-swap=768m`); the 448 MiB figures in the sections below are the
 earlier trial budget. The raised limit and the changed card handling are
 untested in production until a further approved test activation.
+
+That candidate (commit `2c67060`) was test-activated with approval at 19:19 UTC
+after a further protected backup; the selected persistent system stayed the
+older version. Its startup run again kept 200 Immowelt cards and logged
+`search HTTP 403`, which with the new labels identifies the third search
+request, not a card request, as the refused one. No missing-card warning was
+logged. Within the first minute the container reached the 640 MiB limit and the
+full swap allowance with about 9,000 memory-limit events (against 41,000 to
+51,000 per run before), a PID peak of 213 of 256 and no OOM kill. The two-page
+Immowelt limit that followed is untested in production.
 
 Before any further activation, follow
 [deployment](deployment.md#deployment)
