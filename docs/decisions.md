@@ -69,6 +69,16 @@
   booting the last-picked entry instead of a new generation.
   [Layout decision](https://github.com/maurerf/nixos/issues/30#issuecomment-6769006073),
   [boot default amendment](https://github.com/maurerf/nixos/issues/30#issuecomment-6772325555).
+- `desktop-pc` Bluetooth devices used on both OSes share one link key
+  (decided 2026-11-14): pair on Windows last, then copy its key into BlueZ by
+  hand from a temporary read-only mount of the Windows volume
+  ([procedure](deployment.md#desktop-pc-dual-boot-bluetooth-key)). This is not
+  declarative: `/var/lib/bluetooth` is state bluetoothd rewrites, and a key in
+  the flake would be world-readable in `/nix/store`. Writing the NixOS key into
+  the Windows registry (`bt-dualboot`, not packaged) was rejected: it needs a
+  read-write NTFS mount, and a damaged hive can stop Windows from booting.
+  [Research](https://github.com/maurerf/nixos/issues/80),
+  [ticket](https://github.com/maurerf/nixos/issues/81).
 - The operator's ongoing [snapshot and monthly/quarterly maintenance policy](vps-recovery.md#maintenance-and-preparation)
   remains applicable. Legacy entry points were retired with protected recovery copies;
   use [the canonical recovery procedure](vps-recovery.md#retained-legacy-source-recovery).

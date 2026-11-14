@@ -465,10 +465,51 @@ tuigreet, in Ghostty:
    Discovery, bonding and connection with the default dual-mode BlueZ settings
    were observed on 2026-11-13 ([AirPods discovery and bar launcher](https://github.com/maurerf/nixos/issues/57));
    no controller-mode, privacy or WirePlumber overrides were needed.
-   After switching from Windows, re-pair if the other OS replaced the link key
-   ([Bluetooth limitations](https://github.com/maurerf/nixos/issues/26)).
+   Windows and NixOS share the adapter address, so a pairing on one OS breaks
+   the other ([Bluetooth limitations](https://github.com/maurerf/nixos/issues/26));
+   share the key as in [desktop-pc dual-boot Bluetooth key](#desktop-pc-dual-boot-bluetooth-key).
 
 There is no Dock to set up; apps start from fuzzel (Super+Space).
+
+### desktop-pc dual-boot Bluetooth key
+
+A Bluetooth device keeps one link key per host address, and Windows and NixOS
+share the Intel adapter's address. Whichever OS pairs last holds the working
+key; the other connects without audio and drops
+([symptom](https://github.com/maurerf/nixos/issues/51)). The fix
+([decision](decisions.md)) is to pair on Windows last, then copy its key into
+BlueZ once. Background, formats and sources: [research](https://github.com/maurerf/nixos/issues/80).
+
+1. On NixOS, list the device's groups without printing keys:
+   `sudo grep '^\[' /var/lib/bluetooth/<adapter>/<device>/info`. Continue only
+   if `[LinkKey]` is the only key group; LE groups (`[LongTermKey]`,
+   `[IdentityResolvingKey]`, …) need a conversion that has not been tested.
+   Back up the device directory: `sudo cp -a /var/lib/bluetooth/<adapter>/<device> /root/<device>-info.bak`.
+2. On Windows, remove the device, pair it again and check it works. Restart
+   into NixOS (Fast Startup is off, so the volume is cleanly closed).
+3. As root on NixOS, with nothing written to Windows:
+   - Mount the Windows partition read-only under `/run` (`mount -o ro -t ntfs3`),
+     copy `Windows/System32/config/SYSTEM` to `/run` (tmpfs) and unmount.
+   - With `reged` from nixpkgs `chntpw`, export `Select` from that copy to
+     read `Current`, then export
+     `ControlSet00<Current>\Services\BTHPORT\Parameters\Keys`. The device is a
+     `hex:` value named after its address (lowercase, no colons) under the
+     adapter's subkey.
+   - Stop `bluetooth`, set `Key=` under `[LinkKey]` in the device's `info` to
+     those 16 bytes in the same order, uppercase and without commas, keep
+     `Type` and `PINLength`, and start `bluetooth`.
+   - `shred -u` the hive copy and the exports. Never put the key in the
+     repository, an issue or a kept shell history.
+4. Check the device on NixOS, then on Windows without re-pairing.
+
+Undo: stop `bluetooth`, restore `info` from the backup, start `bluetooth` (the
+device then works on Windows only). Re-pairing on either OS or resetting the
+device breaks the match; repeat from step 2. Unknown whether firmware updates
+change the key.
+
+First run on 2026-11-14 for the AirPods ([ticket](https://github.com/maurerf/nixos/issues/81)):
+BlueZ held only `[LinkKey]`; Windows used `ControlSet001`. Audio worked on NixOS
+after the copy, then on Windows without re-pairing.
 
 ### desktop-pc edit keys
 
