@@ -86,7 +86,7 @@
  import { trackPoi } from '../tracking/Tracker.js';
  import { TRACKING_POIS } from '../../TRACKING_POIS.js';
  import { acquireWarmPage as acquireOriginPage, releaseWarmPage } from '../extractor/warmPages.js';
-@@ -284,69 +285,54 @@
+@@ -284,69 +285,55 @@
    const payload = await resolveSearchAreas(browser, request, site);
    const page = await acquireWarmPage(browser, site);
 
@@ -187,7 +187,8 @@
 +    }, { ...payload, paging: { ...payload.paging, page: pageNumber, size } },
 +    site.language, CLASSIFIED_LIST_BATCH_SIZE, timeout, deadline);
 +    return part;
-+  });
++  // Immowelt refused every third search page observed on 2026-11-14.
++  }, { maxPages: 2 });
 +  logger.debug(`${site.host} search: ${result.items.length} unique listings, ${result.pages} pages, total ${result.total ?? 'unknown'}`);
 +  if (result.missing > 0) logger.warn(`${site.host} search: ${result.missing} listed cards were not returned`);
 +  if (!result.complete) {
