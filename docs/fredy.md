@@ -17,6 +17,165 @@ the public `vps` closure
 was active and selected; the booted closure was the retained pre-Fredy
 generation. Compare live active and selected closures before future changes.
 
+## 2026-11-14 pagination and Immowelt browser candidate
+
+The repository now builds a local image archive with pagination and browser fixes over
+Fredy 29.2.1. [The image recipe](../modules/fredy-pagination/default.nix) pins the
+original Linux amd64 manifest, its Nix archive hash and the matching upstream
+source commit. The two modified provider files and browser launcher were compared
+byte-for-byte with the original image's source layer. No dependencies, database
+migrations, settings, filters or notification adapters change. The base
+environment and tini entrypoint are retained. Nix loads the archive with
+`imageFile`. A tag derived from the Nix output hash and
+`pull = "never"` avoid a mutable registry tag or separate publishing step.
+
+The browser launcher adds `--fingerprint-platform=linux` on Linux, matching
+[Fredy 30.1.1's Immowelt fix](https://github.com/orangecoding/fredy/releases/tag/30.1.1).
+Upstream traced repeated Immowelt HTTP 403 searches to the browser presenting a
+Windows identity without matching fonts in its Linux container. This patch
+keeps the pinned Fredy 29.2.1 and CloakBrowser 0.5.11 dependencies.
+
+At 2026-11-14 16:45 UTC, a private, bounded diagnostic using the existing VPS
+container and this one browser argument confirmed a Linux user agent, a
+DataDome cookie, and HTTP 200 from the saved Immowelt search: 222 results,
+100 on the first page. The homepage returned HTTP 403, but Fredy's warm-up
+continues to the search using that cookie. The result supports the launcher
+fix for this request; it does not validate cards, later pages or notifications.
+
+Both providers fetch sequential pages of 100, starting at page 1, with a
+three-minute pagination budget per provider: at most five pages for ImmoScout
+and two for Immowelt. Immowelt refused the third page in every paginated run
+observed on 2026-11-14 (the one run with labelled requests showed the search
+request refused), and each refusal also suppressed that run's remaining
+Immowelt requests; with the newest-first order the two pages are the 200
+newest listings, and a larger result is logged as incomplete at the page limit. ImmoScout requests
+have a 20-second timeout. Immowelt retains card batches of at most 30, with a
+20-second request timeout bounded by the remaining budget. Pages are spaced by
+one second and consecutive card batches by half a second. Listing IDs are
+deduplicated. A repeated page, premature empty response, timeout, refusal or cap
+stops fetching and logs incomplete coverage while retaining successful results.
+A 403/429 also suppresses subsequent provider detail requests in that run.
+An Immowelt card that the search listed but its card request no longer returns
+is counted and logged as a warning; fetching continues. A card batch of more
+than one listing that returns nothing is treated as a refusal and stops
+fetching as incomplete. The image tested on
+2026-11-14 instead stopped the provider at the first such card. Immowelt
+refusals are logged as `search HTTP` or `cards HTTP` by the failing request;
+in that earlier image both read `search HTTP`. The
+time budget covers pagination/card fetching, not the entire job's
+subsequent enrichment and notification pipeline. A cap is a deliberate limit,
+not a promise to retrieve every result for arbitrarily broad searches.
+
+Build-time offline tests exercise the pagination helper and the actual patched
+provider functions with mocked HTTP/browser responses. They cover additional
+pages, duplicate IDs, request errors, partial, short and empty card batches,
+blocking responses, time/page limits and preservation of search parameters. The tests never open the
+live database or send notifications. To build the native VPS candidate:
+
+```sh
+nix build .#nixosConfigurations.vps.config.system.build.toplevel --no-update-lock-file --no-write-lock-file
+nix build .#nixosConfigurations.vps-fredy-bootstrap.config.system.build.toplevel --no-update-lock-file --no-write-lock-file
+```
+
+### Evidence and proposed job settings
+
+Operator-run read-only diagnostics on 2026-11-13 found that about 38.2% of the
+saved Fredy polygon lies outside the provider searches' 5 km radius (grid estimate;
+not a percentage of listings missed). With 2.5–4 rooms and €1,500 warm rent fixed,
+ImmoScout's complete polygon search had 15 title-blacklist survivors at 40–80 m²,
+and 22 at 40–90 m². Seven of the latter were beyond the first 50 raw results.
+The 40–90 m² polygon search returned 73 raw listings; 50 had swap terms in their
+titles. Explicitly adding or removing `exclusioncriteria=swapflat` returned the
+same 73 IDs. The deployed translator already supplied that exclusion, so relying
+on it did not solve the page coverage gap.
+
+Immowelt's original search returned 227 raw cards and 14 blacklist survivors;
+two survivors were beyond its first 100 results. The polygon plus 40–90 m²
+probe fetched only 300 of 344 results and found at least 15 survivors, eight
+beyond the first page. Those polygon counts are lower bounds. Counts are dated
+available candidates, not daily arrivals, guaranteed new rows or unique flats
+across both portals. Provider polygon membership can differ from Fredy's
+address-based geocoding.
+
+After accepting the patched service, preview and save provider URLs using the
+existing polygon directly, 40–90 m², 2.5–4 rooms and €1,500 warm rent, sorted newest
+first. Keep Fredy's existing blacklist and area filter; keep job-level minimum
+rooms 2.5, minimum size 40 and maximum price 1500. Two-room flats are explicitly
+outside the user's requirements. Exact polygon URLs belong in private job state,
+not Git. Listings previously stored and hidden remain known; changing the search
+does not automatically reconsider them or resend notifications. Review those
+separately, without clearing deduplication history.
+
+### Activation and recovery
+
+The pagination-only image was temporarily activated with explicit approval on
+2026-11-14 after a consistent Fredy backup. The public UI and mail checks
+passed. The persistent selected NixOS system remained the older version; a
+reboot would select it. The first two Immowelt searches after test activation
+returned HTTP 403. Retained debug logs show 48 Immowelt search refusals
+during the prior 48 hours, before pagination was deployed. Those failures
+explain why live Immowelt pagination has not yet been accepted.
+
+As of the 16:45 UTC diagnostic, the browser fix had not been activated. It was
+temporarily activated with explicit approval at about 17:11 UTC the same day,
+after a new protected Fredy backup; the selected persistent system again
+remained the older version (source: operator record in
+[PR #72](https://github.com/maurerf/nixos/pull/72)). The first saved-job run
+fetched ImmoScout 48/48 and 200 unique Immowelt cards of a reported 222: the
+third Immowelt search request returned HTTP 403, so coverage was logged as
+incomplete and the first 200 cards were retained. Fredy reached its 448 MiB
+memory limit and used about 122 MiB of the 128 MiB swap allowance without an
+OOM kill; no mail-service outage was observed. This restored Immowelt ingress
+but is not acceptance: full pagination, memory headroom over later scheduled
+runs and a permanent switch remain open, and the temporary test grants no
+approval for one.
+
+The next scheduled run of that image, at 18:10 UTC (sampled read-only every ten
+seconds), repeated the result: 200 Immowelt cards kept, then HTTP 403 on the
+third page. That image logs a refused search and a refused card request alike
+as `search HTTP`, so which request was refused is not established. During the
+roughly 40 seconds of browser activity the container stayed at its 448 MiB
+memory limit and 128 MiB swap allowance, with 118 of 256 PIDs, about 51,000
+further memory-limit events and no OOM kill; the host kept about 1.5 GiB
+available, with no failed units and an empty mail queue. The two error-level
+rows of the 17:11 run were `Overpass API error: 502 Bad Gateway`. In response
+the candidate raises the container limit to 640 MiB memory, keeping 128 MiB
+swap (`--memory-swap=768m`); the 448 MiB figures in the sections below are the
+earlier trial budget. The raised limit and the changed card handling are
+untested in production until a further approved test activation.
+
+That candidate (commit `2c67060`) was test-activated with approval at 19:19 UTC
+after a further protected backup; the selected persistent system stayed the
+older version. Its startup run again kept 200 Immowelt cards and logged
+`search HTTP 403`, which with the new labels identifies the third search
+request, not a card request, as the refused one. No missing-card warning was
+logged. Within the first minute the container reached the 640 MiB limit and the
+full swap allowance with about 9,000 memory-limit events (against 41,000 to
+51,000 per run before), a PID peak of 213 of 256 and no OOM kill. The two-page
+Immowelt limit that followed is untested in production.
+
+Before any further activation, follow
+[deployment](deployment.md#deployment)
+and [backup preparation](vps-recovery.md#fredy-backup-and-recovery), build both VPS
+outputs on Linux, and obtain approval for the concrete committed candidate.
+Allow disk space for the Nix base/derived archives and Podman's loaded image; this
+uses more disk than a registry-only declaration. Build outside the mail VPS where
+possible. Check free bytes/inodes before transferring or loading it.
+
+After activation, confirm the loaded image tag, health and tini; observe one
+normal job with the saved searches, then the proposed URLs. Record unique fetched
+counts, reported totals, completeness warnings, stored/hidden rows and actual
+Telegram receipts. Check parent/child cgroup memory, swap, PIDs and mail services
+across that run. The first wider search can notify about older unseen flats.
+Do not infer failure from fewer posts than fetched listings.
+
+The patch changes no schema. Recovery is the retained pre-change generation and
+original image, followed by health/mail/search checks. If job URLs were also
+changed, restoring the generation does not restore them: keep their original
+values privately and restore them separately if desired. New listing history
+remains in the database; do not restore an old database merely to undo this code
+patch.
+
 ## Original 25.2.0 candidate and measured budget
 
 The candidate uses Fredy [25.2.0](https://github.com/orangecoding/fredy/releases/tag/25.2.0),
@@ -48,6 +207,13 @@ inodes free on the root filesystem, and a 2.3 GiB journal. Memory pressure
 averages were zero; the seven named mail/access services were active and no
 units failed. Port 9998 and public 443 were not listening. These are a dated
 baseline, not a Fredy load measurement. Recheck before deployment.
+
+As of 2026-11-14 the candidate declares 640 MiB memory plus 128 MiB swap and
+256 PIDs ([module](../modules/fredy.nix)); the paragraph below records the
+original trial budget and its headroom reasoning, which has not been redone
+for the higher limit. A read-only sample on 2026-11-14 showed a 1970 MiB host
+with about 1.5 GiB available during a Fredy run; that is one observation, not
+a measured budget.
 
 The trial caps the whole Fredy container, including browser children, at
 448 MiB memory plus at most 128 MiB swap (`--memory-swap=576m`), half of the

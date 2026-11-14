@@ -2,6 +2,7 @@
 
 let
   bootstrapOnly = config.services.fredy.bootstrapOnly;
+  paginationImage = import ./fredy-pagination { inherit pkgs; };
   proxyHeaders = ''
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
@@ -26,10 +27,11 @@ in
     virtualisation.podman.enable = true;
     virtualisation.oci-containers.backend = "podman";
     virtualisation.oci-containers.containers.fredy = {
-      # Fredy 29.2.1, Linux amd64, GHCR index digest (2026-10-03).
-      # Its /usr/bin/tini entrypoint reaps orphaned Chromium children.
-      image = "ghcr.io/orangecoding/fredy@sha256:45fc1d36f8c79151f66c981c1aacde0f9d19409ffac0d9d084dcd2acecc9ea18";
-      pull = "missing";
+      # Local pagination and browser fixes over the pinned Fredy 29.2.1 amd64 image.
+      # The base image and tini entrypoint are preserved; no schema migrations.
+      image = "${paginationImage.imageName}:${paginationImage.imageTag}";
+      imageFile = paginationImage;
+      pull = "never";
       # Keep application logs from displacing the mail journal on this small disk.
       log-driver = "k8s-file";
       ports = [ "127.0.0.1:9998:9998" ];
@@ -38,12 +40,15 @@ in
         "/var/lib/fredy/db:/db"
       ];
       extraOptions = [
-        "--memory=448m"
-        "--memory-swap=576m"
+        # Raised from 448 MiB on 2026-11-14: paginated searches pinned the old
+        # limit and the 128 MiB swap allowance in both sampled runs (docs/fredy.md).
+        "--memory=640m"
+        "--memory-swap=768m"
         "--cpus=0.5"
         # A 29.2.1 search reached 124 PIDs; allow overlapping browser work.
         "--pids-limit=256"
-        # Podman does not retain the health check in this upstream OCI image.
+        # Explicit because Podman did not retain the upstream image's health
+        # check; these flags take precedence over the derived image's own.
         "--health-cmd=curl -f http://127.0.0.1:9998/"
         "--health-interval=120s"
         "--health-timeout=10s"
