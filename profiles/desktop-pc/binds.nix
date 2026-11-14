@@ -28,6 +28,10 @@ in
   (bind "Super+Space" "Run an application: fuzzel" "spawn" [ "fuzzel" ])
   (bind "Super+Escape" "Lock the screen: swaylock" "spawn" [ "swaylock" ])
   (bind "Super+Alt+Escape" "Suspend" "spawn" [ "systemctl" "suspend" ])
+  # The Magic Keyboard's F6 sends the sleep key. logind ignores it
+  # (machines/desktop-pc.nix); the delay lets the key be released first, so
+  # the wake-enabled keyboard sends nothing while the PC is going to sleep.
+  (mediaKey "XF86Sleep" "Suspend (sleep key)" "sleep 1; systemctl suspend")
 
   (mediaKey "XF86AudioRaiseVolume" "Raise volume" "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.05+ -l 1.0")
   (mediaKey "XF86AudioLowerVolume" "Lower volume" "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.05-")

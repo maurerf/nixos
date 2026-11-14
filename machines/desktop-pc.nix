@@ -52,6 +52,10 @@
   # open modules this uses kernel suspend notifiers, not nvidia-sleep.sh.
   # Suspend only, no hibernation: https://github.com/maurerf/nixos/issues/69
   hardware.nvidia.powerManagement.enable = true;
+  # The sleep key (F6 on the Magic Keyboard) suspended through logind on key
+  # press; one such suspend came back after 6 s and the next hung
+  # (2026-11-14). Niri binds the key with a delay instead (binds.nix).
+  services.logind.settings.Login.HandleSuspendKey = "ignore";
   # The Logitech Bolt receiver woke the PC from S3 at once; wake by keyboard.
   services.udev.extraRules = ''
     ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="046d", ATTR{idProduct}=="c548", ATTR{power/wakeup}="disabled"
