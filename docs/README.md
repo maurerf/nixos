@@ -6,11 +6,12 @@ Read only what the task needs:
 - [Validation and deployment](deployment.md): checks, host acceptance, generation recovery and the `desktop-pc` bare-metal install.
 - [VPS recovery and maintenance](vps-recovery.md): SSH access/troubleshooting, backup, mail state, secrets and legacy recovery.
 - [Decisions and limitations](decisions.md): reasons, retained policies and scoped historical exceptions.
-- [Homebrew migration assessment](homebrew-migration-assessment.md): Mac inventory, feasibility grades, completed formula cutover and retained casks.
 - [Fredy hosting plan](fredy-hosting-plan.md): agreed requirements and design record for the VPS apartment-search service.
 - [Fredy operations](fredy.md): staged first login, DNS, Telegram, constrained VPS trial and dated 2026-10-08 search investigation.
 - [Issue tracker](agents/issue-tracker.md): `gh` conventions and wayfinder map operations for agents.
+- [Domain docs](agents/domain.md): where agent skills find the glossary and record decisions.
 - [Completed checkup archive](archive/01-checkup/README.md): original evidence and its provenance.
+- [Completed Homebrew migration](archive/02-homebrew-migration/README.md): Mac inventory, feasibility grades and formula cutover record.
 
 Nix files define declared configuration. These pages own operational context and
 procedures; [repository skills](../README.md) own task workflows. Update the page

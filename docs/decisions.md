@@ -14,13 +14,19 @@
   explicit Dovecot `fileinto` workaround was removed because Dovecot 2.4 enables it
   and the old option failed evaluation. Reassess changes against actual use, not
   cosmetic cleanup. [Source preparation](archive/01-checkup/EVIDENCE.md#release-and-migration-matrix).
+- Keep six Mac casks under manual Homebrew: Steam, Claude Desktop, Tor Browser,
+  Monero Wallet, Chromium and OpenSCAD (decided 2026-10-14); no Homebrew formulas
+  remain. Moving one to Nix needs a refreshed inventory and lock, a native build
+  and launch trial and separate approval before Homebrew ownership is removed;
+  the [migration record](archive/02-homebrew-migration/README.md#migration-scope-complete-2026-10-14)
+  has the per-cask caveats.
 - Keep Claude Code and the Codex CLI out of Nix on every host (decided 2026-11-10).
   The user wants new releases, such as new models, as soon as they ship, and the
   nixpkgs `claude-code` package switches its self-updater off. Both are installed
   with their official self-updating installers into `~/.local/bin` (see
   [manual tools](deployment.md#manual-tools)). This reverses the 2026-10-14 move of
   Claude Code from Homebrew to Nix recorded in the
-  [Homebrew migration assessment](homebrew-migration-assessment.md#claude-code-leaves-nix-2026-11-10).
+  [Homebrew migration record](archive/02-homebrew-migration/README.md#claude-code-leaves-nix-2026-11-10).
   The Autotools, AutoGen and Doxygen leftovers were dropped at the same time.
   [Decision ticket](https://github.com/maurerf/nixos/issues/29).
 - Keep the Postfix outbound IPv4 override: the old source's Gmail delivery failed
