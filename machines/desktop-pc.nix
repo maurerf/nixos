@@ -40,10 +40,8 @@
   users.users.fdm.extraGroups = [ "networkmanager" "gamemode" "input" "uinput" ];
 
   # Mac-style Super+C/V: the xremap user service (Home Manager profile) reads
-  # keyboards and writes a virtual one, so fdm needs input and uinput. This
-  # also lets fdm's processes read every keystroke; keyd was rejected because
-  # its app mapper needs root-equivalent socket access.
-  # https://github.com/maurerf/nixos/issues/59
+  # keyboards and writes a virtual one, so fdm needs input and uinput. The
+  # access trade-off is recorded in docs/decisions.md.
   hardware.uinput.enable = true;
 
   # NVIDIA open kernel modules on the default driver branch.

@@ -6,6 +6,8 @@ let
   palette = import ../modules/palette.nix;
   # fuzzel and swaylock take colours without the leading "#".
   hex = colour: lib.removePrefix "#" colour;
+  # xremap built with Niri support, for the focused-app filter.
+  xremap = pkgs.xremap.niri;
 
   niriConfig = pkgs.replaceVars ./desktop-pc/niri.kdl {
     inherit (palette) background border muted;
@@ -75,9 +77,10 @@ in
         X-Restart-Triggers = [ config.xdg.configFile."xremap/config.yml".source ];
       };
       Service = {
-        ExecStart = "${pkgs.xremap.niri}/bin/xremap --watch=device %h/.config/xremap/config.yml";
+        ExecStart = "${xremap}/bin/xremap --watch=device %h/.config/xremap/config.yml";
         Restart = "always";
-        IPAddressDeny = "any";
+        # Keep retrying slowly instead of hitting systemd's start limit.
+        RestartSec = 2;
       };
       Install.WantedBy = [ "graphical-session.target" ];
     };
@@ -90,7 +93,7 @@ in
       kdePackages.filelight
       wl-clipboard
       # On PATH for `xremap --list-windows`; the service above runs it.
-      xremap.niri
+      xremap
     ];
 
     xdg.configFile."niri/config.kdl".source = validatedNiriConfig;

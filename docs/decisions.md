@@ -40,7 +40,8 @@
   into `Ctrl+…` everywhere except Ghostty, which binds `super+c/v/a` itself.
   fdm is in `input` and `uinput`, so fdm's processes can read every keystroke.
   This was accepted over keyd, whose app mapper needs socket access equivalent
-  to root. Niri's window binds moved to `Super+Shift+C/V`. Nothing changes on
+  to root. Niri's center-column and floating toggle moved to `Super+Shift+C/V`,
+  and its floating/tiling focus switch to `Super+Ctrl+V`. Nothing changes on
   the Mac. [Research](https://github.com/maurerf/nixos/issues/59),
   [scheme](https://github.com/maurerf/nixos/issues/65).
 - Keep the Postfix outbound IPv4 override: the old source's Gmail delivery failed

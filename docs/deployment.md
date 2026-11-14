@@ -470,8 +470,12 @@ tuigreet, in Ghostty:
 
 There is no Dock to set up; apps start from fuzzel (Super+Space).
 
+### desktop-pc edit keys
+
 After the edit-key remap ([decision](decisions.md)) is first activated, log out
 and back in so the `input`/`uinput` groups apply. Check `systemctl --user status
-xremap` and `xremap --list-windows`; the latter must list Niri windows, since the
-niri-ipc version xremap ships is older than Niri. Then check that `Super+C/V`
-copy and paste in Firefox and in Ghostty, and that `Ctrl+C` interrupts in Ghostty.
+xremap` and `xremap --list-windows`; the latter must list Niri windows. As of
+2026-11-14, xremap 0.15.7 is built against niri-ipc 25.11 while nixpkgs ships
+Niri 26.04 ([research](https://github.com/maurerf/nixos/issues/59)). Then check
+that `Super+C/V` copy and paste in Firefox and in Ghostty, and that `Ctrl+C`
+interrupts in Ghostty.
