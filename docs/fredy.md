@@ -44,8 +44,9 @@ fix for this request; it does not validate cards, later pages or notifications.
 
 Both providers fetch sequential pages of 100, starting at page 1, with a
 three-minute pagination budget per provider: at most five pages for ImmoScout
-and two for Immowelt. Immowelt refused the third search page in all four runs
-observed on 2026-11-14, and each refusal also suppressed that run's remaining
+and two for Immowelt. Immowelt refused the third page in every paginated run
+observed on 2026-11-14 (the one run with labelled requests showed the search
+request refused), and each refusal also suppressed that run's remaining
 Immowelt requests; with the newest-first order the two pages are the 200
 newest listings, and a larger result is logged as incomplete at the page limit. ImmoScout requests
 have a 20-second timeout. Immowelt retains card batches of at most 30, with a
@@ -206,6 +207,13 @@ inodes free on the root filesystem, and a 2.3 GiB journal. Memory pressure
 averages were zero; the seven named mail/access services were active and no
 units failed. Port 9998 and public 443 were not listening. These are a dated
 baseline, not a Fredy load measurement. Recheck before deployment.
+
+As of 2026-11-14 the candidate declares 640 MiB memory plus 128 MiB swap and
+256 PIDs ([module](../modules/fredy.nix)); the paragraph below records the
+original trial budget and its headroom reasoning, which has not been redone
+for the higher limit. A read-only sample on 2026-11-14 showed a 1970 MiB host
+with about 1.5 GiB available during a Fredy run; that is one observation, not
+a measured budget.
 
 The trial caps the whole Fredy container, including browser children, at
 448 MiB memory plus at most 128 MiB swap (`--memory-swap=576m`), half of the
