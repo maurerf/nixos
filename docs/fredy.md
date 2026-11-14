@@ -125,6 +125,20 @@ but is not acceptance: full pagination, memory headroom over later scheduled
 runs and a permanent switch remain open, and the temporary test grants no
 approval for one.
 
+The next scheduled run of that image, at 18:10 UTC (sampled read-only every ten
+seconds), repeated the result: 200 Immowelt cards kept, then HTTP 403 on the
+third page. That image logs a refused search and a refused card request alike
+as `search HTTP`, so which request was refused is not established. During the
+roughly 40 seconds of browser activity the container stayed at its 448 MiB
+memory limit and 128 MiB swap allowance, with 118 of 256 PIDs, about 51,000
+further memory-limit events and no OOM kill; the host kept about 1.5 GiB
+available, with no failed units and an empty mail queue. The two error-level
+rows of the 17:11 run were `Overpass API error: 502 Bad Gateway`. In response
+the candidate raises the container limit to 640 MiB memory, keeping 128 MiB
+swap (`--memory-swap=768m`); the 448 MiB figures in the sections below are the
+earlier trial budget. The raised limit and the changed card handling are
+untested in production until a further approved test activation.
+
 Before any further activation, follow
 [deployment](deployment.md#deployment)
 and [backup preparation](vps-recovery.md#fredy-backup-and-recovery), build both VPS

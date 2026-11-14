@@ -40,8 +40,10 @@ in
         "/var/lib/fredy/db:/db"
       ];
       extraOptions = [
-        "--memory=448m"
-        "--memory-swap=576m"
+        # Raised from 448 MiB on 2026-11-14: paginated searches pinned the old
+        # limit and the 128 MiB swap allowance on every run (docs/fredy.md).
+        "--memory=640m"
+        "--memory-swap=768m"
         "--cpus=0.5"
         # A 29.2.1 search reached 124 PIDs; allow overlapping browser work.
         "--pids-limit=256"
