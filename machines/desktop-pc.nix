@@ -47,6 +47,10 @@
   # open modules this uses kernel suspend notifiers, not nvidia-sleep.sh.
   # Suspend only, no hibernation: https://github.com/maurerf/nixos/issues/69
   hardware.nvidia.powerManagement.enable = true;
+  # The Logitech Bolt receiver woke the PC from S3 at once; wake by keyboard.
+  services.udev.extraRules = ''
+    ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="046d", ATTR{idProduct}=="c548", ATTR{power/wakeup}="disabled"
+  '';
   # Niri wiki: stop the driver keeping a large free buffer pool for niri.
   environment.etc."nvidia/nvidia-application-profiles-rc.d/50-limit-free-buffer-pool-in-wayland-compositors.json".text =
     builtins.toJSON {
