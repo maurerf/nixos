@@ -37,6 +37,11 @@ do not load the entire knowledge base or archive by default.
 GitHub issues in `maurerf/nixos`, including wayfinder maps as sub-issue trees
 with native blocking. See [issue tracker](docs/agents/issue-tracker.md).
 
+### Domain docs
+
+Single-context; decisions go to `docs/decisions.md`, not `docs/adr/`. See
+[domain docs](docs/agents/domain.md).
+
 ## Review before push
 
 Before the first push, run `/mattpocock-skills:code-review` against `main` (the

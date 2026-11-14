@@ -1,6 +1,10 @@
 # Homebrew migration assessment and handoff
 
-[Knowledge index](README.md) · [Architecture](architecture.md) · [Deployment](deployment.md)
+[Knowledge index](../../README.md) · [Architecture](../../architecture.md) · [Deployment](../../deployment.md)
+
+> Archived 2026-11-14: the migration completed on 2026-10-14. This is the
+> historical record; its continuing decisions (retained casks, Claude Code
+> outside Nix) live in [decisions](../../decisions.md).
 
 ## Intent and authorization
 
@@ -117,7 +121,7 @@ Relevant primary sources:
 - [Steam Darwin dependency issue](https://github.com/NixOS/nixpkgs/issues/411274).
 - [Claude Desktop package request](https://github.com/NixOS/nixpkgs/issues/366213); external Linux repackaging is not evidence of a working Mac package.
 - Historical OpenSCAD migration/reversal is recorded in
-  [checkup evidence](archive/01-checkup/EVIDENCE.md) around commits
+  [checkup evidence](../01-checkup/EVIDENCE.md) around commits
   `baa80bd5f8b5ca2b0834239a4a0ac06b68482645` and
   `4d2ef692a57011f6dc49e20ee2d6dd7444e71d6b`; it is not a fresh build result.
 
@@ -274,7 +278,7 @@ explicit version pinning, and an update process because
 [Chromium snapshots do not update themselves](https://www.chromium.org/getting-involved/download-chromium/).
 Resume project development libraries only with a consuming project's dev shell.
 Any future Nix change belongs in a separate focused branch, with native build,
-[deployment approval and recovery checks](deployment.md#deployment), and
+[deployment approval and recovery checks](../../deployment.md#deployment), and
 separate authorization before removing Homebrew ownership.
 
 At assessment time, `machines/m2-macbook-air.nix` enabled Homebrew with empty
@@ -292,8 +296,8 @@ remain installed, and the six casks are intentionally retained under Homebrew.
 The user decided to take Claude Code out of Nix again so that its own updater
 delivers new releases immediately; the Nix package disables that updater. Claude
 Code and the Codex CLI are now installed manually with their official installers
-into `~/.local/bin` (see [manual tools](deployment.md#manual-tools) and
-[decisions](decisions.md)). The user also confirmed that `autoconf`, `autogen`,
+into `~/.local/bin` (see [manual tools](../../deployment.md#manual-tools) and
+[decisions](../../decisions.md)). The user also confirmed that `autoconf`, `autogen`,
 `automake` and `doxygen` were leftovers; they were dropped from Nix, not moved
 elsewhere. `yt-dlp` stays in Nix through the shared Workstation module. This
 supersedes the first-batch ownership above for these five packages; the earlier

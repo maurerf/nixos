@@ -22,7 +22,12 @@ Each profile keeps its per-OS exceptions, such as Notion, the Ghostty package an
 the Darwin app copying on the Mac. Change one host's packages in its profile;
 shared modules can affect several hosts. Do not import the Linux base into Darwin. The Mac integrates Homebrew without
 managing its manually installed packages; application ownership matters when
-checking launches or contemplating removal.
+checking launches or contemplating removal. Its `PATH` puts `~/.nix-profile/bin` ahead of
+Homebrew only from the generated `.zshrc`, after the unmanaged `~/.zprofile` runs
+`brew shellenv`; shells that skip `.zshrc` can resolve a command to
+`/opt/homebrew/bin` first, so use explicit paths there and check for new
+command-name overlaps when adding packages
+([PATH cutover](archive/02-homebrew-migration/README.md#path-cutover-activation-2026-10-14)).
 
 The Linux base keeps unfree packages off by default (`lib.mkDefault false`), and each
 NixOS machine sets its own `system.stateVersion`; `desktop-pc` alone allows unfree.
