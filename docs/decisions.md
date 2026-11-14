@@ -53,6 +53,13 @@
   because the small Apple keyboard has no Print key. The overlay hides
   workspaces 2–9 and the media keys; the palette lists every bind.
   [Bind help](https://github.com/maurerf/nixos/issues/66).
+- VS Code on both Workstations is fully declarative: read-only settings and only
+  the declared extensions, tuned for reading Markdown, diffs and Git (decided
+  2026-11-14). Unlike Claude Code's settings, VS Code needs nothing it writes
+  at runtime, so a setting changed in the UI fails and changes go through Nix.
+  Its Claude Code extension stays out, as it would pin Claude with the flake;
+  Claude runs in the terminal. Diff and Git colours use palette blue/orange
+  instead of red vs green. [Ticket](https://github.com/maurerf/nixos/issues/67).
 - Keep the Postfix outbound IPv4 override: the old source's Gmail delivery failed
   with `5.7.25` and an IPv6 sender without matching reverse/forward identity.
   Target delivery and SPF/DKIM/DMARC later passed. Changing that route requires

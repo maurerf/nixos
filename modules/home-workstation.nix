@@ -11,6 +11,7 @@ in
   imports = [
     ./claude-statusline.nix
     ./git.nix
+    ./vscode.nix
     ./zsh.nix
   ];
 
@@ -18,7 +19,6 @@ in
     vim
     htop
     yt-dlp
-    vscode
     # spotify  # Temporarily disabled due to hash mismatch
     keepassxc
     telegram-desktop
