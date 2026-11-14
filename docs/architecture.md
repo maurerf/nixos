@@ -17,7 +17,9 @@ All profiles use shared [Git](../modules/git.nix) and [Zsh](../modules/zsh.nix)
 settings: the VPS profile imports them directly, the Workstations through the
 Workstation module. The Workstation module is the Home Manager setup for hosts the
 user works at (the Mac and `desktop-pc`): the shared apps and fonts, Ghostty with
-colours from the [palette](../modules/palette.nix), and `~/.local/bin` on `PATH`.
+colours from the [palette](../modules/palette.nix), a fully declarative
+[VS Code](../modules/vscode.nix) (read-only settings, only declared extensions)
+and `~/.local/bin` on `PATH`.
 Each profile keeps its per-OS exceptions, such as Notion, the Ghostty package and
 the Darwin app copying on the Mac. Change one host's packages in its profile;
 shared modules can affect several hosts. Do not import the Linux base into Darwin. The Mac integrates Homebrew without
