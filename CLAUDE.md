@@ -9,6 +9,8 @@ do not load the entire knowledge base or archive by default.
 - Preserve unrelated work. Use a feature branch and focused commits/PRs.
   Never add credentials or private keys; preserve state versions unless an
   intentional migration is requested and documented.
+- Agents share the primary checkout concurrently: do branch work in your own
+  `git worktree`; never switch the primary checkout's branch or commit there.
 - For Nix changes, read [architecture](docs/architecture.md), find the affected
   hosts through imports and make the smallest useful change. Validate them per
   [select checks](docs/deployment.md#select-checks) and report unavailable
