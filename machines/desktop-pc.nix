@@ -1,6 +1,6 @@
 # desktop-pc: Workstation with a Niri desktop and Steam, dual-booted beside
 # Windows. Decisions: https://github.com/maurerf/nixos/issues/21
-{ lib, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   imports = [
