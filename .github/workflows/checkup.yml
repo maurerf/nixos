@@ -20,7 +20,6 @@ jobs:
           nix eval --raw .#nixosConfigurations.vps.config.system.build.toplevel.drvPath --no-update-lock-file --no-write-lock-file
           nix eval --raw .#nixosConfigurations.vps-fredy-bootstrap.config.system.build.toplevel.drvPath --no-update-lock-file --no-write-lock-file
           nix eval --raw .#nixosConfigurations.desktop-pc.config.system.build.toplevel.drvPath --no-update-lock-file --no-write-lock-file
-          nix eval --raw .#nixosConfigurations.desktop-pc.config.system.build.vm.drvPath --no-update-lock-file --no-write-lock-file
           nix flake check --no-build --all-systems --no-update-lock-file --no-write-lock-file
           git diff --check
       - name: Build both VPS stages on Linux

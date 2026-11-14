@@ -41,12 +41,10 @@ coding tools. Per-user session parts (Waybar, fuzzel, mako, swaylock, swayidle)
 live in its profile; there is no Dock. The Niri configuration is a KDL template in
 [`profiles/desktop-pc/`](../profiles/desktop-pc/niri.kdl): the profile fills its
 `@placeholders@` (palette colours, polkit agent), appends the binds rendered from
-the Nix list in [`binds.nix`](../profiles/desktop-pc/binds.nix) with the modifier
-key, and runs `niri validate` at build time. The same list feeds the hotkey-overlay
-titles and the fuzzel command palette `niri-bind-palette`. The VM variant
-(`config.system.build.vm`) is the same host with its own disk image, no NVIDIA, a
-throwaway password, Alt as the Niri modifier and an OpenGL version override for
-virgl; it is declared inline in the machine file. The disk layout reasons are in [decisions](decisions.md).
+the Nix list in [`binds.nix`](../profiles/desktop-pc/binds.nix),
+and runs `niri validate` at build time. The same list feeds the hotkey-overlay
+titles and the fuzzel command palette `niri-bind-palette`. The disk layout
+reasons are in [decisions](decisions.md).
 
 Claude Code and the Codex CLI are deliberately not managed by Nix, so their own
 updaters deliver new releases immediately. They are installed manually into

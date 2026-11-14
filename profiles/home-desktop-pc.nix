@@ -17,10 +17,9 @@ let
   # One bind list renders Niri's binds (with hotkey-overlay titles) and the
   # fuzzel command palette. https://github.com/maurerf/nixos/issues/66
   binds = import ./desktop-pc/binds.nix { inherit lib; };
-  bindKey = bind: lib.replaceStrings [ "Mod+" ] [ "${config.desktopPc.niriModKey}+" ] bind.key;
   kdlArg = arg: if builtins.isInt arg then toString arg else builtins.toJSON arg;
   bindLine = bind: lib.concatStringsSep " " (
-    [ (bindKey bind) ]
+    [ bind.key ]
     ++ lib.optional (bind ? props) bind.props
     ++ [
       "hotkey-overlay-title=${if bind.overlay or true then builtins.toJSON bind.title else "null"}"
@@ -37,7 +36,7 @@ let
   titleWidth = 2 + lib.foldl' lib.max 0 (map (bind: lib.stringLength bind.title) binds);
   paletteRow = bind:
     bind.title + lib.concatStrings (lib.replicate (titleWidth - lib.stringLength bind.title) " ")
-    + lib.replaceStrings [ "udiaeresis" "plus" ] [ "ü" "+" ] (bindKey bind);
+    + lib.replaceStrings [ "udiaeresis" "plus" ] [ "ü" "+" ] bind.key;
   paletteMenu = pkgs.writeText "niri-bind-palette.txt" (lib.concatMapStrings (bind: paletteRow bind + "\n") binds);
   paletteCommand = bind: lib.escapeShellArgs (
     [ "niri" "msg" "action" bind.action ]
@@ -71,12 +70,6 @@ in
   imports = [
     ../modules/home-workstation.nix
   ];
-
-  options.desktopPc.niriModKey = lib.mkOption {
-    type = lib.types.enum [ "Super" "Alt" ];
-    default = "Super";
-    description = "Niri modifier key; the VM variant uses Alt because Windows captures Super.";
-  };
 
   config = {
     home.username = "fdm";

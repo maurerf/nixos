@@ -97,6 +97,13 @@
   read-write NTFS mount, and a damaged hive can stop Windows from booting.
   [Research](https://github.com/maurerf/nixos/issues/80),
   [ticket](https://github.com/maurerf/nixos/issues/81).
+- `desktop-pc` has no VM variant (decided 2026-11-14). It existed to preview the
+  host from NixOS-WSL before NixOS ran on the metal; the repo is no longer
+  developed on Windows, the VM could not test NVIDIA, and boot-menu rollback
+  covers a bad activation. Its WSL workarounds (Alt as the Niri modifier, the
+  OpenGL override) went with it. If a dry-run is needed again, restore it from
+  `machines/desktop-pc.nix` at `b018a9d`.
+  [Ticket](https://github.com/maurerf/nixos/issues/90).
 - The operator's ongoing [snapshot and monthly/quarterly maintenance policy](vps-recovery.md#maintenance-and-preparation)
   remains applicable. Legacy entry points were retired with protected recovery copies;
   use [the canonical recovery procedure](vps-recovery.md#retained-legacy-source-recovery).

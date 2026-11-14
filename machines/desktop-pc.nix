@@ -116,35 +116,4 @@
     socat
     mangohud
   ];
-
-  # `nixos-rebuild build-vm` / config.system.build.vm, run from NixOS-WSL with
-  # nested KVM and virgl through WSLg. The VM uses its own disk image, so the
-  # mounts above do not apply, and qemu-vm forces the modesetting driver, so
-  # NVIDIA is off.
-  virtualisation.vmVariant = {
-    virtualisation = {
-      memorySize = 4096;
-      cores = 4;
-      # Steam's bootstrap alone needs about 600 MB; the default 1 GiB is too small.
-      diskSize = 10240;
-      qemu.forceAccel = true;
-      qemu.options = [
-        "-vga none"
-        "-device virtio-vga-gl,xres=1920,yres=1080"
-        "-display gtk,gl=on"
-      ];
-    };
-    # Throwaway login for the dry run only.
-    users.users.fdm = {
-      hashedPasswordFile = lib.mkForce null;
-      initialPassword = "fdm";
-    };
-    # Windows captures Super, so the VM uses Alt as the Niri modifier. Windows
-    # still takes Alt+Space and Alt+Escape; the run injects those through the
-    # QEMU monitor (docs/deployment.md).
-    home-manager.users.fdm.desktopPc.niriModKey = "Alt";
-    # virgl through WSLg offers OpenGL 4.2; Ghostty needs 4.3 and renders
-    # correctly with the version raised.
-    environment.sessionVariables.MESA_GL_VERSION_OVERRIDE = "4.3";
-  };
 }
