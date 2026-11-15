@@ -1,0 +1,8 @@
+--- a/lib/services/extractor/puppeteerExtractor.js
++++ b/lib/services/extractor/puppeteerExtractor.js
+@@ -50,2 +50,5 @@
+     preCfg.windowSizeArg,
++    // Match the Linux container's fonts to its browser OS identity. Fredy 30.1.1
++    // found that a Windows persona made Immowelt refuse searches with HTTP 403.
++    ...(process.platform === 'linux' ? ['--fingerprint-platform=linux'] : []),
+   ];
