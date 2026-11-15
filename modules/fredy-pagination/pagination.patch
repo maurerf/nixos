@@ -196,7 +196,7 @@
 -    }
 +    }, { ...payload, paging: { ...payload.paging, page: pageNumber, size } },
 +    site.language, CLASSIFIED_LIST_BATCH_SIZE, timeout, deadline);
-+    failure = part?.failure ?? failure;
++    failure = part?.failure ?? null;
 +    return part;
 +  // Every two-page run on 2026-11-14/15 was refused during Immowelt's second page.
 +  }, { maxPages: 1 });
