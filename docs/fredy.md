@@ -183,6 +183,27 @@ requests returned data, and how many listings were stored, was not examined.
 This meets the agreed bar for the test; a permanent switch still needs its
 own approval.
 
+With approval, the operator switched permanently on 2026-11-15 to `main` at
+`89517b5a936fa510330182b729600b39efc85f3a`, built natively on `desktop-pc`
+and on the VPS to
+`/nix/store/nzjn3c3r1yx4q5sn6j2gg8vj5135w2w1-nixos-system-nixos-vps-26.05.20260925.f5c082a`.
+A read-only check at 14:07 UTC found the active and selected closures equal to
+that path, selected generation 26 and configuration revision `89517b5`. The switch did
+not restart Fredy (running since 09:50:25 UTC, no restart). No unit had
+failed; `postfix`, `dovecot`, `rspamd`, `redis-rspamd`, `nginx`, `sshd`,
+`kresd@1` and `podman-fredy` were active; the UI returned HTTP 200, the mail
+queue was empty and 24 GB of disk were free.
+Generation 25, the system before PR #72, is retained for
+[generation recovery](deployment.md#generation-recovery). The operator had
+taken a new full Vultr snapshot first (see
+[snapshot recovery](vps-recovery.md#snapshot-recovery)). Not done at the
+switch: a reboot into the new generation, external IPv6 and TLS/DNS checks,
+and examining stored listings and Immowelt detail data (source: operator
+record in [PR #72](https://github.com/maurerf/nixos/pull/72)).
+
+The Fredy backups retained after this switch are listed under
+[Fredy backup and recovery](vps-recovery.md#fredy-backup-and-recovery).
+
 Before any further activation, follow
 [deployment](deployment.md#deployment)
 and [backup preparation](vps-recovery.md#fredy-backup-and-recovery), build both VPS
@@ -204,6 +225,22 @@ changed, restoring the generation does not restore them: keep their original
 values privately and restore them separately if desired. New listing history
 remains in the database; do not restore an old database merely to undo this code
 patch.
+
+## Current resource budget
+
+As of the permanent switch of 2026-11-15, and in its test activations from
+2026-11-14, the [module](../modules/fredy.nix) declares 640 MiB memory plus 128 MiB swap (`--memory-swap=768m`) and 256 PIDs.
+The [original trial budget](#original-2520-candidate-and-measured-budget)
+of 448 MiB, and its headroom reasoning for the 964 MiB host, are kept below as a
+record. The operator has since upgraded the VPS to the provider's 2048 MB plan
+(operator-reported 2026-11-15; done after the 2026-09-29 baseline and, given
+the last boot, by 2026-10-04; exact date not recorded). Read-only samples on
+2026-11-14 and 15 showed 1970 MiB RAM and 1023 MiB swap. The declared 640 MiB
+leaves a nominal 1330 MiB of physical RAM for mail and the host, against
+516 MiB under the original budget. Observed during and between Fredy runs:
+about 1.5 GiB available, 440 to 530 MiB of host swap in use, no failed units
+and an empty mail queue. These are samples over one day, not a measured budget
+under mail load.
 
 ## Original 25.2.0 candidate and measured budget
 
@@ -236,19 +273,6 @@ inodes free on the root filesystem, and a 2.3 GiB journal. Memory pressure
 averages were zero; the seven named mail/access services were active and no
 units failed. Port 9998 and public 443 were not listening. These are a dated
 baseline, not a Fredy load measurement. Recheck before deployment.
-
-As of 2026-11-14 the candidate declares 640 MiB memory plus 128 MiB swap and
-256 PIDs ([module](../modules/fredy.nix)); the paragraph below records the
-original trial budget and its headroom reasoning for the 964 MiB host. The
-operator has since upgraded the VPS to the provider's 2048 MB plan
-(operator-reported 2026-11-15; done after the 2026-09-29 baseline and, given
-the last boot, by 2026-10-04; exact date not recorded). Read-only samples on
-2026-11-14 and 15 showed 1970 MiB RAM and 1023 MiB swap. The declared 640 MiB
-leaves a nominal 1330 MiB of physical RAM for mail and the host, against
-516 MiB under the original budget. Observed during and between Fredy runs:
-about 1.5 GiB available, 440 to 530 MiB of host swap in use, no failed units
-and an empty mail queue. These are samples over one day, not a measured budget
-under mail load.
 
 The trial caps the whole Fredy container, including browser children, at
 448 MiB memory plus at most 128 MiB swap (`--memory-swap=576m`), half of the

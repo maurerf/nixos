@@ -6,7 +6,7 @@ Status: candidate prepared on 2026-09-29; the operator added dedicated Fredy
 DNS and approved staged activation on 2026-09-30. The bootstrap and public
 stages were activated and selected in sequence that day; the public stage was
 running from source revision `68c6cc671415117d7b06569ff125da6dbfaca7b2`
-at the [dated post-switch check](fredy.md#candidate-and-measured-budget). The
+at the [dated post-switch check](fredy.md#original-2520-candidate-and-measured-budget). The
 [Fredy operations guide](fredy.md) gives the measured baseline, selected image,
 first-login, DNS and Telegram steps. This plan remains the design record.
 The operator confirmed actual Telegram listing notifications on 2026-09-30.
@@ -99,7 +99,7 @@ specific release selected for implementation; upstream `master` links can change
   for its exact fields and group setup procedure.
 
 At planning time no runtime capacity check or Fredy load test had occurred.
-The later [dated baseline](fredy.md#candidate-and-measured-budget) still cannot
+The later [dated baseline](fredy.md#original-2520-candidate-and-measured-budget) still cannot
 establish browser-load feasibility. A 1 GB VPS running mail may have
 insufficient headroom; feasibility must be demonstrated. Do not present
 2 GB or any other size as a measured minimum. Resource limits reduce risk but do

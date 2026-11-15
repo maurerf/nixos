@@ -156,6 +156,16 @@ generation and image using [generation recovery](deployment.md#generation-recove
 before starting Fredy; that activation may itself start the service. Verify
 the active unit references the previous image, start it if necessary, and
 repeat Fredy plus mail acceptance.
+
+On 2026-11-15, after the permanent switch to PR #72, the operator deleted the
+intermediate backups `fredy-prebrowser-*`, `fredy-prebatchfix-*`,
+`fredy-prepagecap-*` and the two test directories from `/root/fredy-backups`.
+Kept: `fredy-preupgrade-*` (before the 29.2.1 upgrade and PR #72),
+`fredy-prepagination-*` (before the PR's first activation) and
+`fredy-preonepage-*` (before its final activation). The resulting listing was
+not shown to the agent (operator report in
+[issue #94](https://github.com/maurerf/nixos/issues/94)).
+
 Do not restore the whole mail VPS snapshot just to repair Fredy without a
 separate recovery decision. If Fredy harms mail or host resources during the
 trial, stop `podman-fredy.service` within the approved incident scope and
@@ -198,6 +208,17 @@ The recorded snapshot is `pre-coding-agent`, ID
 reported quiescence. Availability was last operator-confirmed on 2026-09-29;
 restore, consistency and duration were never demonstrated. The provider instance
 UUID was not recorded. This is a historical recovery input, not proof of availability now.
+
+A newer full snapshot, `15-11-2026`, ID `8d78fcc3-36af-4c0b-8632-59285b071953`,
+was taken by the operator on 2026-11-15 before the permanent Fredy switch. The
+Vultr console showed its time as 10:17:29, with the time zone not established. Read
+as UTC, it was captured after the 09:50 UTC test activation of `4edb8ea`, with
+the pre-PR generation 25 selected. Read as CET (09:17 UTC), it predates that
+activation. Either way generation 26 was not yet selected. Whether it was captured
+quiesced is not recorded. It is not yet verified, so `pre-coding-agent` remains
+the recorded recovery snapshot until the operator verifies the new one and
+explicitly retires the old (source: operator report, 2026-11-15, in
+[issue #94](https://github.com/maurerf/nixos/issues/94)).
 
 Before any destructive restore, bind the exact instance UUID to the intended VPS,
 verify the chosen snapshot and current provider instructions, preserve newer mail
