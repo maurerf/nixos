@@ -240,21 +240,23 @@ The Fredy backups retained after this switch are listed under
 [Fredy backup and recovery](vps-recovery.md#fredy-backup-and-recovery).
 
 The follow-up image of [PR #97](https://github.com/maurerf/nixos/pull/97)
-(`29.2.1-pagination-6`; restored failure logs, refusal on an empty card batch,
-no image health check) was test-activated with approval at 15:34 UTC on
+(`29.2.1-pagination-6`)
+was test-activated with approval at 15:34 UTC on
 2026-11-15. The candidate was `28492cb`, built to
 `/nix/store/kndd981rarfn098z53g4ph4irlrrbmwc-nixos-system-nixos-vps-26.05.20260925.f5c082a`
 on both `desktop-pc` and the VPS. It followed an online backup
 (`fredy-prefollowup-20261115T152358Z`, integrity check `ok`; see
 [job and setting edits](vps-recovery.md#job-and-setting-edits)): the patch
 changes no schema, and a stopped backup would have added a second startup run.
-The first Podman health check ran before Fredy listened and left a failed
+The first run of the service's Podman health check came before Fredy listened and left a failed
 transient unit; the next timer run cleared it, with 0 failed units by
 15:40 UTC. The startup run and the scheduled run at 16:34 UTC each fetched
 ImmoScout's 60 of 60 in one page and logged for Immowelt only
 `search incomplete: page limit; keeping 100 listings` (100 of 381). Neither
 logged a refusal or stored a new listing, and the container had no OOM kill and
-no restart. This shortened acceptance, startup plus one run, was agreed in
+no restart. Sources: operator terminal output (container log, `podman inspect`,
+debug log) and agent read-only SSH checks. This shortened acceptance, startup
+plus one run, was agreed in
 advance.
 
 After merging, the operator switched permanently with approval to `main` at
@@ -315,8 +317,8 @@ platform, version, providers, adapters) and a per-job price report (median
 €/m² of stored listings, sample size, price band). It had logged
 `Error sending tracking data to /main. Status: 500`. It also gates the
 `DETECTED_AS_BOT` events of Immowelt's `reportFailure`. The setting reads
-false in the database. The container log from 15:34 to about 16:40 UTC, covering
-Fredy's report at startup (the follow-up image's start at 15:34) and its
+false in the database. The container log at the follow-up image's startup (15:34 to
+15:39 UTC) and from 15:58 to about 16:40 UTC, covering Fredy's startup report and its
 16:00 UTC report time, had no tracking line.
 
 **Provider URLs.** The one job, with ImmoScout and Immowelt, now searches a polygon
