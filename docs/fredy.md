@@ -251,8 +251,9 @@ the UI's admin system settings. In Fredy 29.2.1 (`lib/services/tracking/Tracker.
 platform, version, providers, adapters) and a per-job price report (median
 €/m² of stored listings, sample size, price band). It had logged
 `Error sending tracking data to /main. Status: 500`. It also gates the
-`DETECTED_AS_BOT` events of Immowelt's `reportFailure`. The container log
-from 15:58 to 16:04 UTC, across the 16:00 report time, had no tracking line.
+`DETECTED_AS_BOT` events of Immowelt's `reportFailure`. The setting reads
+false in the database; the first report time after the change, 16:00 UTC, had
+not yet been checked in the log when this was written.
 
 **Provider URLs.** The one job, with ImmoScout and Immowelt, now searches a polygon
 drawn on each portal, with 2.5–4 rooms, 40–90 m² and at most €1,500 warm rent
