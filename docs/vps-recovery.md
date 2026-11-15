@@ -199,6 +199,17 @@ reported quiescence. Availability was last operator-confirmed on 2026-09-29;
 restore, consistency and duration were never demonstrated. The provider instance
 UUID was not recorded. This is a historical recovery input, not proof of availability now.
 
+A newer full snapshot, `15-11-2026`, ID `8d78fcc3-36af-4c0b-8632-59285b071953`,
+was taken by the operator on 2026-11-15 before the permanent Fredy switch. The
+Vultr console showed its time as 10:17:29, with the time zone not established. Read
+as UTC, it was captured after the 09:50 UTC test activation of `4edb8ea`, with
+the pre-PR generation 25 selected. Read as CET (09:17 UTC), it predates that
+activation. Either way generation 26 was not yet selected. Whether it was captured
+quiesced is not recorded. It is not yet verified, so `pre-coding-agent` remains
+the recorded recovery snapshot until the operator verifies the new one and
+explicitly retires the old (source: operator report, 2026-11-15, in
+[issue #94](https://github.com/maurerf/nixos/issues/94)).
+
 Before any destructive restore, bind the exact instance UUID to the intended VPS,
 verify the chosen snapshot and current provider instructions, preserve newer mail
 where feasible, and obtain explicit approval for target, data-loss risk and action.
