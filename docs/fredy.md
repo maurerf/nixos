@@ -105,7 +105,9 @@ rooms 2.5, minimum size 40 and maximum price 1500. Two-room flats are explicitly
 outside the user's requirements. Exact polygon URLs belong in private job state,
 not Git. Listings previously stored and hidden remain known; changing the search
 does not automatically reconsider them or resend notifications. Review those
-separately, without clearing deduplication history.
+separately, without clearing deduplication history. The URLs were saved on
+2026-11-15, with drawn portal polygons instead of the saved one; see
+[provider URLs and usage reporting](#2026-11-15-provider-urls-and-usage-reporting).
 
 ### Activation and recovery
 
@@ -225,6 +227,65 @@ changed, restoring the generation does not restore them: keep their original
 values privately and restore them separately if desired. New listing history
 remains in the database; do not restore an old database merely to undo this code
 patch.
+
+## 2026-11-15 provider URLs and usage reporting
+
+The operator edited the saved job and a setting in the UI on 2026-11-15, without
+a restart, after an online database backup (`fredy-prejobedit-20261115T142925Z`;
+see [job and setting edits](vps-recovery.md#job-and-setting-edits)). The
+previous provider URLs are kept in a root-only file next to that backup. Sources:
+operator-run read-only queries and container log, an operator browser check of
+both URLs, and an offline agent check of their parameters against Fredy 29.2.1's
+translators, unless noted.
+
+Before the edit the database held 78 ImmoScout rows (40 deleted by the
+operator) and 59 Immowelt rows (48 deleted); neither provider had stored a row
+since the one-page test activation at 09:50 UTC, because every listing it found
+was already known. 3 of the 11 Immowelt rows stored on 2026-11-14 had
+descriptions longer than the 500-character card limit, so their exposé requests
+had succeeded.
+
+**Usage reporting** is off: the operator set `analyticsEnabled` to false in
+the UI's admin system settings. In Fredy 29.2.1 (`lib/services/tracking/Tracker.js`,
+`lib/services/crons/tracker-cron.js`) it gated an 8-hourly report to the upstream project (device ID,
+platform, version, providers, adapters) and a per-job price report (median
+€/m² of stored listings, sample size, price band). It had logged
+`Error sending tracking data to /main. Status: 500`. It also gates the
+`DETECTED_AS_BOT` events of Immowelt's `reportFailure`. The setting reads
+false in the database; the first report time after the change, 16:00 UTC, had
+not yet been checked in the log when this was written.
+
+**Provider URLs.** The one job, with ImmoScout and Immowelt, now searches a polygon
+drawn on each portal, with 2.5–4 rooms, 40–90 m² and at most €1,500 warm rent
+(ImmoScout's `calculatedtotalrent`, Immowelt's `Warmrent`), flats only. Fredy's
+ImmoScout provider forces the newest-first order itself (`sortByDateParam`); the
+Immowelt URL carries it. Both browser drafts lacked the four-room maximum,
+the Immowelt draft included houses, and the ImmoScout draft carried `bbox`
+(which Fredy would have dropped with a warning on every run) and
+`enteredFrom`; all were fixed before saving. The two portal
+polygons were drawn separately. Neither covers the job's own area filter:
+judged by bounding boxes, both miss roughly the eastern 1.2 km and ImmoScout also
+about 2 km in the north. The operator accepted that gap (border flats are not the
+focus). Fredy's area filter, blacklist and
+[job-level filters](#evidence-and-proposed-job-settings) are unchanged.
+
+The first scheduled run with the new URLs (14:50 UTC) logged no refusal; Immowelt
+logged its expected page-limit warning:
+
+| Provider | Reported total | Fetched | After provider filters | New stored | Details |
+| --- | ---: | ---: | ---: | ---: | --- |
+| ImmoScout | 58 | 58, one page, complete | 11 | 4 | 4 of 4 with full description |
+| Immowelt | 382 | 100, page limit | 5 | 2 | 1 of 2; the other exposé failed with `Execution context was destroyed` |
+
+So Immowelt detail requests do work at one page, though not reliably. The
+ImmoScout website showed 352 results for the same search. A read-only
+`search/total` request from `desktop-pc`, built as Fredy builds it, returned
+`totalResults` 60 and `comingSoonTotalResults` 271, with or without
+`exclusioncriteria=swapflat`. Fredy fetches only the regular result list, so
+ImmoScout's "coming soon" listings are not searched. The operator accepted
+that. The run also logged three `Overpass API error: 502 Bad Gateway` lines and
+one Telegram `sendPhoto` failure for which Fredy logged that it used its fallback; the
+container had no OOM kill and no restart.
 
 ## Current resource budget
 

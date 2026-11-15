@@ -164,12 +164,38 @@ Kept: `fredy-preupgrade-*` (before the 29.2.1 upgrade and PR #72),
 `fredy-prepagination-*` (before the PR's first activation) and
 `fredy-preonepage-*` (before its final activation). The resulting listing was
 not shown to the agent (operator report in
-[issue #94](https://github.com/maurerf/nixos/issues/94)).
+[issue #94](https://github.com/maurerf/nixos/issues/94)). An operator-run
+listing at 14:29 UTC the same day later showed exactly those three archives
+besides the new job-edit backup below.
 
 Do not restore the whole mail VPS snapshot just to repair Fredy without a
 separate recovery decision. If Fredy harms mail or host resources during the
 trial, stop `podman-fredy.service` within the approved incident scope and
 diagnose before changing limits, deleting state or altering the VPS size.
+
+### Job and setting edits
+
+A job or setting edit in the UI changes no code or schema and needs no restart,
+so stopping Fredy would only add a browser session and a provider run. Instead,
+take an online copy with SQLite's backup API, which stays consistent while
+Fredy writes. The VPS has no `sqlite3` on its path; use the
+`/nix/store/*-sqlite-*-bin` directory on the host:
+
+```sh
+SQ=/nix/store/<hash>-sqlite-<version>-bin/bin/sqlite3
+DB=/var/lib/fredy/db/listings.db
+TS=$(date -u +%Y%m%dT%H%M%SZ)
+sudo "$SQ" "$DB" ".backup /root/fredy-backups/fredy-prejobedit-$TS.db"
+sudo tar -C /var/lib/fredy -cpf "/root/fredy-backups/fredy-prejobedit-$TS-conf.tar" conf
+sudo chmod 0600 "/root/fredy-backups/fredy-prejobedit-$TS.db" "/root/fredy-backups/fredy-prejobedit-$TS-conf.tar"
+sudo "$SQ" -readonly "/root/fredy-backups/fredy-prejobedit-$TS.db" "PRAGMA integrity_check;"
+```
+
+Opening the copy creates `-shm` and empty `-wal` files beside it; they are
+harmless. Before changing provider URLs, also keep the old ones in a root-only
+file there, never in Git. Use the stopped full archive above for image upgrades
+and restores. First used on 2026-11-15
+([Fredy record](fredy.md#2026-11-15-provider-urls-and-usage-reporting)).
 
 ## Runtime secrets
 
