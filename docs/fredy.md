@@ -239,6 +239,36 @@ record in [PR #72](https://github.com/maurerf/nixos/pull/72)).
 The Fredy backups retained after this switch are listed under
 [Fredy backup and recovery](vps-recovery.md#fredy-backup-and-recovery).
 
+The follow-up image of [PR #97](https://github.com/maurerf/nixos/pull/97)
+(`29.2.1-pagination-6`; restored failure logs, refusal on an empty card batch,
+no image health check) was test-activated with approval at 15:34 UTC on
+2026-11-15. The candidate was `28492cb`, built to
+`/nix/store/kndd981rarfn098z53g4ph4irlrrbmwc-nixos-system-nixos-vps-26.05.20260925.f5c082a`
+on both `desktop-pc` and the VPS. It followed an online backup
+(`fredy-prefollowup-20261115T152358Z`, integrity check `ok`; see
+[job and setting edits](vps-recovery.md#job-and-setting-edits)): the patch
+changes no schema, and a stopped backup would have added a second startup run.
+The first Podman health check ran before Fredy listened and left a failed
+transient unit; the next timer run cleared it, with 0 failed units by
+15:40 UTC. The startup run and the scheduled run at 16:34 UTC each fetched
+ImmoScout's 60 of 60 in one page and logged for Immowelt only
+`search incomplete: page limit; keeping 100 listings` (100 of 381). Neither
+logged a refusal or stored a new listing, and the container had no OOM kill and
+no restart. This shortened acceptance, startup plus one run, was agreed in
+advance.
+
+After merging, the operator switched permanently with approval to `main` at
+`36fdfbc9adf0461d8bd81580c9a149391149476a`
+(`/nix/store/cp4dg7iabk11kiybhpsdpwq70ic20ivy-nixos-system-nixos-vps-26.05.20260925.f5c082a`).
+Compared with the tested candidate, its image was identical and `nix store
+diff-closures` showed no difference, only the revision. A read-only check at
+16:44 UTC found active and selected equal to that path as generation 27,
+revision `36fdfbc`, and Fredy not restarted (running since 15:34:08 UTC). It
+also found 0 failed units, the mail/access services, nginx and `podman-fredy`
+active, UI HTTP 200, an empty mail queue and 23 GB free. Generations 26 and 25
+are retained. The booted system remains the 2026-09-30 closure; no reboot was
+done.
+
 Before any further activation, follow
 [deployment](deployment.md#deployment)
 and [backup preparation](vps-recovery.md#fredy-backup-and-recovery), build both VPS
@@ -285,8 +315,9 @@ platform, version, providers, adapters) and a per-job price report (median
 €/m² of stored listings, sample size, price band). It had logged
 `Error sending tracking data to /main. Status: 500`. It also gates the
 `DETECTED_AS_BOT` events of Immowelt's `reportFailure`. The setting reads
-false in the database; the first report time after the change, 16:00 UTC, had
-not yet been checked in the log when this was written.
+false in the database. The container log from 15:34 to about 16:40 UTC, covering
+Fredy's report at startup (the follow-up image's start at 15:34) and its
+16:00 UTC report time, had no tracking line.
 
 **Provider URLs.** The one job, with ImmoScout and Immowelt, now searches a polygon
 drawn on each portal, with 2.5–4 rooms, 40–90 m² and at most €1,500 warm rent
