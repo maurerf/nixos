@@ -113,6 +113,11 @@
   forward by hand on each Fredy upgrade. Immowelt is limited to one search
   page (decided 2026-11-15): every run of the two-page candidate was refused
   during the second page. [Fredy record](fredy.md#activation-and-recovery).
+- Fredy's usage reporting to its upstream project is off, and the provider
+  searches use polygons drawn on each portal, which do not fully cover the job's
+  own area filter (decided 2026-11-15). Border flats are not the focus, and
+  ImmoScout's "coming soon" listings stay unsearched.
+  [Fredy record](fredy.md#2026-11-15-provider-urls-and-usage-reporting).
 - The operator's ongoing [snapshot and monthly/quarterly maintenance policy](vps-recovery.md#maintenance-and-preparation)
   remains applicable. Legacy entry points were retired with protected recovery copies;
   use [the canonical recovery procedure](vps-recovery.md#retained-legacy-source-recovery).
