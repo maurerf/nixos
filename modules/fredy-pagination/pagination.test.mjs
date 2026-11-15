@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import vm from 'node:vm';
-import { collectSearchPages } from './pagination.js';
+import { collectSearchPages, isRefusal } from './pagination.js';
 const options = { delayMs: 0 };
 const page = (ids, total, rest = {}) => ({ ids, items: ids.map(id => ({ id })), total, ...rest });
 test('fetches beyond a full first page, deduplicates and reaches total', async () => {
@@ -75,7 +75,7 @@ async function loadProvider(relative, fetchImpl) {
   });
   await mod.evaluate();return {exports:mod.namespace,warnings,calls,closed};
 }
-const response=(data,status=200)=>({ok:status===200,status,json:async()=>data});
+const response=(data,status=200,text)=>({ok:status===200,status,statusText:"",json:async()=>data,text:async()=>text??JSON.stringify(data)});
 const expose=id=>({type:'EXPOSE_RESULT',item:{id,title:`Flat ${id}`,attributes:[]}});
 test('actual ImmoScout adapter requests 100/page, keeps filters, gets later listings',async()=>{
  const urls=[];
@@ -118,15 +118,59 @@ test('actual Immowelt adapter retains partial batch and stops on blocked cards',
  assert.equal(rows.length,30);assert.equal(searches,1);assert.equal(batches,2);assert.equal(p.closed.length,1);
  assert.match(p.warnings.join(' '),/incomplete: cards HTTP 403/);
 });
-test('actual Immowelt adapter treats an empty card batch as incomplete',async()=>{
+test('actual Immowelt adapter treats an empty card batch as a refusal',async()=>{
  let searches=0;
  const p=await loadProvider('lib/services/immowelt/immoweltBff.js',async(url)=>{
   if(url==='/serp-bff/search'){searches++;return response({totalCount:5,classifieds:Array.from({length:5},(_,i)=>({id:i+1}))});}
   return response([]);
  });
  const rows=await p.exports.searchClassifieds({}, {criteria:{},paging:{page:1,size:100}},{host:'immowelt.de',origin:'https://www.immowelt.de',language:'de'});
- assert.equal(rows.length,0);assert.equal(searches,1);
+ assert.equal(rows.length,0);assert.equal(searches,1);assert.equal(p.closed.length,1);
  assert.match(p.warnings.join(' '),/incomplete: empty card response/);
+ assert.match(p.warnings.join(' '),/Skipping the remaining immowelt.de requests/);
+});
+test('actual Immowelt adapter counts an empty one-card batch as missing, not refused',async()=>{
+ const batches=[];
+ const p=await loadProvider('lib/services/immowelt/immoweltBff.js',async(url)=>{
+  if(url==='/serp-bff/search')return response({totalCount:31,classifieds:Array.from({length:31},(_,i)=>({id:i+1}))});
+  const ids=url.split('/').pop().split(',');batches.push(ids.length);
+  return response(ids.length===1?[]:ids.map(id=>({id})));
+ });
+ const rows=await p.exports.searchClassifieds({}, {criteria:{},paging:{page:1,size:100}},{host:'immowelt.de',origin:'https://www.immowelt.de',language:'de'});
+ assert.equal(rows.length,30);assert.deepEqual(batches,[30,1]);assert.equal(p.closed.length,0);
+ assert.match(p.warnings.join(' '),/1 listed cards were not returned/);
+ assert.doesNotMatch(p.warnings.join(' '),/incomplete/);
+});
+test('actual Immowelt adapter logs the validation body of a rejected search',async()=>{
+ const p=await loadProvider('lib/services/immowelt/immoweltBff.js',async(url)=>{
+  if(url==='/serp-bff/search')return response({},400,'criteria.priceMax: expected one of 100..100000');
+  throw new Error('no card request expected');
+ });
+ const rows=await p.exports.searchClassifieds({}, {criteria:{},paging:{page:1,size:100}},{host:'immowelt.de',origin:'https://www.immowelt.de',language:'de'});
+ assert.equal(rows.length,0);assert.equal(p.closed.length,0);
+ assert.match(p.warnings.join(' '),/immowelt\.de search answered 400: criteria\.priceMax: expected one of/);
+ assert.match(p.warnings.join(' '),/incomplete: search HTTP 400/);
+});
+test('actual Immowelt adapter reports a blocked search as a bot detection',async()=>{
+ const p=await loadProvider('lib/services/immowelt/immoweltBff.js',async(url)=>{
+  if(url==='/serp-bff/search')return response({},403,'<html>blocked</html>');
+  throw new Error('no card request expected');
+ });
+ await p.exports.searchClassifieds({}, {criteria:{},paging:{page:1,size:100}},{host:'immowelt.de',origin:'https://www.immowelt.de',language:'de'});
+ assert.equal(p.closed.length,1);
+ assert.match(p.warnings.join(' '),/detected as a bot :-\/ immowelt\.de search answered 403/);
+});
+test('actual ImmoScout adapter logs the body of a rejected search',async()=>{
+ const p=await loadProvider('lib/services/immoscout/mobileApi.js',async()=>response({},412,'{"message":"Cannot parse shape"}'));
+ const cfg=p.exports.buildImmoscoutProvider({}).config;
+ const rows=await cfg.getListings.call({_providerConfig:cfg},'https://example.org/search');
+ assert.equal(rows.length,0);assert.equal(cfg.paginationBlocked,false);
+ assert.match(p.warnings.join(' '),/ImmoScout Mobile API: 412 .*Cannot parse shape/);
+ assert.match(p.warnings.join(' '),/incomplete: search HTTP 412/);
+});
+test('refusal reasons are shared by both providers',()=>{
+ for(const r of ['search HTTP 403','cards HTTP 429','empty card response'])assert.equal(isRefusal(r),true,r);
+ for(const r of ['search HTTP 400','search HTTP 4031','page limit','time budget',undefined])assert.equal(isRefusal(r),false,String(r));
 });
 test('actual Immowelt adapter stops after one page without refusing the site',async()=>{
  const searches=[];

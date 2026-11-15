@@ -48,7 +48,7 @@ in
         # A 29.2.1 search reached 124 PIDs; allow overlapping browser work.
         "--pids-limit=256"
         # Explicit because Podman did not retain the upstream image's health
-        # check; these flags take precedence over the derived image's own.
+        # check; the derived image declares none, so these flags are the only one.
         "--health-cmd=curl -f http://127.0.0.1:9998/"
         "--health-interval=120s"
         "--health-timeout=10s"

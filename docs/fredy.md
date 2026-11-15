@@ -58,8 +58,10 @@ stops fetching and logs incomplete coverage while retaining successful results.
 A 403/429 also suppresses subsequent provider detail requests in that run.
 An Immowelt card that the search listed but its card request no longer returns
 is counted and logged as a warning; fetching continues. A card batch of more
-than one listing that returns nothing is treated as a refusal and stops
-fetching as incomplete. The image tested on
+than one listing that returns nothing is treated as a soft block: it stops
+fetching as incomplete and, since the follow-up image of
+[issue #94](https://github.com/maurerf/nixos/issues/94), also suppresses that
+run's Immowelt detail requests like a 403/429. The image tested on
 2026-11-14 instead stopped the provider at the first such card. Immowelt
 refusals are logged as `search HTTP` or `cards HTTP` by the failing request;
 in that earlier image both read `search HTTP`. The
@@ -67,10 +69,36 @@ time budget covers pagination/card fetching, not the entire job's
 subsequent enrichment and notification pipeline. A cap is a deliberate limit,
 not a promise to retrieve every result for arbitrarily broad searches.
 
+The follow-up image restores two upstream logs that the first patch had
+dropped. ImmoScout logs the body of a non-OK search response again, the only
+way to tell a rejected (412) search from an empty one. A failed Immowelt search
+or card request goes through upstream's `reportFailure` again: a 403/429 logs
+the bot warning and its `DETECTED_AS_BOT` tracking event (inert while
+[usage reporting](#2026-11-15-provider-urls-and-usage-reporting) is off), any
+other status logs the response body, where the portal names an invalid
+criterion. The image declares no health check of its own; the service's
+Podman flags are the only one.
+
+Accepted without change (issue #94, decided 2026-11-15):
+- The three-minute budget does not cover `resolveSearchAreas`,
+  `acquireWarmPage` or a hung `page.evaluate`. The last is bounded only by
+  Puppeteer's protocol timeout, and Fredy's scheduler still starts the next
+  run.
+- An empty one-card Immowelt batch cannot be told apart from a delisted card.
+  It is counted as missing, and the page can still be reported complete. At
+  one page of 100 in batches of 30, such a batch only arises after
+  deduplication.
+- ImmoScout counts only `EXPOSE_RESULT` items against `totalResults`. On
+  2026-11-15 the two agreed (58 of 58, complete), so the fix was not needed.
+- `AbortSignal.timeout`, the in-page deadline and request pacing have no
+  offline test.
+
 Build-time offline tests exercise the pagination helper and the actual patched
 provider functions with mocked HTTP/browser responses. They cover additional
-pages, duplicate IDs, request errors, partial, short and empty card batches,
-blocking responses, time/page limits and preservation of search parameters. The tests never open the
+pages, duplicate IDs, request errors, partial, short and empty card batches
+(including the one-card boundary), blocking responses and the resulting
+detail suppression, the logged bodies of rejected searches, time/page limits
+and preservation of search parameters. The tests never open the
 live database or send notifications. To build the native VPS candidate:
 
 ```sh
