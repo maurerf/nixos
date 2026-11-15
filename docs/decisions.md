@@ -118,6 +118,9 @@
   own area filter (decided 2026-11-15). Border flats are not the focus, and
   ImmoScout's "coming soon" listings stay unsearched.
   [Fredy record](fredy.md#2026-11-15-provider-urls-and-usage-reporting).
+- Four gaps in Fredy's pagination patch stay as they are (decided 2026-11-15):
+  the time budget's scope, the one-card ambiguity, the `EXPOSE_RESULT` count and
+  untested timing. [Accepted pagination gaps](fredy.md#accepted-pagination-gaps).
 - The operator's ongoing [snapshot and monthly/quarterly maintenance policy](vps-recovery.md#maintenance-and-preparation)
   remains applicable. Legacy entry points were retired with protected recovery copies;
   use [the canonical recovery procedure](vps-recovery.md#retained-legacy-source-recovery).

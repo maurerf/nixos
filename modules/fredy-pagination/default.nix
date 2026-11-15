@@ -53,16 +53,9 @@ pkgs.dockerTools.buildImage {
     ExposedPorts."9998/tcp" = { };
     Volumes = { "/conf" = { }; "/db" = { }; };
     Labels = {
-      "org.opencontainers.image.version" = "29.2.1-pagination-5";
+      "org.opencontainers.image.version" = "29.2.1-pagination-6";
       "org.opencontainers.image.base.digest" = "sha256:1be69e57027924abba16a0d06f37697ae883322002e0fd2d2325f8ef459612cc";
     };
-    # The service also sets an explicit Podman health check.
-    Healthcheck = {
-      Test = [ "CMD-SHELL" "curl -f http://localhost:9998/ || exit 1" ];
-      Interval = 30000000000;
-      Timeout = 10000000000;
-      StartPeriod = 30000000000;
-      Retries = 3;
-    };
+    # No Healthcheck here: the service's Podman flags are its single source.
   };
 }

@@ -4,13 +4,13 @@
  import { MAX_PROBE_ATTEMPTS, backoffDelay, retryAfterDelay } from '../listings/activeProbeBackoff.js';
  import { convertImmoscoutListingToMobileListing } from './immoscout-web-translator.js';
  import logger from '../logger.js';
-+import { collectSearchPages } from '../searchPagination.js';
++import { collectSearchPages, isRefusal } from '../searchPagination.js';
  import { extractNumber } from '../../utils/extract-number.js';
  import { normalizeBuildYear, normalizeEnergyClass } from '../../utils/buildingFacts.js';
  /** @import { ParsedListing } from '../../types/listing.js' */
-@@ -77,37 +78,34 @@
+@@ -77,37 +78,43 @@
  const EXPOSE_USER_AGENT = 'ImmoScout_27.3_26.0_._';
-
+ 
  /**
 - * Fetches one page of search results.
 + * Fetches bounded, sequential search pages and keeps successful pages on failure.
@@ -41,7 +41,16 @@
 +      body: JSON.stringify({ supportedResultListTypes: [], userData: {} }),
 +      signal: AbortSignal.timeout(timeout),
 +    });
-+    if (!response.ok) throw new Error(`search HTTP ${response.status}`);
++    if (!response.ok) {
++      // The mobile API answers 412 with a body naming the parameter it refused, and nothing else in
++      // the pipeline ever sees that body. Without it a rejected search is indistinguishable from a
++      // search that simply found nothing.
++      const details = await response.text().catch(() => '');
++      logger.error(
++        `Error fetching data from ImmoScout Mobile API: ${response.status} ${response.statusText ?? ''} ${details.slice(0, 500)}`,
++      );
++      throw new Error(`search HTTP ${response.status}`);
++    }
 +    const data = await response.json();
 +    if (!Array.isArray(data.resultListItems)) throw new Error('invalid search response');
 +    const items = data.resultListItems.filter(item => item.type === 'EXPOSE_RESULT').map(entry => entry.item);
@@ -61,14 +70,14 @@
 -  const responseBody = await response.json();
 -  return responseBody.resultListItems
 -    .filter((item) => item.type === 'EXPOSE_RESULT')
-+  if (runConfig) runConfig.paginationBlocked = /HTTP (403|429)\b/.test(result.reason);
++  if (runConfig) runConfig.paginationBlocked = isRefusal(result.reason);
 +  logger.debug(`ImmoScout search: ${result.items.length} unique listings, ${result.pages} pages, total ${result.total ?? 'unknown'}`);
 +  if (!result.complete) logger.warn(`ImmoScout search incomplete: ${result.reason}; keeping ${result.items.length} listings`);
 +  return result.items.map(item => ({ item }))
      .map((expose) => {
        const item = expose.item;
        const { price, size, rooms } = readAttributes(item.attributes);
-@@ -156,6 +154,7 @@
+@@ -156,6 +163,7 @@
   *   relies on that to report the refetch as failed, so it is not caught here.
   */
  async function fetchDetails(listing) {
@@ -80,16 +89,16 @@
 +++ b/lib/services/immowelt/immoweltBff.js
 @@ -30,6 +30,7 @@
   */
-
+ 
  import logger from '../logger.js';
-+import { collectSearchPages } from '../searchPagination.js';
++import { collectSearchPages, isRefusal } from '../searchPagination.js';
  import { trackPoi } from '../tracking/Tracker.js';
  import { TRACKING_POIS } from '../../TRACKING_POIS.js';
  import { acquireWarmPage as acquireOriginPage, releaseWarmPage } from '../extractor/warmPages.js';
-@@ -284,69 +285,55 @@
+@@ -284,69 +285,64 @@
    const payload = await resolveSearchAreas(browser, request, site);
    const page = await acquireWarmPage(browser, site);
-
+ 
 -  const result = await page.evaluate(
 -    async (payload, timeout, batchSize, language) => {
 -      const withTimeout = (promise) =>
@@ -98,18 +107,7 @@
 -          new Promise((_, reject) => setTimeout(() => reject(new Error('immowelt bff request timed out')), timeout)),
 -        ]);
 -
-+  const result = await collectSearchPages(async (pageNumber, size, timeout, deadline) => {
-+    const part = await page.evaluate(async (payload, language, batchSize, timeout, deadline) => {
-+      const classifieds = [];
-+      let ids = [], total, missing = 0;
-+      async function read(step, path, options) {
-+        const remaining = Math.min(timeout, deadline - Date.now());
-+        if (remaining <= 0) throw new Error('time budget');
-+        const response = await fetch(path, { ...options, signal: AbortSignal.timeout(remaining) });
-+        if (!response.ok) throw new Error(`${step} HTTP ${response.status}`);
-+        return response.json();
-+      }
-       try {
+-      try {
 -        const searchResponse = await withTimeout(
 -          fetch('/serp-bff/search', {
 -            method: 'POST',
@@ -120,7 +118,20 @@
 -        const searchBody = await searchResponse.text();
 -        if (searchResponse.status !== 200) {
 -          return { error: { step: 'search', status: searchResponse.status, body: searchBody.slice(0, 800) } };
--        }
++  let failure = null;
++  const result = await collectSearchPages(async (pageNumber, size, timeout, deadline) => {
++    const part = await page.evaluate(async (payload, language, batchSize, timeout, deadline) => {
++      const classifieds = [];
++      let ids = [], total, missing = 0, failure;
++      async function read(step, path, options) {
++        const remaining = Math.min(timeout, deadline - Date.now());
++        if (remaining <= 0) throw new Error('time budget');
++        const response = await fetch(path, { ...options, signal: AbortSignal.timeout(remaining) });
++        if (!response.ok) {
++          const body = await response.text().catch(() => '');
++          failure = { step, status: response.status, body: body.slice(0, 800) };
++          throw new Error(`${step} HTTP ${response.status}`);
+         }
 -
 -        const ids = (JSON.parse(searchBody).classifieds || []).map((entry) => entry?.id).filter(Boolean);
 -        if (ids.length === 0) return { classifieds: [] };
@@ -128,6 +139,9 @@
 -        const classifieds = [];
 -        let failure = null;
 -
++        return response.json();
++      }
++      try {
 +        const data = await read('search', '/serp-bff/search', {
 +          method: 'POST', headers: { 'Content-Type': 'application/json; charset=utf-8' },
 +          body: JSON.stringify(payload),
@@ -147,9 +161,6 @@
 -            break;
 -          }
 -          classifieds.push(...JSON.parse(listBody));
--        }
--
--        return { classifieds, error: failure };
 +          const rows = await read('cards', `/classifiedList/${batch.map(encodeURIComponent).join(',')}`, {
 +            headers: { 'x-language': language },
 +          });
@@ -159,11 +170,13 @@
 +          // A listing can disappear between the search and its card request.
 +          const returned = new Set(rows.map(row => String(row?.id)));
 +          missing += batch.filter(id => !returned.has(String(id))).length;
-+        }
+         }
+-
+-        return { classifieds, error: failure };
 +        return { items: classifieds, ids, total, missing };
        } catch (error) {
 -        return { error: { step: 'request', status: 0, body: String(error?.message || error) } };
-+        return { items: classifieds, ids, total, missing, error: error?.message || 'request failed' };
++        return { items: classifieds, ids, total, missing, failure, error: error?.message || 'request failed' };
        }
 -    },
 -    payload,
@@ -181,22 +194,25 @@
 -        `${site.host} returned ${classifieds.length} listing(s) before the request was refused; keeping those.`,
 -      );
 -    }
--  }
--
--  return classifieds;
 +    }, { ...payload, paging: { ...payload.paging, page: pageNumber, size } },
 +    site.language, CLASSIFIED_LIST_BATCH_SIZE, timeout, deadline);
++    failure = part?.failure ?? null;
 +    return part;
 +  // Every two-page run on 2026-11-14/15 was refused during Immowelt's second page.
 +  }, { maxPages: 1 });
 +  logger.debug(`${site.host} search: ${result.items.length} unique listings, ${result.pages} pages, total ${result.total ?? 'unknown'}`);
 +  if (result.missing > 0) logger.warn(`${site.host} search: ${result.missing} listed cards were not returned`);
 +  if (!result.complete) {
++    // Upstream's report: the bot warning and tracking event for 403/429, otherwise the BFF's
++    // validation body, the only thing that turns "0 listings" into something actionable.
++    if (failure) await reportFailure(failure.status, failure.step, failure.body, site);
 +    logger.warn(`${site.host} search incomplete: ${result.reason}; keeping ${result.items.length} listings`);
-+    // Do not continue to detail-page requests after an explicit block/rate limit.
-+    if (/HTTP (403|429)\b/.test(result.reason)) await refuseSite(browser, site);
-+  }
++    // Do not continue to detail-page requests after a block, rate limit or soft block.
++    if (isRefusal(result.reason)) await refuseSite(browser, site);
+   }
+-
+-  return classifieds;
 +  return result.items;
  }
-
+ 
  /**

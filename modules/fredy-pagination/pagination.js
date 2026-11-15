@@ -1,4 +1,11 @@
 /* Local pagination patch for Fredy 29.2.1. No database or notification side effects. */
+
+/**
+ * Whether a stop reason means the provider refused this session: an explicit block or rate
+ * limit, or an empty multi-card batch (a soft block). Both providers then skip detail requests.
+ */
+export const isRefusal = reason => /HTTP (403|429)\b|^empty card response$/.test(reason ?? '');
+
 export async function collectSearchPages(fetchPage, {
   pageSize = 100, maxPages = 5, budgetMs = 180000, delayMs = 1000,
   now = Date.now, wait = ms => new Promise(resolve => setTimeout(resolve, ms)),
