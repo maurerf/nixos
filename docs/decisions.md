@@ -108,11 +108,11 @@
   one (decided 2026-11-13, [PR #72](https://github.com/maurerf/nixos/pull/72)).
   The patch over the pinned upstream image is loaded from the Nix store with
   `pull = "never"`, so no registry account, credentials or publication step is
-  needed and the image tag follows the patch content. The cost is disk for the
+  needed and the image tag derives from the Nix output hash. The cost is disk for the
   base and derived archives plus Podman's loaded copy, and a patch to carry
   forward by hand on each Fredy upgrade. Immowelt is limited to one search
-  page (decided 2026-11-15): it refused the session during the second page in
-  every run. [Fredy record](fredy.md#activation-and-recovery).
+  page (decided 2026-11-15): every run of the two-page candidate was refused
+  during the second page. [Fredy record](fredy.md#activation-and-recovery).
 - The operator's ongoing [snapshot and monthly/quarterly maintenance policy](vps-recovery.md#maintenance-and-preparation)
   remains applicable. Legacy entry points were retired with protected recovery copies;
   use [the canonical recovery procedure](vps-recovery.md#retained-legacy-source-recovery).
