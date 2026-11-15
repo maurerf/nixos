@@ -168,8 +168,20 @@ looks like a per-session request allowance of about one search page with its
 card batches; it neither recovered nor tightened overnight. Across the
 `2c67060` container's three runs the 640 MiB limit was hit about 11,700 times
 in total, with no OOM kill. In response the candidate limits Immowelt to one
-page. That limit, and whether detail requests then succeed, are untested in
-production until a further approved test activation.
+page.
+
+That candidate (commit `4edb8ea`) was test-activated with approval at
+09:50 UTC on 2026-11-15 after a further protected backup
+(`fredy-preonepage-*`); the selected persistent system stayed the older
+version. Its startup run and the scheduled runs at 11:50, 12:50 and 13:50 UTC
+each logged only `search incomplete: page limit; keeping 100 listings`, with
+no refusal and no skipped Immowelt requests (the 10:50 UTC run fell outside
+the supplied log window). At 13:59 UTC the container had no OOM kill and no
+restart, no unit had failed and the mail services were active (sources:
+operator-supplied container log and a read-only check). Whether the detail
+requests returned data, and how many listings were stored, was not examined.
+This meets the agreed bar for the test; a permanent switch still needs its
+own approval.
 
 Before any further activation, follow
 [deployment](deployment.md#deployment)
