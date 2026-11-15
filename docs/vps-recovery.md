@@ -162,10 +162,11 @@ intermediate backups `fredy-prebrowser-*`, `fredy-prebatchfix-*`,
 `fredy-prepagecap-*` and the two test directories from `/root/fredy-backups`.
 Kept: `fredy-preupgrade-*` (before the 29.2.1 upgrade and PR #72),
 `fredy-prepagination-*` (before the PR's first activation) and
-`fredy-preonepage-*` (before its final activation) (operator report in
+`fredy-preonepage-*` (before its final activation). The resulting listing was
+not shown to the agent (operator report in
 [issue #94](https://github.com/maurerf/nixos/issues/94)). An operator-run
-listing at 14:29 UTC the same day showed exactly those three archives besides
-the new job-edit backup below.
+listing at 14:29 UTC the same day later showed exactly those three archives
+besides the new job-edit backup below.
 
 Do not restore the whole mail VPS snapshot just to repair Fredy without a
 separate recovery decision. If Fredy harms mail or host resources during the
