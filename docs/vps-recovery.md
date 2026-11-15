@@ -156,6 +156,16 @@ generation and image using [generation recovery](deployment.md#generation-recove
 before starting Fredy; that activation may itself start the service. Verify
 the active unit references the previous image, start it if necessary, and
 repeat Fredy plus mail acceptance.
+
+On 2026-11-15, after the permanent switch to PR #72, the operator deleted the
+intermediate backups `fredy-prebrowser-*`, `fredy-prebatchfix-*`,
+`fredy-prepagecap-*` and the two test directories from `/root/fredy-backups`.
+Kept: `fredy-preupgrade-*` (before the 29.2.1 upgrade and PR #72),
+`fredy-prepagination-*` (before the PR's first activation) and
+`fredy-preonepage-*` (before its final activation). The resulting listing was
+not shown to the agent (operator report in
+[issue #94](https://github.com/maurerf/nixos/issues/94)).
+
 Do not restore the whole mail VPS snapshot just to repair Fredy without a
 separate recovery decision. If Fredy harms mail or host resources during the
 trial, stop `podman-fredy.service` within the approved incident scope and

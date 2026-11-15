@@ -190,9 +190,10 @@ and on the VPS to
 A read-only check at 14:07 UTC found the active and selected closures equal to
 that path, selected generation 26 and configuration revision `89517b5`. The switch did
 not restart Fredy (running since 09:50:25 UTC, no restart). No unit had
-failed, the mail/access services, nginx and `podman-fredy` were active, the UI
-returned HTTP 200, the mail queue was empty and 24 GB of disk were free.
-Generation 25, the pre-PR system, is retained for
+failed; `postfix`, `dovecot`, `rspamd`, `redis-rspamd`, `nginx`, `sshd`,
+`kresd@1` and `podman-fredy` were active; the UI returned HTTP 200, the mail
+queue was empty and 24 GB of disk were free.
+Generation 25, the system before PR #72, is retained for
 [generation recovery](deployment.md#generation-recovery). The operator had
 taken a new full Vultr snapshot first (see
 [snapshot recovery](vps-recovery.md#snapshot-recovery)). Not done at the
@@ -200,13 +201,8 @@ switch: a reboot into the new generation, external IPv6 and TLS/DNS checks,
 and examining stored listings and Immowelt detail data (source: operator
 record in [PR #72](https://github.com/maurerf/nixos/pull/72)).
 
-Afterwards the operator deleted the intermediate backups `fredy-prebrowser-*`,
-`fredy-prebatchfix-*`, `fredy-prepagecap-*` and the two test directories from
-`/root/fredy-backups`, keeping `fredy-preupgrade-*` (before PR #72),
-`fredy-prepagination-*` (before its first activation) and
-`fredy-preonepage-*` (before the final activation). The resulting listing was
-not shown to the agent (operator report, 2026-11-15, in
-[issue #94](https://github.com/maurerf/nixos/issues/94)).
+The Fredy backups retained after this switch are listed under
+[Fredy backup and recovery](vps-recovery.md#fredy-backup-and-recovery).
 
 Before any further activation, follow
 [deployment](deployment.md#deployment)
@@ -232,8 +228,8 @@ patch.
 
 ## Current resource budget
 
-Since the permanent switch of 2026-11-15, the [module](../modules/fredy.nix)
-declares 640 MiB memory plus 128 MiB swap (`--memory-swap=768m`) and 256 PIDs.
+As of the permanent switch of 2026-11-15, and in its test activations from
+2026-11-14, the [module](../modules/fredy.nix) declares 640 MiB memory plus 128 MiB swap (`--memory-swap=768m`) and 256 PIDs.
 The [original trial budget](#original-2520-candidate-and-measured-budget)
 of 448 MiB, and its headroom reasoning for the 964 MiB host, are kept below as a
 record. The operator has since upgraded the VPS to the provider's 2048 MB plan
