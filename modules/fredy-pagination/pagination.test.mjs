@@ -98,13 +98,13 @@ test('actual Immowelt adapter pages ids and keeps card batches at 30',async()=>{
  const p=await loadProvider('lib/services/immowelt/immoweltBff.js',async(url,opts)=>{
   if(url==='/serp-bff/search'){
    const q=JSON.parse(opts.body);searches.push(q);
-   const ids=q.paging.page===1?Array.from({length:31},(_,i)=>i+1):[31,32];
-   return response({totalCount:32,classifieds:ids.map(id=>({id}))});
+   const ids=Array.from({length:31},(_,i)=>i+1);
+   return response({totalCount:31,classifieds:ids.map(id=>({id}))});
   }
   const ids=url.split('/').pop().split(',');batches.push(ids);return response(ids.map(id=>({id})));
  });
  const rows=await p.exports.searchClassifieds({}, {criteria:{priceMax:1500},paging:{page:8,size:100,order:'DateDesc'}},{host:'immowelt.de',origin:'https://www.immowelt.de',language:'de'});
- assert.equal(rows.length,32);assert.deepEqual(searches.map(q=>q.paging.page),[1,2]);
+ assert.equal(rows.length,31);assert.deepEqual(searches.map(q=>q.paging.page),[1]);
  assert.ok(batches.every(b=>b.length<=30));assert.ok(searches.every(q=>q.criteria.priceMax===1500));
 });
 test('actual Immowelt adapter retains partial batch and stops on blocked cards',async()=>{
@@ -128,7 +128,7 @@ test('actual Immowelt adapter treats an empty card batch as incomplete',async()=
  assert.equal(rows.length,0);assert.equal(searches,1);
  assert.match(p.warnings.join(' '),/incomplete: empty card response/);
 });
-test('actual Immowelt adapter stops after two pages without refusing the site',async()=>{
+test('actual Immowelt adapter stops after one page without refusing the site',async()=>{
  const searches=[];
  const p=await loadProvider('lib/services/immowelt/immoweltBff.js',async(url,opts)=>{
   if(url==='/serp-bff/search'){
@@ -138,22 +138,22 @@ test('actual Immowelt adapter stops after two pages without refusing the site',a
   return response(url.split('/').pop().split(',').map(id=>({id})));
  });
  const rows=await p.exports.searchClassifieds({}, {criteria:{},paging:{page:1,size:100}},{host:'immowelt.de',origin:'https://www.immowelt.de',language:'de'});
- assert.equal(rows.length,4);assert.deepEqual(searches,[1,2]);assert.equal(p.closed.length,0);
- assert.match(p.warnings.join(' '),/incomplete: page limit; keeping 4 listings/);
+ assert.equal(rows.length,2);assert.deepEqual(searches,[1]);assert.equal(p.closed.length,0);
+ assert.match(p.warnings.join(' '),/incomplete: page limit; keeping 2 listings/);
 });
 test('actual Immowelt adapter continues past a card that is no longer returned',async()=>{
  const searches=[],batches=[];
  const p=await loadProvider('lib/services/immowelt/immoweltBff.js',async(url,opts)=>{
   if(url==='/serp-bff/search'){
    const q=JSON.parse(opts.body);searches.push(q.paging.page);
-   const ids=q.paging.page===1?Array.from({length:35},(_,i)=>i+1):[36];
-   return response({totalCount:36,classifieds:ids.map(id=>({id}))});
+   const ids=Array.from({length:35},(_,i)=>i+1);
+   return response({totalCount:35,classifieds:ids.map(id=>({id}))});
   }
   const ids=url.split('/').pop().split(',');batches.push(ids.length);
   return response(ids.filter(id=>id!=='2').map(id=>({id})));
  });
  const rows=await p.exports.searchClassifieds({}, {criteria:{},paging:{page:1,size:100}},{host:'immowelt.de',origin:'https://www.immowelt.de',language:'de'});
- assert.equal(rows.length,35);assert.deepEqual(searches,[1,2]);assert.deepEqual(batches,[30,5,1]);
+ assert.equal(rows.length,34);assert.deepEqual(searches,[1]);assert.deepEqual(batches,[30,5]);
  assert.equal(p.closed.length,0);assert.match(p.warnings.join(' '),/1 listed cards were not returned/);
  assert.doesNotMatch(p.warnings.join(' '),/incomplete/);
 });

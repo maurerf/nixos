@@ -187,8 +187,8 @@
 +    }, { ...payload, paging: { ...payload.paging, page: pageNumber, size } },
 +    site.language, CLASSIFIED_LIST_BATCH_SIZE, timeout, deadline);
 +    return part;
-+  // Immowelt refused every third search page observed on 2026-11-14.
-+  }, { maxPages: 2 });
++  // Immowelt refused the session on its second page in every run on 2026-11-14/15.
++  }, { maxPages: 1 });
 +  logger.debug(`${site.host} search: ${result.items.length} unique listings, ${result.pages} pages, total ${result.total ?? 'unknown'}`);
 +  if (result.missing > 0) logger.warn(`${site.host} search: ${result.missing} listed cards were not returned`);
 +  if (!result.complete) {

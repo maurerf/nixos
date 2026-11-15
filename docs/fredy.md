@@ -44,11 +44,12 @@ fix for this request; it does not validate cards, later pages or notifications.
 
 Both providers fetch sequential pages of 100, starting at page 1, with a
 three-minute pagination budget per provider: at most five pages for ImmoScout
-and two for Immowelt. Immowelt refused the third page in every paginated run
-observed on 2026-11-14 (the one run with labelled requests showed the search
-request refused), and each refusal also suppressed that run's remaining
-Immowelt requests; with the newest-first order the two pages are the 200
-newest listings, and a larger result is logged as incomplete at the page limit. ImmoScout requests
+and one for Immowelt. Immowelt refused the session during its second page in
+every run of the two-page candidate on 2026-11-14 and 15 (see
+[activation and recovery](#activation-and-recovery)), and each refusal also
+suppressed that run's remaining Immowelt requests. One page is the request
+volume of unpatched Fredy; with the newest-first order it is the 100 newest
+listings, and a larger result is logged as incomplete at the page limit. ImmoScout requests
 have a 20-second timeout. Immowelt retains card batches of at most 30, with a
 20-second request timeout bounded by the remaining budget. Pages are spaced by
 one second and consecutive card batches by half a second. Listing IDs are
@@ -151,8 +152,24 @@ older version. Its startup run again kept 200 Immowelt cards and logged
 request, not a card request, as the refused one. No missing-card warning was
 logged. Within the first minute the container reached the 640 MiB limit and the
 full swap allowance with about 9,000 memory-limit events (against 41,000 to
-51,000 per run before), a PID peak of 213 of 256 and no OOM kill. The two-page
-Immowelt limit that followed is untested in production.
+51,000 per run before), a PID peak of 213 of 256 and no OOM kill.
+
+The refusal was not tied to the third page. The two scheduled runs of that
+image kept 100 listings at 20:20 UTC (`Execution context was destroyed`) and
+130 at 21:20 UTC (`cards HTTP 403`). A two-page candidate (commit `25a040d`)
+was test-activated with approval at 22:05 UTC after a further protected
+backup. Its startup run and all eleven scheduled runs up to 2026-11-15
+09:07 UTC, with no restart in between, were refused during the second page:
+nine at the second search request and three at a card request, keeping 100
+or 130 listings (source: operator-supplied container log, 2026-11-15). Each
+refusal skipped that run's remaining Immowelt requests, so no run of either
+candidate reached Immowelt detail requests unrefused. The limit therefore
+looks like a per-session request allowance of about one search page with its
+card batches; it neither recovered nor tightened overnight. Across the
+`2c67060` container's three runs the 640 MiB limit was hit about 11,700 times
+in total, with no OOM kill. In response the candidate limits Immowelt to one
+page. That limit, and whether detail requests then succeed, are untested in
+production until a further approved test activation.
 
 Before any further activation, follow
 [deployment](deployment.md#deployment)
@@ -210,10 +227,16 @@ baseline, not a Fredy load measurement. Recheck before deployment.
 
 As of 2026-11-14 the candidate declares 640 MiB memory plus 128 MiB swap and
 256 PIDs ([module](../modules/fredy.nix)); the paragraph below records the
-original trial budget and its headroom reasoning, which has not been redone
-for the higher limit. A read-only sample on 2026-11-14 showed a 1970 MiB host
-with about 1.5 GiB available during a Fredy run; that is one observation, not
-a measured budget.
+original trial budget and its headroom reasoning for the 964 MiB host. The
+operator has since upgraded the VPS to the provider's 2048 MB plan
+(operator-reported 2026-11-15; done after the 2026-09-29 baseline and, given
+the last boot, by 2026-10-04; exact date not recorded). Read-only samples on
+2026-11-14 and 15 showed 1970 MiB RAM and 1023 MiB swap. The declared 640 MiB
+leaves a nominal 1330 MiB of physical RAM for mail and the host, against
+516 MiB under the original budget. Observed during and between Fredy runs:
+about 1.5 GiB available, 440 to 530 MiB of host swap in use, no failed units
+and an empty mail queue. These are samples over one day, not a measured budget
+under mail load.
 
 The trial caps the whole Fredy container, including browser children, at
 448 MiB memory plus at most 128 MiB swap (`--memory-swap=576m`), half of the
