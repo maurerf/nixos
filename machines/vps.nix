@@ -5,6 +5,7 @@
     [
       ../modules/nixos-base.nix
       ../modules/fredy.nix
+      ../modules/t9a-tutor.nix # disabled by default; see docs/t9a-tutor.md
     ];
 
   networking.hostName = "nixos-vps";
