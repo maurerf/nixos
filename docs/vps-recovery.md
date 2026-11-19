@@ -91,6 +91,7 @@ before a new backup or restore:
 | DKIM and ACME | `/var/dkim`, `/var/lib/acme` |
 | Rspamd and Redis | `/var/lib/rspamd`, `/var/lib/redis-rspamd` |
 | Target credentials | `/etc/checkup-secrets` plus persistent system account state |
+| T9A tutor | `/var/lib/t9a-tutor` (SQLite, backups, page images), `/srv/t9a-tutor/content` (copy of learn-t9a `content/`, restorable from the repo) |
 
 `/run/dovecot2/passwd` and `userdb` were regenerated runtime files on tmpfs, not disk
 backup contents. The old snapshot predates target secret provisioning. Never put
@@ -202,7 +203,9 @@ and restores. First used on 2026-11-15
 The declared references are in [Linux users](../modules/nixos-base.nix) and
 [mail accounts](../machines/vps.nix). Keep `/etc/checkup-secrets` root:root `0700`,
 with `fdm-login.hash` and `mail-felix.hash` root:root `0600`, one nonempty hash line
-each. Preserve known passwords for continuity; unknown passwords require an approved
+each. `t9a-anthropic-api-key` (root:root `0600`) holds the T9A tutor's Claude API key;
+a lost key is replaced by a new one from the Claude Console
+([setup](t9a-tutor.md#one-time-setup)). Preserve known passwords for continuity; unknown passwords require an approved
 rotation and client update. Old Git/store exposure was not erased by moving secrets;
 rotation completion is not established by the archive.
 

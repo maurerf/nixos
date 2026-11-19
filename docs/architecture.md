@@ -9,7 +9,7 @@ nix-darwin and simple-nixos-mailserver follow the shared nixpkgs input.
 | Host | Configuration relationship |
 | --- | --- |
 | `m2-macbook-air`, aarch64-darwin | [machine](../machines/m2-macbook-air.nix) + Home Manager [profile](../profiles/home-darwin.nix), which imports the [Workstation module](../modules/home-workstation.nix); nix-darwin owns system activation |
-| `vps`, x86_64-linux | [machine](../machines/vps.nix) imports [Linux base](../modules/nixos-base.nix) and [Fredy](../modules/fredy.nix); flake adds [hardware](../hardware/vultr-vps.nix), mailserver and Home Manager [profile](../profiles/home-vps.nix) |
+| `vps`, x86_64-linux | [machine](../machines/vps.nix) imports [Linux base](../modules/nixos-base.nix), [Fredy](../modules/fredy.nix) and the [T9A tutor](../modules/t9a-tutor.nix) (package from the `learn-t9a` input); flake adds [hardware](../hardware/vultr-vps.nix), mailserver and Home Manager [profile](../profiles/home-vps.nix) |
 | `vps-fredy-bootstrap`, x86_64-linux | Same VPS configuration with external Fredy requests denied during first login; see [Fredy operations](fredy.md#first-login-and-public-switch). |
 | `desktop-pc`, x86_64-linux | [machine](../machines/desktop-pc.nix) imports the [Linux base](../modules/nixos-base.nix); flake adds hand-written [hardware](../hardware/desktop-pc.nix) and Home Manager [profile](../profiles/home-desktop-pc.nix), which imports the Workstation module. Installed beside Windows 2026-11-11, accepted 2026-11-13 ([run](https://github.com/maurerf/nixos/issues/45)). |
 
@@ -65,7 +65,9 @@ nginx serves ACME HTTP challenges for the mail hostname. The Fredy
 service adds a pinned Podman container with `/var/lib/fredy` persistence and a
 loopback proxy behind HTTPS at `fredy.maurerf.com`. Its
 [staged deployment](fredy.md#first-login-and-public-switch) gates external
-access until the initial password is replaced. Explicit Postfix outbound
+access until the initial password is replaced. The [T9A tutor](t9a-tutor.md) adds a
+Node service on loopback 5179 behind HTTPS at `t9a.maurerf.com`, with state in
+`/var/lib/t9a-tutor` and hand-copied content in `/srv/t9a-tutor/content`. Explicit Postfix outbound
 IPv4 overrides preserve inbound IPv6 while avoiding the historical sender-identity
 failure; see [decisions](decisions.md). A listening port is not automatically a
 public service requirement. Runtime credentials are absolute host-file references,

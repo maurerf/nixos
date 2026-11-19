@@ -85,6 +85,8 @@ the current copied apps and repeat discovery after a fresh login.
 
 VPS: complete [recovery preparation](vps-recovery.md), establish baseline mail/access
 checks below, and keep a second SSH session plus independent Vultr console available.
+The VPS cannot fetch the private `learn-t9a` input: first copy the candidate's inputs
+with `nix flake archive` from the Mac ([T9A package source](t9a-tutor.md#source-of-the-package)).
 For a compatible live transition, the proposed route is:
 
 ```sh
@@ -104,8 +106,8 @@ Fredy adds a justified public HTTPS requirement on TCP 443. Its
 [first-login sequence](fredy.md#first-login-and-public-switch) uses
 `#vps-fredy-bootstrap` first, then `#vps` only after the initial password has
 been replaced and verified. Both stages require the same mail/access checks
-after `test` and `switch`. Public 443 is expected only for the Fredy HTTPS
-host; direct 9998 and quota-status 12340 remain nonpublic. Check the Vultr
+after `test` and `switch`. Public 443 serves the Fredy and
+[T9A tutor](t9a-tutor.md) HTTPS hosts only; direct T9A 5179, direct 9998 and quota-status 12340 remain nonpublic. Check the Vultr
 firewall independently of the NixOS firewall and preserve port 80 for ACME.
 
 ## VPS acceptance
@@ -123,8 +125,9 @@ the candidate rather than assuming them forever.
 Use an independent external client for SSH, TCP reachability and mail checks:
 
 - Intended public ports before Fredy: 22, 25, 80, 465, 993. The Fredy
-  candidate adds HTTPS 443 after its approved staged activation. Keep direct
-  Fredy 9998 and quota-status 12340 nonpublic.
+  candidate adds HTTPS 443 after its approved staged activation; `t9a.maurerf.com`
+  shares it ([checks](t9a-tutor.md#checks-after-activation)). Keep direct Fredy 9998,
+  T9A 5179 and quota-status 12340 nonpublic.
 - Validate TLS chain, hostname and expiry on SMTP STARTTLS 25, submission 465 and
   IMAPS 993; check MX/A/AAAA, sender PTR/forward identity, SPF, DKIM and DMARC.
 - Send controlled messages to the primary account and alias, verify IMAPS receipt

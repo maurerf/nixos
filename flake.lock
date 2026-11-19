@@ -101,6 +101,27 @@
         "type": "github"
       }
     },
+    "learn-t9a": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795110706,
+        "narHash": "sha256-+hqP1GoE1xDMvEwycc9Iyw2+V3yCTRHwx6i0TDG6Ico=",
+        "ref": "master",
+        "rev": "1b894bfbcd3abff7e532fb422a15734772954c85",
+        "revCount": 23,
+        "type": "git",
+        "url": "https://github.com/maurerf/learn-t9a"
+      },
+      "original": {
+        "ref": "master",
+        "type": "git",
+        "url": "https://github.com/maurerf/learn-t9a"
+      }
+    },
     "nix-darwin": {
       "inputs": {
         "nixpkgs": [
@@ -141,6 +162,7 @@
     "root": {
       "inputs": {
         "home-manager": "home-manager",
+        "learn-t9a": "learn-t9a",
         "nix-darwin": "nix-darwin",
         "nixpkgs": "nixpkgs",
         "simple-nixos-mailserver": "simple-nixos-mailserver"

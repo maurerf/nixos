@@ -1,11 +1,18 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 
 {
   imports =
     [
       ../modules/nixos-base.nix
       ../modules/fredy.nix
+      ../modules/t9a-tutor.nix
     ];
+
+  # T9A tutor web app, see docs/t9a-tutor.md (API key and content are placed by hand first).
+  services.t9a-tutor = {
+    enable = true;
+    package = inputs.learn-t9a.packages.${pkgs.stdenv.hostPlatform.system}.app;
+  };
 
   networking.hostName = "nixos-vps";
   system.stateVersion = "24.05";
