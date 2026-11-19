@@ -15,9 +15,14 @@
       url = "gitlab:simple-nixos-mailserver/nixos-mailserver/nixos-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Private repo: locked with the operator's GitHub login, copied to the VPS with `nix flake archive` (docs/t9a-tutor.md).
+    learn-t9a = {
+      url = "git+https://github.com/maurerf/learn-t9a?ref=master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = inputs @ { self, nixpkgs, home-manager, simple-nixos-mailserver, nix-darwin }:
+  outputs = inputs @ { self, nixpkgs, home-manager, simple-nixos-mailserver, nix-darwin, learn-t9a }:
   let
     nixosSystem = "x86_64-linux";
     darwinSystem = "aarch64-darwin";

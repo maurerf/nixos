@@ -121,6 +121,16 @@
 - Four gaps in Fredy's pagination patch stay as they are (decided 2026-11-15):
   the time budget's scope, the one-card ambiguity, the `EXPOSE_RESULT` count and
   untested timing. [Accepted pagination gaps](fredy.md#accepted-pagination-gaps).
+- The T9A tutor on the VPS uses the Claude API with a key, not the Agent SDK
+  (decided 2026-11-19): an SDK call needs about 395 MiB and a logged-in Claude
+  Code, which this VPS cannot spare. The key is a root-only file passed as a
+  systemd credential; spend is capped in the Claude Console.
+  [T9A tutor](t9a-tutor.md).
+- The private `learn-t9a` input is locked over `git+https` with the operator's
+  normal GitHub login and reaches the VPS by `nix flake archive` from the Mac;
+  the VPS holds no GitHub token or deploy key (decided 2026-11-19). The copyrighted
+  rules content is copied by hand to `/srv/t9a-tutor/content`, never into the nix
+  store. [Package source](t9a-tutor.md#source-of-the-package).
 - The operator's ongoing [snapshot and monthly/quarterly maintenance policy](vps-recovery.md#maintenance-and-preparation)
   remains applicable. Legacy entry points were retired with protected recovery copies;
   use [the canonical recovery procedure](vps-recovery.md#retained-legacy-source-recovery).
