@@ -8,30 +8,35 @@ password login. [`modules/t9a-tutor.nix`](../modules/t9a-tutor.nix) declares the
 service (paths, port and host name fixed there); [`machines/vps.nix`](../machines/vps.nix) enables it with the package from
 the `learn-t9a` flake input. Activation needs the [deployment approval](deployment.md#deployment).
 
-The tutor uses the Claude API (`tutorBackend = "api"`, billed per token from prepaid
-credits, spend limit set in the Claude Console). The Agent SDK backend (about 395 MiB
-per call and a logged-in Claude Code) does not fit this VPS. The packaged server
-peaked at about 154 MiB in a local trial with the fake tutor; `MemoryMax` is 256M.
-Confirm the peak with real tutor calls after activation (`systemctl status t9a-tutor`).
+The tutor uses the Claude API (`T9A_TUTOR_BACKEND=api`, billed per token from prepaid
+API credits, spend limit set in the Claude Console). Buy those credits in the Console
+(Settings → Billing), for the organization that owns the key: usage credits on a claude.ai
+plan do not pay for the API, and the app then shows "Your credit balance is too low".
+The Agent SDK backend (about 395 MiB per call and a logged-in Claude Code) does not fit
+this VPS. Live on the VPS, the service peaked at 112 MiB across a real tutor call
+(2026-11-19; 156 MiB during the first start with page rendering); `MemoryMax` is 256M.
 
 ## Source of the package
 
 `learn-t9a` is private. The flake input is `git+https`, locked on a machine whose git
 reads the repo with the operator's normal GitHub login. The VPS holds no GitHub
 credential: before each VPS rebuild, copy the locked flake and all its inputs into the
-VPS store from the Mac (the machine with VPS SSH access and the GitHub login):
+VPS store from a machine with both the GitHub login and VPS SSH access (the Mac, or
+desktop-pc with its VPS key; `maurerf.com` and `mail.maurerf.com` share one host key):
 
 ```sh
 nix flake archive --to ssh://maurerf.com "github:maurerf/nixos/$CANDIDATE"
+# desktop-pc:
+nix flake archive --to 'ssh://fdm@mail.maurerf.com?ssh-key=/home/fdm/.ssh/id_ed25519_vps' "github:maurerf/nixos/$CANDIDATE"
 ```
 
 `nixos-rebuild` on the VPS then finds the locked `learn-t9a` source in its store and
 does not fetch it. The source tree includes the copyrighted rules files, so they
 are in the VPS store too; accepted in [decisions](decisions.md) (single-user VPS).
-During preparation, check that the copy is accepted for the
-non-trusted SSH user (source paths are content-addressed) and that the VPS evaluates
-the candidate without reaching the repo. If either fails, stop and decide; do not add
-`fdm` to `trusted-users` or put a token on the VPS without a recorded decision.
+The copy is accepted for the non-trusted SSH user `fdm` (source paths are
+content-addressed), and the VPS then evaluates the candidate without reaching the repo
+(both checked for `564838c` on 2026-11-19). If that ever fails, stop and decide; do not
+add `fdm` to `trusted-users` or put a token on the VPS without a recorded decision.
 
 CI cannot fetch the repo either: it overrides the input with the stub in
 [`ci/learn-t9a-stub`](../ci/learn-t9a-stub/flake.nix), so a green CI run says nothing
@@ -43,12 +48,13 @@ with the real input.
 1. DNS: `A`/`AAAA` record `t9a.maurerf.com` to the VPS (as for Fredy). Ports 80 and
    443 are already open for Fredy; recheck the Vultr firewall.
 2. API key (before activation): create it in the Claude Console ("Somewhere else",
-   name `t9a-vps`). Write it privately, without echo or shell history, as a root-only
+   name `t9a-vps`). Copy the `sk-ant-api03-…` secret from the creation dialog, not the
+   `apikey_…` ID from the key list. Write it privately, without echo or shell history, as a root-only
    file; systemd passes it to the service as the credential `anthropic-api-key`
    (`LoadCredential`), so it never enters the nix store or a unit file:
    ```sh
-   sudo sh -c 'umask 077; set -C; read -rs k && printf %s "$k" > /etc/checkup-secrets/t9a-anthropic-api-key'
-   sudo stat -c '%U:%G %a %s %n' /etc/checkup-secrets/t9a-anthropic-api-key   # root:root 600, nonzero size
+   sudo sh -c 'umask 077; set -C; printf "API key: " >&2; read -rs k && printf %s "$k" > /etc/checkup-secrets/t9a-anthropic-api-key; echo >&2'
+   sudo stat -c '%U:%G %a %s %n' /etc/checkup-secrets/t9a-anthropic-api-key   # root:root 600, about 108 bytes
    ```
 3. Content: activation creates the `t9a-tutor` group and `/srv/t9a-tutor/content`
    (`root:t9a-tutor 0750`) but does not start the service until
@@ -83,5 +89,5 @@ t9a-tutor` shows the memory peak.
 
 State is `/var/lib/t9a-tutor` (mode 0700): `t9a.sqlite`, daily backups in `backups/`,
 page images in `pages/` (rebuildable), `tutor-usage.jsonl`. Copy the backups off the
-VPS; the disk has about 7 GiB free. Revoke the API key in the Console if the VPS or the
+VPS; the disk had 29 GiB free on 2026-11-19. Revoke the API key in the Console if the VPS or the
 key file may be exposed.
