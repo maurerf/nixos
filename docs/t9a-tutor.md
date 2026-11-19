@@ -33,6 +33,11 @@ non-trusted SSH user (source paths are content-addressed) and that the VPS evalu
 the candidate without reaching the repo. If either fails, stop and decide; do not add
 `fdm` to `trusted-users` or put a token on the VPS without a recorded decision.
 
+CI cannot fetch the repo either: it overrides the input with the stub in
+[`ci/learn-t9a-stub`](../ci/learn-t9a-stub/flake.nix), so a green CI run says nothing
+about the app itself. Before activation, build the candidate's `vps` system locally
+with the real input.
+
 ## One-time setup
 
 1. DNS: `A`/`AAAA` record `t9a.maurerf.com` to the VPS (as for Fredy). Ports 80 and

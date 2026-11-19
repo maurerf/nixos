@@ -133,6 +133,10 @@
   VPS's world-readable nix store; accepted because the operator is the VPS's only
   user (decided 2026-11-19). The app reads its content from the hand-copied
   `/srv/t9a-tutor/content`. [Package source](t9a-tutor.md#source-of-the-package).
+- CI evaluates and builds with `learn-t9a` overridden by the stub in
+  `ci/learn-t9a-stub`, since GitHub Actions cannot fetch the private repo and gets
+  no token for it (decided 2026-11-19). CI therefore never builds the real app; it
+  is built locally before each VPS activation. [Package source](t9a-tutor.md#source-of-the-package).
 - The operator's ongoing [snapshot and monthly/quarterly maintenance policy](vps-recovery.md#maintenance-and-preparation)
   remains applicable. Legacy entry points were retired with protected recovery copies;
   use [the canonical recovery procedure](vps-recovery.md#retained-legacy-source-recovery).
