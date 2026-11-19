@@ -61,7 +61,12 @@ activation mechanism and are not maintained by this configuration; check their
 embedded destinations before using or retiring them.
 
 The VPS exists to serve mail. The mailserver module supplies the mail stack;
-nginx serves ACME HTTP challenges for the mail hostname. The Fredy
+nginx serves ACME HTTP challenges for the mail hostname. Mail clients send via
+authenticated SMTP with implicit TLS on port 465; the
+[machine](../machines/vps.nix) keeps the module default that leaves STARTTLS
+submission on 587 closed. A client set to 587 cannot send, and one that falls
+back to unauthenticated port 25 gets "Relay access denied" for external
+recipients. The Fredy
 service adds a pinned Podman container with `/var/lib/fredy` persistence and a
 loopback proxy behind HTTPS at `fredy.maurerf.com`. Its
 [staged deployment](fredy.md#first-login-and-public-switch) gates external
