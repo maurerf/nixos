@@ -2,6 +2,13 @@
 
 let
   cfg = config.services.t9a-tutor;
+  domain = "t9a.maurerf.com";
+  port = 5179;
+  # Copy of the learn-t9a content/ directory (rules/, legacy/, list/), copied by hand.
+  contentDir = "/srv/t9a-tutor/content";
+  stateDir = "/var/lib/t9a-tutor"; # systemd StateDirectory below
+  # Root-only file with the Claude API key, passed to the service as a credential.
+  apiKeyFile = "/etc/checkup-secrets/t9a-anthropic-api-key";
   proxyHeaders = ''
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
@@ -12,30 +19,17 @@ let
     proxy_set_header X-Forwarded-Host $host;
     proxy_http_version 1.1;
   '';
-  # The api backend reads ANTHROPIC_API_KEY; the key reaches the service only as a systemd credential.
+  # The app reads ANTHROPIC_API_KEY; the key reaches the service only as a systemd credential
+  # (LoadCredential fails the start if the file is missing).
   start = pkgs.writeShellScript "t9a-tutor-start" ''
-    if [ -r "$CREDENTIALS_DIRECTORY/anthropic-api-key" ]; then
-      ANTHROPIC_API_KEY="$(< "$CREDENTIALS_DIRECTORY/anthropic-api-key")"
-      export ANTHROPIC_API_KEY
-    fi
+    ANTHROPIC_API_KEY="$(< "$CREDENTIALS_DIRECTORY/anthropic-api-key")"
+    export ANTHROPIC_API_KEY
     exec ${lib.getExe cfg.package}
   '';
 in
 {
   options.services.t9a-tutor = {
     enable = lib.mkEnableOption "the T9A tutor web app";
-
-    domain = lib.mkOption {
-      type = lib.types.str;
-      default = "t9a.maurerf.com";
-      description = "Public host name served by nginx with ACME TLS.";
-    };
-
-    port = lib.mkOption {
-      type = lib.types.port;
-      default = 5179;
-      description = "Localhost port of the Node server.";
-    };
 
     package = lib.mkOption {
       type = lib.types.nullOr lib.types.package;
@@ -46,51 +40,6 @@ in
         Required when the service is enabled; see docs/t9a-tutor.md.
       '';
     };
-
-    contentDir = lib.mkOption {
-      type = lib.types.path;
-      default = "/srv/t9a-tutor/content";
-      description = ''
-        Copy of the learn-t9a `content/` directory (rules/, legacy/, list/).
-        Copied by hand, never via the nix store: it holds copyrighted PDFs.
-        Created root:t9a-tutor 0750.
-      '';
-    };
-
-    stateDir = lib.mkOption {
-      type = lib.types.str;
-      default = "/var/lib/t9a-tutor";
-      description = "SQLite state, backups and page images. Must live under /var/lib (systemd StateDirectory).";
-    };
-
-    tutorBackend = lib.mkOption {
-      type = lib.types.enum [ "api" "fake" "sdk" ];
-      # "sdk" peaks at about 395 MiB per call and needs a logged-in Claude Code;
-      # it does not fit this VPS. "api" runs in the server process.
-      default = "api";
-      description = "Tutor backend: Claude API with a key (api), canned replies (fake) or Claude Agent SDK (sdk).";
-    };
-
-    apiKeyFile = lib.mkOption {
-      type = lib.types.str;
-      default = "/etc/checkup-secrets/t9a-anthropic-api-key";
-      description = ''
-        Root-only file holding the Claude API key (api backend). Read by systemd
-        and passed to the service as a credential; never in the nix store.
-      '';
-    };
-
-    memoryMax = lib.mkOption {
-      type = lib.types.str;
-      default = "256M";
-      description = "Hard memory cap. The packaged server peaked at about 154 MiB in a local trial (fake tutor).";
-    };
-
-    memoryHigh = lib.mkOption {
-      type = lib.types.str;
-      default = "208M";
-      description = "Soft memory limit (throttling) below memoryMax.";
-    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -99,16 +48,12 @@ in
         assertion = cfg.package != null;
         message = "services.t9a-tutor.package must be set when the service is enabled (see docs/t9a-tutor.md).";
       }
-      {
-        assertion = lib.hasPrefix "/var/lib/" cfg.stateDir;
-        message = "services.t9a-tutor.stateDir must be under /var/lib.";
-      }
     ];
 
     users.users.t9a-tutor = {
       isSystemUser = true;
       group = "t9a-tutor";
-      home = cfg.stateDir;
+      home = stateDir;
     };
     users.groups.t9a-tutor = { };
 
@@ -117,7 +62,7 @@ in
 
     # Content is private: readable only by root and the service group.
     systemd.tmpfiles.rules = [
-      "d ${cfg.contentDir} 0750 root t9a-tutor -"
+      "d ${contentDir} 0750 root t9a-tutor -"
     ];
 
     systemd.services.t9a-tutor = {
@@ -125,25 +70,28 @@ in
       wantedBy = [ "multi-user.target" ];
       after = [ "network-online.target" ];
       wants = [ "network-online.target" ];
+      # Not before the content is copied: the first start seeds the database and checks its quotes against it.
+      unitConfig.ConditionPathExists = "${contentDir}/rules/text";
       environment = {
         HOST = "127.0.0.1";
-        PORT = toString cfg.port;
-        T9A_CONTENT_DIR = toString cfg.contentDir;
-        T9A_STATE_DIR = cfg.stateDir;
-        T9A_TUTOR_BACKEND = cfg.tutorBackend;
+        PORT = toString port;
+        T9A_CONTENT_DIR = contentDir;
+        T9A_STATE_DIR = stateDir;
+        # Claude API with a key: the Agent SDK backend needs about 395 MiB per call (docs/t9a-tutor.md).
+        T9A_TUTOR_BACKEND = "api";
       };
       serviceConfig = {
         ExecStart = start;
-        LoadCredential = lib.optional (cfg.tutorBackend == "api") "anthropic-api-key:${cfg.apiKeyFile}";
+        LoadCredential = "anthropic-api-key:${apiKeyFile}";
         User = "t9a-tutor";
         Group = "t9a-tutor";
         StateDirectory = "t9a-tutor";
         StateDirectoryMode = "0700";
-        ReadOnlyPaths = [ (toString cfg.contentDir) ];
+        ReadOnlyPaths = [ contentDir ];
         Restart = "on-failure";
         RestartSec = "10s";
-        MemoryHigh = cfg.memoryHigh;
-        MemoryMax = cfg.memoryMax;
+        # Packaged server peaked at about 154 MiB in a local trial (fake tutor).
+        MemoryMax = "256M";
         NoNewPrivileges = true;
         ProtectSystem = "strict";
         ProtectHome = true;
@@ -161,11 +109,11 @@ in
       startLimitBurst = 5;
     };
 
-    services.nginx.virtualHosts.${cfg.domain} = {
+    services.nginx.virtualHosts.${domain} = {
       enableACME = true;
       forceSSL = true;
       locations."/" = {
-        proxyPass = "http://127.0.0.1:${toString cfg.port}";
+        proxyPass = "http://127.0.0.1:${toString port}";
         recommendedProxySettings = false;
         extraConfig = proxyHeaders + ''
           client_max_body_size 2m;
