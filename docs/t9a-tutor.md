@@ -19,19 +19,22 @@ Confirm the peak with real tutor calls after activation (`systemctl status t9a-t
 `learn-t9a` is private. The flake input is `git+https`, locked on a machine whose git
 reads the repo with the operator's normal GitHub login. The VPS holds no GitHub
 credential: before each VPS rebuild, copy the locked flake and all its inputs into the
-VPS store from the Mac (the machine with VPS SSH access and the GitHub login):
+VPS store from a machine with both the GitHub login and VPS SSH access (the Mac, or
+desktop-pc with its VPS key; `maurerf.com` and `mail.maurerf.com` share one host key):
 
 ```sh
 nix flake archive --to ssh://maurerf.com "github:maurerf/nixos/$CANDIDATE"
+# desktop-pc:
+nix flake archive --to 'ssh://fdm@mail.maurerf.com?ssh-key=/home/fdm/.ssh/id_ed25519_vps' "github:maurerf/nixos/$CANDIDATE"
 ```
 
 `nixos-rebuild` on the VPS then finds the locked `learn-t9a` source in its store and
 does not fetch it. The source tree includes the copyrighted rules files, so they
 are in the VPS store too; accepted in [decisions](decisions.md) (single-user VPS).
-During preparation, check that the copy is accepted for the
-non-trusted SSH user (source paths are content-addressed) and that the VPS evaluates
-the candidate without reaching the repo. If either fails, stop and decide; do not add
-`fdm` to `trusted-users` or put a token on the VPS without a recorded decision.
+The copy is accepted for the non-trusted SSH user `fdm` (source paths are
+content-addressed), and the VPS then evaluates the candidate without reaching the repo
+(both checked for `564838c` on 2026-11-19). If that ever fails, stop and decide; do not
+add `fdm` to `trusted-users` or put a token on the VPS without a recorded decision.
 
 CI cannot fetch the repo either: it overrides the input with the stub in
 [`ci/learn-t9a-stub`](../ci/learn-t9a-stub/flake.nix), so a green CI run says nothing
@@ -47,8 +50,8 @@ with the real input.
    file; systemd passes it to the service as the credential `anthropic-api-key`
    (`LoadCredential`), so it never enters the nix store or a unit file:
    ```sh
-   sudo sh -c 'umask 077; set -C; read -rs k && printf %s "$k" > /etc/checkup-secrets/t9a-anthropic-api-key'
-   sudo stat -c '%U:%G %a %s %n' /etc/checkup-secrets/t9a-anthropic-api-key   # root:root 600, nonzero size
+   sudo sh -c 'umask 077; set -C; printf "API key: " >&2; read -rs k && printf %s "$k" > /etc/checkup-secrets/t9a-anthropic-api-key; echo >&2'
+   sudo stat -c '%U:%G %a %s %n' /etc/checkup-secrets/t9a-anthropic-api-key   # root:root 600, about 108 bytes
    ```
 3. Content: activation creates the `t9a-tutor` group and `/srv/t9a-tutor/content`
    (`root:t9a-tutor 0750`) but does not start the service until
@@ -83,5 +86,5 @@ t9a-tutor` shows the memory peak.
 
 State is `/var/lib/t9a-tutor` (mode 0700): `t9a.sqlite`, daily backups in `backups/`,
 page images in `pages/` (rebuildable), `tutor-usage.jsonl`. Copy the backups off the
-VPS; the disk has about 7 GiB free. Revoke the API key in the Console if the VPS or the
+VPS; the disk had 29 GiB free on 2026-11-19. Revoke the API key in the Console if the VPS or the
 key file may be exposed.
