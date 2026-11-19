@@ -85,6 +85,8 @@ the current copied apps and repeat discovery after a fresh login.
 
 VPS: complete [recovery preparation](vps-recovery.md), establish baseline mail/access
 checks below, and keep a second SSH session plus independent Vultr console available.
+The VPS cannot fetch the private `learn-t9a` input: first copy the candidate's inputs
+with `nix flake archive` from the Mac ([T9A package source](t9a-tutor.md#source-of-the-package)).
 For a compatible live transition, the proposed route is:
 
 ```sh
