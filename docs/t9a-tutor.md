@@ -8,11 +8,13 @@ password login. [`modules/t9a-tutor.nix`](../modules/t9a-tutor.nix) declares the
 service (paths, port and host name fixed there); [`machines/vps.nix`](../machines/vps.nix) enables it with the package from
 the `learn-t9a` flake input. Activation needs the [deployment approval](deployment.md#deployment).
 
-The tutor uses the Claude API (`tutorBackend = "api"`, billed per token from prepaid
-credits, spend limit set in the Claude Console). The Agent SDK backend (about 395 MiB
-per call and a logged-in Claude Code) does not fit this VPS. The packaged server
-peaked at about 154 MiB in a local trial with the fake tutor; `MemoryMax` is 256M.
-Confirm the peak with real tutor calls after activation (`systemctl status t9a-tutor`).
+The tutor uses the Claude API (`T9A_TUTOR_BACKEND=api`, billed per token from prepaid
+API credits, spend limit set in the Claude Console). Buy those credits in the Console
+(Settings → Billing), for the organization that owns the key: usage credits on a claude.ai
+plan do not pay for the API, and the app then shows "Your credit balance is too low".
+The Agent SDK backend (about 395 MiB per call and a logged-in Claude Code) does not fit
+this VPS. Live on the VPS, the service peaked at 112 MiB across a real tutor call
+(2026-11-19; 156 MiB during the first start with page rendering); `MemoryMax` is 256M.
 
 ## Source of the package
 
@@ -46,7 +48,8 @@ with the real input.
 1. DNS: `A`/`AAAA` record `t9a.maurerf.com` to the VPS (as for Fredy). Ports 80 and
    443 are already open for Fredy; recheck the Vultr firewall.
 2. API key (before activation): create it in the Claude Console ("Somewhere else",
-   name `t9a-vps`). Write it privately, without echo or shell history, as a root-only
+   name `t9a-vps`). Copy the `sk-ant-api03-…` secret from the creation dialog, not the
+   `apikey_…` ID from the key list. Write it privately, without echo or shell history, as a root-only
    file; systemd passes it to the service as the credential `anthropic-api-key`
    (`LoadCredential`), so it never enters the nix store or a unit file:
    ```sh
