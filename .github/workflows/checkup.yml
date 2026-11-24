@@ -10,8 +10,8 @@ jobs:
   evaluate:
     runs-on: ubuntu-24.04
     env:
-      # learn-t9a is private; CI evaluates and builds against a stub (ci/learn-t9a-stub).
-      STUB: --override-input learn-t9a path:./ci/learn-t9a-stub
+      # learn-t9a and home are private; CI evaluates and builds against stubs (ci/learn-t9a-stub, ci/home-stub).
+      STUB: --override-input learn-t9a path:./ci/learn-t9a-stub --override-input home path:./ci/home-stub
     steps:
       - uses: actions/checkout@v4
         with:
