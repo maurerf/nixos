@@ -15,6 +15,9 @@
       url = "gitlab:simple-nixos-mailserver/nixos-mailserver/nixos-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Private repo: only its home-manager module is used, which registers the pinned Pocock skills (home ADR 0002).
+    home.url = "git+https://github.com/maurerf/home?ref=main";
+
     # Private repo: locked with the operator's GitHub login, copied to the VPS with `nix flake archive` (docs/t9a-tutor.md).
     learn-t9a = {
       url = "git+https://github.com/maurerf/learn-t9a?ref=master";
@@ -22,7 +25,7 @@
     };
   };
 
-  outputs = inputs @ { self, nixpkgs, home-manager, simple-nixos-mailserver, nix-darwin, learn-t9a }:
+  outputs = inputs @ { self, nixpkgs, home-manager, simple-nixos-mailserver, nix-darwin, learn-t9a, home }:
   let
     nixosSystem = "x86_64-linux";
     darwinSystem = "aarch64-darwin";
@@ -61,6 +64,7 @@
             system.configurationRevision = self.rev or null;
             home-manager.useGlobalPkgs = true;
             home-manager.users.fdm = ./profiles/home-desktop-pc.nix;
+            home-manager.sharedModules = [ home.homeManagerModules.default ];
           }
         ];
       };
@@ -76,6 +80,7 @@
             system.configurationRevision = self.rev or null;
             home-manager.useGlobalPkgs = true;
             home-manager.users.fdm = ./profiles/home-darwin.nix;
+            home-manager.sharedModules = [ home.homeManagerModules.default ];
           }
         ];
       };
