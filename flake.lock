@@ -80,6 +80,25 @@
         "type": "github"
       }
     },
+    "home": {
+      "inputs": {
+        "pocock-skills": "pocock-skills"
+      },
+      "locked": {
+        "lastModified": 1795544224,
+        "narHash": "sha256-FgcNGXY5Cb4Cudkyqem8ovADq44wWkSVp5PVYgHhpNM=",
+        "ref": "main",
+        "rev": "6ff2b5b2a2c79d6149c7f4f09ffa4112829a1863",
+        "revCount": 19,
+        "type": "git",
+        "url": "https://github.com/maurerf/home"
+      },
+      "original": {
+        "ref": "main",
+        "type": "git",
+        "url": "https://github.com/maurerf/home"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -159,8 +178,26 @@
         "type": "github"
       }
     },
+    "pocock-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793269649,
+        "narHash": "sha256-ej0ATi0BWaAx+83dBwgCQxr9J2L2qEwKhUIeIRJ03Go=",
+        "owner": "mattpocock",
+        "repo": "skills",
+        "rev": "d1478fcb140db0b93c0c8df17bcfd311844749d0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mattpocock",
+        "ref": "v1.3.2",
+        "repo": "skills",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
+        "home": "home",
         "home-manager": "home-manager",
         "learn-t9a": "learn-t9a",
         "nix-darwin": "nix-darwin",
